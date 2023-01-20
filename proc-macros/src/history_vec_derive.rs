@@ -53,7 +53,7 @@ pub fn history_vec_derive(input: TokenStream) -> TokenStream {
     .parse()
     .unwrap();
     generated.append_all(quote! {
-        #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+        #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
         #struct_doc
         pub struct #new_name {
             #vec_fields

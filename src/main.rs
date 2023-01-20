@@ -11,7 +11,7 @@ pub struct ThermalMass {
     /// thermal capacitance
     pub c: f64,
     pub state: ThermalMassState,
-    pub history: ThermalMassHistory,
+    pub history: ThermalMassStateHistoryVec,
 }
 
 impl ThermalMass {
@@ -20,7 +20,7 @@ impl ThermalMass {
         Self {
             c,
             state: ThermalMassState { t: t0 },
-            history: ThermalMassHistory { t: vec![t0] },
+            history: ThermalMassStateHistoryVec { t: vec![t0] },
         }
     }
 }
@@ -31,24 +31,12 @@ pub struct ThermalMassState {
     pub t: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct ThermalMassHistory {
-    pub t: Vec<f64>,
-}
-
-impl ThermalMassHistory {
-    // this can be automated with a procedural macro similar to ALTRIOS
-    pub fn push(&mut self, state: ThermalMassState) {
-        self.t.push(state.t)
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, PartialOrd, BasicHistoryMethods)]
 pub struct Conductance {
     /// Thermal conductance between two temperatures
     pub h: f64,
     pub state: ConductanceState,
-    pub history: ConductanceHistory,
+    pub history: ConductanceStateHistoryVec,
 }
 
 impl Conductance {
@@ -58,7 +46,7 @@ impl Conductance {
             state: ConductanceState {
                 q: q0.unwrap_or_default(),
             },
-            history: ConductanceHistory {
+            history: ConductanceStateHistoryVec {
                 q: vec![q0.unwrap_or_default()],
             },
         }
@@ -68,17 +56,6 @@ impl Conductance {
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
 pub struct ConductanceState {
     pub q: f64,
-}
-
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct ConductanceHistory {
-    pub q: Vec<f64>,
-}
-
-impl ConductanceHistory {
-    pub fn push(&mut self, state: ConductanceState) {
-        self.q.push(state.q);
-    }
 }
 
 fn main() {
@@ -99,13 +76,13 @@ fn main() {
     for (_, dt) in dt_vec.iter().enumerate() {
         // assumes heat flow from 1 -> 2 is positive
         h12.state.q = h12.h * (m1.state.t - m2.state.t);
-        h12.history.push(h12.state.clone());
+        h12.save_state();
 
         m1.state.t += -h12.state.q * dt / m1.c;
-        m1.history.push(m1.state.clone());
+        m1.save_state();
 
         m2.state.t += h12.state.q * dt / m2.c;
-        m2.history.push(m2.state.clone());
+        m2.save_state();
     }
 
     dbg!(h12.history);
