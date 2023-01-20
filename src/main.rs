@@ -1,7 +1,12 @@
-use std::vec;
 use proc_macros::*;
+use std::vec;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+mod imports;
+use imports::*;
+mod traits;
+use traits::*;
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, BasicHistoryMethods)]
 pub struct ThermalMass {
     /// thermal capacitance
     pub c: f64,
@@ -20,7 +25,7 @@ impl ThermalMass {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
 pub struct ThermalMassState {
     /// temperature \[°C\]
     pub t: f64,
@@ -38,7 +43,7 @@ impl ThermalMassHistory {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, BasicHistoryMethods)]
 pub struct Conductance {
     /// Thermal conductance between two temperatures
     pub h: f64,
@@ -60,7 +65,7 @@ impl Conductance {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
 pub struct ConductanceState {
     pub q: f64,
 }
@@ -73,21 +78,6 @@ pub struct ConductanceHistory {
 impl ConductanceHistory {
     pub fn push(&mut self, state: ConductanceState) {
         self.q.push(state.q);
-    }
-}
-
-pub trait Diff {
-    fn diff(&self) -> Vec<f64>;
-}
-
-impl Diff for Vec<f64> {
-    fn diff(&self) -> Vec<f64> {
-        self.windows(2)
-            .map(|vs| {
-                let [x, y] = vs else {unreachable!()};
-                y - x
-            })
-            .collect()
     }
 }
 

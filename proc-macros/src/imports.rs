@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 pub(crate) use proc_macro::TokenStream;
 pub(crate) use proc_macro2::TokenStream as TokenStream2;
 pub(crate) use proc_macro_error::{abort, proc_macro_error};
