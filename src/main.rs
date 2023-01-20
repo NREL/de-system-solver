@@ -1,4 +1,5 @@
 use std::vec;
+use proc_macros::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct ThermalMass {

@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 ode_solvers = "0.3.7"
+proc-macros = { path = "proc-macros" }
+
