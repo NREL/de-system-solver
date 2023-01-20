@@ -4,7 +4,7 @@ use std::vec;
 mod imports;
 use imports::*;
 mod traits;
-use traits::*;
+// use traits::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, BasicHistoryMethods)]
 pub struct ThermalMass {
@@ -53,39 +53,81 @@ impl Conductance {
     }
 }
 
+/// Struct for tracking flow variables in Conductance
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
 pub struct ConductanceState {
     pub q: f64,
 }
 
-fn main() {
-    let time_step = 0.1;
+#[derive(Debug, Clone, PartialEq, PartialOrd, BasicHistoryMethods)]
+pub struct System {
+    pub m1: ThermalMass,
+    pub m2: ThermalMass,
+    pub h12: Conductance,
+    pub state: SystemState,
+    pub history: SystemStateHistoryVec,
+}
 
-    let time_vec: Vec<f64> = (0..=10)
-        .collect::<Vec<i64>>()
-        .iter()
-        .map(|x| *x as f64 * time_step)
-        .collect();
-
-    let dt_vec: Vec<f64> = time_vec.diff();
-
-    let mut m1 = ThermalMass::new(1.0, 0.0);
-    let mut m2 = ThermalMass::new(2.0, 10.0);
-    let mut h12 = Conductance::new(5.0, None);
-
-    for (_, dt) in dt_vec.iter().enumerate() {
+impl System {
+    pub fn new(m1: ThermalMass, m2: ThermalMass, h12: Conductance) -> Self {
+        Self {
+            m1,
+            m2,
+            h12,
+            state: Default::default(),
+            history: Default::default(),
+        }
+    }
+    pub fn step(&mut self, dt: f64) {
         // assumes heat flow from 1 -> 2 is positive
-        h12.state.q = h12.h * (m1.state.t - m2.state.t);
-        h12.save_state();
+        // calculate flow variable value first then update states
+        self.h12.state.q = self.h12.h * (self.m1.state.t - self.m2.state.t);
+        self.h12.save_state();
 
-        m1.state.t += -h12.state.q * dt / m1.c;
-        m1.save_state();
+        self.m1.state.t += -self.h12.state.q * dt / self.m1.c;
+        self.m1.save_state();
 
-        m2.state.t += h12.state.q * dt / m2.c;
-        m2.save_state();
+        self.m2.state.t += self.h12.state.q * dt / self.m2.c;
+        self.m2.save_state();
+
+        self.state.t += dt;
+        self.save_state();
     }
 
-    dbg!(h12.history);
-    dbg!(m1.history);
-    dbg!(m2.history);
+    pub fn walk(&mut self, solver: Solver, end_time: f64) {
+        match solver {
+            Solver::FixedEuler { dt } => {
+                while self.state.t < end_time {
+                    self.step(dt)
+                }
+            }
+            _ => todo!(),
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
+pub struct SystemState {
+    // current time
+    t: f64,
+}
+
+pub enum Solver {
+    FixedEuler { dt: f64 },
+    ToDo,
+}
+
+fn main() {
+    let dt = 0.1;
+    let m1 = ThermalMass::new(1.0, 0.0);
+    let m2 = ThermalMass::new(2.0, 10.0);
+    let h12 = Conductance::new(5.0, None);
+
+    let mut system = System::new(m1, m2, h12);
+
+    system.walk(Solver::FixedEuler { dt }, 2.0);
+
+    dbg!(system.h12.history);
+    dbg!(system.m1.history);
+    dbg!(system.m2.history);
 }
