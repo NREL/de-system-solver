@@ -24,6 +24,7 @@ pub fn nested_history_methods_derive(input: TokenStream) -> TokenStream {
         _ => panic!("only works on structs"),
     };
 
+    // TODO: make this actually get used
     let _struct_has_state = fields
         .iter()
         .any(|x| x.ident.as_ref().unwrap().to_string() == "state");
