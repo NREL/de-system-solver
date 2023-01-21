@@ -59,10 +59,13 @@ pub struct ConductanceState {
     pub q: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, BasicHistoryMethods)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, NestedHistoryMethods)]
 pub struct System {
-    pub m1: ThermalMass,
+    #[has_state]
+    pub m1: ThermalMass,    
+    // #[has_state]
     pub m2: ThermalMass,
+    // #[has_state]
     pub h12: Conductance,
     pub state: SystemState,
     pub history: SystemStateHistoryVec,
