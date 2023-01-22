@@ -33,7 +33,7 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
 
     let mut impl_block = TokenStream2::default();
 
-    if struct_has_state && !fields_with_state.is_empty() {
+    if struct_has_state {
         // struct has state and has fields with state
         let save_state_cust_doc: TokenStream2 = format!(
             "/// Saves `self.state` to `self.history` and propagtes to `save_state` in {}",
@@ -49,17 +49,6 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
         impl_block.extend::<TokenStream2>(quote! {
             impl #ident {
                 #save_state_cust_doc
-                pub fn save_state(&mut self) {
-                    self.history.push(self.state);
-                    #(self.#fields_with_state.save_state();)*
-                }
-            }
-        });
-    } else if struct_has_state {
-        // struct has state and does not have fields with state
-        impl_block.extend::<TokenStream2>(quote! {
-            impl #ident {
-                /// Saves `self.state` to `self.history`
                 pub fn save_state(&mut self) {
                     self.history.push(self.state);
                     #(self.#fields_with_state.save_state();)*
