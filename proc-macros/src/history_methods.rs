@@ -57,7 +57,6 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
         });
     } else if struct_has_state {
         // struct has state and does not have fields with state
-        // struct has state and has fields with state
         impl_block.extend::<TokenStream2>(quote! {
             impl #ident {
                 /// Saves `self.state` to `self.history`
@@ -68,6 +67,7 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
             }
         });
     } else {
+        // struct does not have state and has no fields with state
         panic!("HistoryMethods does not work here.");
     }
     impl_block.into()
