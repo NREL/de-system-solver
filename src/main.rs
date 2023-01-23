@@ -85,13 +85,10 @@ impl System {
         // assumes heat flow from 1 -> 2 is positive
         // calculate flow variable value first then update states
         self.h12.state.q = self.h12.h * (self.m1.state.t - self.m2.state.t);
-        self.h12.save_state();
 
         self.m1.state.t += -self.h12.state.q * dt / self.m1.c;
-        self.m1.save_state();
 
         self.m2.state.t += self.h12.state.q * dt / self.m2.c;
-        self.m2.save_state();
 
         self.state.t += dt;
         self.save_state();
