@@ -19,8 +19,8 @@ impl ThermalMass {
     pub fn new(c: f64, t0: f64) -> Self {
         Self {
             c,
-            state: ThermalMassState { t: t0 },
-            history: ThermalMassStateHistoryVec { t: vec![t0] },
+            state: ThermalMassState { temp: t0 },
+            history: ThermalMassStateHistoryVec { temp: vec![t0] },
         }
     }
 }
@@ -28,7 +28,7 @@ impl ThermalMass {
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
 pub struct ThermalMassState {
     /// temperature \[°C\]
-    pub t: f64,
+    pub temp: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods)]
@@ -59,6 +59,22 @@ pub struct ConductanceState {
     pub q: f64,
 }
 
+/// this is limited to only two thermal masses as currently coded.
+/// TODO:
+/// - figure out how to abstract connector to be direction agnostic
+///   or include heat flows inside masses and not connector
+/// - make it so that q gets set with setter
+/// - make it so that temp gets set with setter
+/// assumes heat flow from source -> sink is positive
+/// calculates flow variable value first then updates states.
+macro_rules! connect_heat {
+    ($source: expr, $sink: expr, $connector: expr, $dt: expr) => {
+        $connector.state.q = $connector.h * ($source.state.temp - $sink.state.temp);
+        $source.state.temp += -$connector.state.q * $dt / $source.c;
+        $sink.state.temp += $connector.state.q * $dt / $sink.c;
+    };
+}
+
 #[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods)]
 pub struct System {
     #[has_state]
@@ -82,22 +98,15 @@ impl System {
         }
     }
     pub fn step(&mut self, dt: f64) {
-        // assumes heat flow from 1 -> 2 is positive
-        // calculate flow variable value first then update states
-        self.h12.state.q = self.h12.h * (self.m1.state.t - self.m2.state.t);
-
-        self.m1.state.t += -self.h12.state.q * dt / self.m1.c;
-
-        self.m2.state.t += self.h12.state.q * dt / self.m2.c;
-
-        self.state.t += dt;
+        connect_heat!(self.m1, self.m2, self.h12, dt);
+        self.state.time += dt;
         self.save_state();
     }
 
     pub fn walk(&mut self, solver: Solver, end_time: f64) {
         match solver {
             Solver::FixedEuler { dt } => {
-                while self.state.t < end_time {
+                while self.state.time < end_time {
                     self.step(dt)
                 }
             }
@@ -109,7 +118,7 @@ impl System {
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
 pub struct SystemState {
     // current time
-    t: f64,
+    time: f64,
 }
 
 pub enum Solver {
