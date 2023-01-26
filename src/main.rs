@@ -68,10 +68,11 @@ pub struct ConductanceState {
 /// assumes heat flow from source -> sink is positive
 /// calculates flow variable value first then updates states.
 macro_rules! connect_heat {
-    ($source: expr, $sink: expr, $connector: expr, $dt: expr) => {
-        $connector.state.q = $connector.h * ($source.state.temp - $sink.state.temp);
-        $source.state.temp += -$connector.state.q * $dt / $source.c;
-        $sink.state.temp += $connector.state.q * $dt / $sink.c;
+    ($sys: ident, $source: ident, $sink: ident, $connector: ident, $dt: ident) => {
+        $sys.$connector.state.q =
+            $sys.$connector.h * ($sys.$source.state.temp - $sys.$sink.state.temp);
+        $sys.$source.state.temp += -$sys.$connector.state.q * $dt / $sys.$source.c;
+        $sys.$sink.state.temp += $sys.$connector.state.q * $dt / $sys.$sink.c;
     };
 }
 
@@ -98,7 +99,7 @@ impl System {
         }
     }
     pub fn step(&mut self, dt: f64) {
-        connect_heat!(self.m1, self.m2, self.h12, dt);
+        connect_heat!(self, m1, m2, h12, dt);
         self.state.time += dt;
         self.save_state();
     }
