@@ -7,13 +7,7 @@ use solver::*;
 mod components;
 use components::*;
 
-// TODO:
-// - make it so that q gets set with setter
-// - make it so that temp gets set with setter
-// - the above should make this connector domain agnostic
-// - incorporate UOM and make it so that `f64::from` is used
-//     to return anything that needs to be f64
-
+/// System of connected components
 #[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods)]
 pub struct System {
     // components
