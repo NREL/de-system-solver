@@ -3,7 +3,7 @@ pub enum Solver {
     FixedEuler {
         dt: f64,
     },
-    /// Runga-Kutta, 3rd order, adaptive time step
+    /// Runge-Kutta, 3rd order, adaptive time step
     RK3Adaptive {
         /// max allowable dt
         dt_max: f64,

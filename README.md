@@ -8,7 +8,7 @@ This is a proof-of-concept Rust crate that will attempt to demonstrate that the 
 - Solvers that we may want to use:
    - fixed-step euler
    - adaptive euler
-   - adaptive Runga-Kutta (e.g. RK45)
+   - adaptive Runge-Kutta (e.g. RK45)
    - ???
 - Solver framework:
    - could reference https://github.nrel.gov/cbaker2/rust_kepler_example and use `ode-solvers` crate.  This may require impractical code gymnastics to support the required state-space formulation, or macros (possibly procedural?) may make this straightforward.  
