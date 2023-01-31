@@ -97,7 +97,7 @@ fn main() {
     let m2 = ThermalMass::new(2.0, 10.0);
     let h12 = Conductance::new(5.0, None);
     let m3 = ThermalMass::new(1.5, 12.0);
-    let h13 = Conductance::new(5.0e-2, None);
+    let h13 = Conductance::new(5.0, None);
 
     let mut system = System::new(m1, m2, h12, m3, h13);
 
