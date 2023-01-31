@@ -11,6 +11,8 @@ use components::*;
 // - make it so that q gets set with setter
 // - make it so that temp gets set with setter
 // - the above should make this connector domain agnostic
+// - incorporate UOM and make it so that `f64::from` is used
+//     to return anything that needs to be f64
 
 /// assumes heat flow from source -> sink is positive
 /// calculates flow variable value first then updates states.
@@ -19,12 +21,12 @@ macro_rules! connect_states {
     ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
         // update flow variables
         $(
-            $sys.$c.state.q = $sys.$c.h * ($sys.$s0.state.pot() - $sys.$s1.state.pot());
+            $sys.$c.set_flow(&$sys.$s0.state, &$sys.$s1.state);
         )+
         // update state variables
         $(
-            $sys.$s0.state.temp -= $sys.$c.state.q * $dt / $sys.$s0.c;
-            $sys.$s1.state.temp += $sys.$c.state.q * $dt / $sys.$s1.c;
+            $sys.$s0.state.step_pot(-$sys.$c.flow() * $dt / $sys.$s0.c);
+            $sys.$s1.state.step_pot($sys.$c.flow() * $dt / $sys.$s1.c);
         )+
     };
 }

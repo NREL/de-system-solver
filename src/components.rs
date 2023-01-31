@@ -31,7 +31,6 @@ impl Potential for ThermalMassState {
     fn set_pot(&mut self, val: f64) {
         self.temp = val
     }
-
     fn pot(&self) -> f64 {
         self.temp
     }
@@ -57,6 +56,15 @@ impl Conductance {
                 q: vec![q0.unwrap_or_default()],
             },
         }
+    }
+}
+
+impl Flow for Conductance {
+    fn flow(&self) -> f64 {
+        self.state.q
+    }
+    fn set_flow(&mut self, p0: &dyn Potential, p1: &dyn Potential) {
+        self.state.q = self.h * (p0.pot() - p1.pot());
     }
 }
 
