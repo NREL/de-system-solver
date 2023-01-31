@@ -16,9 +16,15 @@ use components::*;
 /// calculates flow variable value first then updates states.
 #[macro_export]
 macro_rules! connect_states {
-    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +)) => {
+    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
+        // update flow variables
         $(
             $sys.$c.state.q = $sys.$c.h * ($sys.$s0.state.pot() - $sys.$s1.state.pot());
+        )+
+        // update state variables
+        $(
+            $sys.$s0.state.temp -= $sys.$c.state.q * $dt / $sys.$s0.c;
+            $sys.$s1.state.temp += $sys.$c.state.q * $dt / $sys.$s1.c;
         )+
     };
 }
@@ -46,7 +52,7 @@ impl System {
         }
     }
     pub fn step(&mut self, dt: f64) {
-        connect_states!(self, (m1, m2, h12));
+        connect_states!(self, (m1, m2, h12), dt);
         self.state.time += dt;
         self.save_state();
     }
