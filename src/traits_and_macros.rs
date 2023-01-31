@@ -1,3 +1,20 @@
+/// assumes heat flow from source -> sink is positive
+/// calculates flow variable value first then updates states.
+#[macro_export]
+macro_rules! connect_states {
+    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
+        // update flow variables
+        $(
+            $sys.$c.set_flow(&$sys.$s0.state, &$sys.$s1.state);
+        )+
+        // update state variables
+        $(
+            $sys.$s0.state.step_pot(-$sys.$c.flow() * $dt / $sys.$s0.c);
+            $sys.$s1.state.step_pot($sys.$c.flow() * $dt / $sys.$s1.c);
+        )+
+    };
+}
+
 pub trait Potential {
     /// sets value `val` of potential variable (e.g. temperature, pressure, voltage)
     fn set_pot(&mut self, val: f64);
