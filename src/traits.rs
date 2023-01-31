@@ -1,3 +1,10 @@
+pub trait Potential {
+    /// sets value of potential variable (e.g. temperature, pressure, voltage)
+    fn set_pot(&mut self, val: f64);
+    /// returns value of potential variable (e.g. temperature, pressure, voltage)
+    fn pot(&self) -> f64;
+}
+
 pub trait Diff {
     fn diff(&self) -> Vec<f64>;
 }

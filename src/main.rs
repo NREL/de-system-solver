@@ -1,65 +1,12 @@
 use proc_macros::*;
-use std::vec;
-
 mod imports;
 use imports::*;
+mod solver;
 mod traits;
-// use traits::*;
+use solver::*;
+mod components;
+use components::*;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods)]
-pub struct ThermalMass {
-    /// thermal capacitance
-    pub c: f64,
-    pub state: ThermalMassState,
-    pub history: ThermalMassStateHistoryVec,
-}
-
-impl ThermalMass {
-    /// New thermal mass with capacitance `c` and initial temperature `t0`
-    pub fn new(c: f64, t0: f64) -> Self {
-        Self {
-            c,
-            state: ThermalMassState { temp: t0 },
-            history: ThermalMassStateHistoryVec { temp: vec![t0] },
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
-pub struct ThermalMassState {
-    /// temperature \[°C\]
-    pub temp: f64,
-}
-
-#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods)]
-pub struct Conductance {
-    /// Thermal conductance between two temperatures
-    pub h: f64,
-    pub state: ConductanceState,
-    pub history: ConductanceStateHistoryVec,
-}
-
-impl Conductance {
-    pub fn new(h: f64, q0: Option<f64>) -> Self {
-        Self {
-            h,
-            state: ConductanceState {
-                q: q0.unwrap_or_default(),
-            },
-            history: ConductanceStateHistoryVec {
-                q: vec![q0.unwrap_or_default()],
-            },
-        }
-    }
-}
-
-/// Struct for tracking flow variables in Conductance
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
-pub struct ConductanceState {
-    pub q: f64,
-}
-
-/// this is limited to only two thermal masses as currently coded.
 /// TODO:
 /// - figure out how to abstract connector to be direction agnostic
 ///   or include heat flows inside masses and not connector
@@ -67,12 +14,12 @@ pub struct ConductanceState {
 /// - make it so that temp gets set with setter
 /// assumes heat flow from source -> sink is positive
 /// calculates flow variable value first then updates states.
-macro_rules! connect_heat {
-    ($sys: ident, $source: ident, $sink: ident, $connector: ident, $dt: ident) => {
-        $sys.$connector.state.q =
-            $sys.$connector.h * ($sys.$source.state.temp - $sys.$sink.state.temp);
-        $sys.$source.state.temp += -$sys.$connector.state.q * $dt / $sys.$source.c;
-        $sys.$sink.state.temp += $sys.$connector.state.q * $dt / $sys.$sink.c;
+#[macro_export]
+macro_rules! connect_states {
+    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +)) => {
+        $(
+            $sys.$c.state.q = $sys.$c.h * ($sys.$s0.state.pot() - $sys.$s1.state.pot());
+        )+
     };
 }
 
@@ -99,7 +46,7 @@ impl System {
         }
     }
     pub fn step(&mut self, dt: f64) {
-        connect_heat!(self, m1, m2, h12, dt);
+        connect_states!(self, (m1, m2, h12));
         self.state.time += dt;
         self.save_state();
     }
@@ -120,11 +67,6 @@ impl System {
 pub struct SystemState {
     // current time
     time: f64,
-}
-
-pub enum Solver {
-    FixedEuler { dt: f64 },
-    ToDo,
 }
 
 fn main() {
