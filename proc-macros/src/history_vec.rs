@@ -1,7 +1,7 @@
 use crate::imports::*;
 use crate::utilities::TokenStreamIterator;
 
-pub fn history_vec_derive(input: TokenStream) -> TokenStream {
+pub(crate) fn history_vec_derive(input: TokenStream) -> TokenStream {
     let ast: DeriveInput = syn::parse(input).unwrap();
     let original_name = &ast.ident;
     let original_name_str: String = original_name.to_string();
