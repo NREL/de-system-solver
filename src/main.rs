@@ -8,7 +8,7 @@ mod components;
 use components::*;
 
 /// System of connected components
-#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods, Solver)]
 pub struct System {
     // components
     #[has_state]
@@ -51,17 +51,6 @@ impl System {
         self.state.time += dt;
         self.save_state();
     }
-
-    pub fn walk(&mut self, solver: Solver, end_time: f64) {
-        match solver {
-            Solver::FixedEuler { dt } => {
-                while self.state.time < end_time {
-                    self.step(dt)
-                }
-            }
-            _ => todo!(),
-        }
-    }
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
@@ -80,7 +69,7 @@ fn main() {
 
     let mut system = System::new(m1, m2, h12, m3, h13);
 
-    system.walk(Solver::FixedEuler { dt }, 2.0);
+    system.walk(SolverOptions::FixedEuler { dt }, 2.0);
 
     dbg!(system);
 }
