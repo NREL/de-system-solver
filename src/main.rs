@@ -8,7 +8,7 @@ mod components;
 use components::*;
 
 /// System of connected components
-#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods, Solver)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods, Solver, GetStateValues)]
 pub struct System {
     // components
     #[has_state]
@@ -16,11 +16,11 @@ pub struct System {
     #[has_state]
     pub m2: ThermalMass,
     /// h12 connects m1 to m2
-    #[has_state]
+    #[history]
     pub h12: Conductance,
     #[has_state]
     pub m3: ThermalMass,
-    #[has_state]
+    #[history]
     pub h13: Conductance,
 
     // boiler plate fields (could be generated with proc macro)

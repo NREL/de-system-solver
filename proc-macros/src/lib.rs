@@ -13,7 +13,7 @@ pub fn history_vec_derive(input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_error]
-#[proc_macro_derive(HistoryMethods, attributes(has_state))]
+#[proc_macro_derive(HistoryMethods, attributes(has_state, history))]
 pub fn history_methods_derive(input: TokenStream) -> TokenStream {
     history_methods::history_methods_derive(input)
 }
@@ -22,4 +22,10 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(Solver)]
 pub fn solver_derive(input: TokenStream) -> TokenStream {
     solver_derive::solver_derive(input)
+}
+
+#[proc_macro_error]
+#[proc_macro_derive(GetStateValues)]
+pub fn get_state_vals_derive(input: TokenStream) -> TokenStream {
+    solver_derive::get_state_vals_derive(input)
 }
