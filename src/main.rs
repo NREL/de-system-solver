@@ -72,5 +72,6 @@ fn main() {
 
     system.walk(SolverOptions::FixedEuler { dt }, 2.0);
 
-    dbg!(system);
+    dbg!(&system);
+    dbg!(system.get_state_vals());
 }

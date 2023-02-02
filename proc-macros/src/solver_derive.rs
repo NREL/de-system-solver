@@ -58,7 +58,7 @@ pub(crate) fn get_state_vals_derive(input: TokenStream) -> TokenStream {
 
     impl_block.extend::<TokenStream2>(quote! {
         impl #ident {
-            pub fn get_states(&self) -> Vec<f64> {
+            pub fn get_state_vals(&self) -> Vec<f64> {
                 let mut state_vec: Vec<f64> = vec![];
                 #(state_vec.push(self.#fields_with_state.state.pot());)*
                 state_vec
