@@ -1,6 +1,6 @@
 use crate::imports::*;
 
-pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
+pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
 

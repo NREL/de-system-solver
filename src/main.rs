@@ -8,7 +8,7 @@ mod components;
 use components::*;
 
 /// System of connected components
-#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods, Solver, GetStateValues)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods, Walk, GetStateValues)]
 pub struct System {
     // components
     #[has_state]
