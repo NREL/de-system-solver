@@ -46,6 +46,7 @@ impl System {
             history: Default::default(),
         }
     }
+
     pub fn step(&mut self, dt: f64) {
         connect_states!(self, (m1, m2, h12, m2, m3, h13), dt);
         self.state.time += dt;
