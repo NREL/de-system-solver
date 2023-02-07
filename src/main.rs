@@ -52,6 +52,7 @@ impl System {
 
     pub fn step(&mut self, dt: f64) {
         connect_states!(self, (m1, m2, h12, m1, m3, h13), dt);
+        update_states!(self, (m1, m2, h12, m1, m3, h13), dt);
         self.state.time += dt;
         self.save_state();
     }
@@ -77,6 +78,5 @@ fn main() {
 
     dbg!(&system);
     dbg!(system.get_state_vals());
-    dbg!(system.bare_clone().m2.state);
-    dbg!(system.m2.state);
+    dbg!(system.bare_clone());
 }

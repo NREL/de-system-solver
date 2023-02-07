@@ -1,5 +1,5 @@
 /// assumes heat flow from source -> sink is positive
-/// calculates flow variable value first then updates states.
+/// calculates flow variable values
 #[macro_export]
 macro_rules! connect_states {
     ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
@@ -7,6 +7,12 @@ macro_rules! connect_states {
         $(
             $sys.$c.set_flow(&$sys.$s0.state, &$sys.$s1.state);
         )+
+    };
+}
+
+#[macro_export]
+macro_rules! update_states {
+    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
         // update state variables
         $(
             $sys.$s0.state.step_pot(-$sys.$c.flow() * $dt / $sys.$s0.c);
