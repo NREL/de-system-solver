@@ -1,5 +1,6 @@
 mod imports;
 use imports::*;
+mod bare_clone;
 mod history_methods;
 mod history_vec;
 mod solver_derive;
@@ -30,7 +31,19 @@ pub fn walk_derive(input: TokenStream) -> TokenStream {
 /// Derives `get_state_values` method for struct with fields marked with
 /// `has_state` attribute
 #[proc_macro_error]
-#[proc_macro_derive(GetStateValues)]
+#[proc_macro_derive(GetStateValues, attributes(has_state))]
 pub fn get_state_vals_derive(input: TokenStream) -> TokenStream {
     solver_derive::get_state_vals_derive(input)
 }
+
+/// Derives `get_state_values` method for struct with fields marked with
+/// `has_state` attribute
+#[proc_macro_error]
+#[proc_macro_derive(BareClone, attributes(has_state, history))]
+pub fn bare_clone(input: TokenStream) -> TokenStream {
+    bare_clone::bare_clone_derive(input)
+}
+
+// TODO: make an attribute-style macro that creates:
+// - pyo3 api
+// - serde api (e.g. to/from_file, json, yaml, bincode)

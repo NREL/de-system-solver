@@ -15,12 +15,17 @@ pub struct RK3Adaptive {
     dt_max: f64,
     /// max number of iterations per time step
     max_iter: f64,
-    /// absolute convergence tolerance
-    atol: f64,
-    /// relative convergence tolerance
-    rtol: f64,
+    /// euclidean error tolerance
+    tol: f64,
     /// save iteration history
     save: bool,
+    /// time step size in previous interval
+    dt_prev: f64,
+    /// amount of allowable dt increase from previous time step
+    dt_relax_coeff: f64,
+    /// vector of times at which the solver must report
+    /// if empty, solver chooses time steps to report
+    t_report: Vec<f64>,
     /// iteration history
     history: Vec<SolverHistory>,
 }

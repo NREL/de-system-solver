@@ -8,9 +8,12 @@ mod components;
 use components::*;
 
 /// System of connected components
-#[derive(Debug, Clone, PartialEq, PartialOrd, HistoryMethods, Walk, GetStateValues)]
+#[derive(
+    Debug, Default, Clone, PartialEq, PartialOrd, HistoryMethods, Walk, GetStateValues, BareClone,
+)]
 pub struct System {
     // components
+    // the `has_state` attribute tells the Walk
     #[has_state]
     pub m1: ThermalMass,
     #[has_state]
@@ -48,7 +51,7 @@ impl System {
     }
 
     pub fn step(&mut self, dt: f64) {
-        connect_states!(self, (m1, m2, h12, m2, m3, h13), dt);
+        connect_states!(self, (m1, m2, h12, m1, m3, h13), dt);
         self.state.time += dt;
         self.save_state();
     }
@@ -74,4 +77,6 @@ fn main() {
 
     dbg!(&system);
     dbg!(system.get_state_vals());
+    dbg!(system.bare_clone().m2.state);
+    dbg!(system.m2.state);
 }
