@@ -9,7 +9,17 @@ use components::*;
 
 /// System of connected components
 #[derive(
-    Debug, Default, Clone, PartialEq, PartialOrd, HistoryMethods, Walk, GetStateValues, BareClone,
+    Debug,
+    Default,
+    Clone,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    Deserialize,
+    HistoryMethods,
+    Walk,
+    GetStateValues,
+    BareClone,
 )]
 pub struct System {
     // components
@@ -58,14 +68,16 @@ impl System {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec,
+)]
 pub struct SystemState {
     // current time
     time: f64,
 }
 
 fn main() {
-    let dt = 0.1;
+    let dt = 0.001;
     let m1 = ThermalMass::new(1.0, 0.0);
     let m2 = ThermalMass::new(2.0, 10.0);
     let h12 = Conductance::new(5.0, None);
@@ -76,7 +88,8 @@ fn main() {
 
     system.walk(SolverOptions::FixedEuler { dt }, 2.0);
 
-    dbg!(&system);
-    dbg!(system.get_state_vals());
-    dbg!(system.bare_clone());
+    system.to_file("temp_results.json").unwrap();
+
+    // TODO: make a test around this
+    // dbg!(system.bare_clone());
 }

@@ -4,6 +4,14 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
+#[macro_export]
+macro_rules! common_derives {
+    () => {
+        #[derive(
+            Default, Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize
+        )]
+    };
+}
 /// assumes heat flow from source -> sink is positive
 /// calculates flow variable values
 #[macro_export]
@@ -75,12 +83,22 @@ pub trait SerdeAPI: Serialize + for<'a> Deserialize<'a> {
     /// A Rust Result
     fn to_file(&self, filename: &str) -> Result<(), anyhow::Error> {
         let file = PathBuf::from(filename);
-        match file.extension().unwrap().to_str().unwrap() {
-            "json" => serde_json::to_writer(&File::create(file)?, self)?,
-            "yaml" => serde_yaml::to_writer(&File::create(file)?, self)?,
-            _ => serde_json::to_writer(&File::create(file)?, self)?,
+        let extension = Path::new(filename)
+            .extension()
+            .and_then(OsStr::to_str)
+            .unwrap_or("");
+        let res = match extension {
+            "json" => {
+                serde_json::to_writer(&File::create(file)?, self)?;
+                Ok(())
+            }
+            "yaml" => {
+                serde_yaml::to_writer(&File::create(file)?, self)?;
+                Ok(())
+            }
+            _ => Err(anyhow!("Unsupported file extension {}", extension)),
         };
-        Ok(())
+        res
     }
 
     /// Read from file and return instantiated struct. Method adaptively calls deserialization

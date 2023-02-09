@@ -1,7 +1,9 @@
 use crate::imports::*;
 
 /// ThermalMass component with capacitance, state, and history
-#[derive(Default, Debug, Clone, PartialEq, PartialOrd, HistoryMethods, BareClone)]
+#[derive(
+    Default, Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone,
+)]
 pub struct ThermalMass {
     /// thermal capacitance \[J/K\]
     pub c: f64,
@@ -21,7 +23,9 @@ impl ThermalMass {
 }
 
 /// State for tracking temperature of [ThermalMass]
-#[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
+#[derive(
+    Default, Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec,
+)]
 pub struct ThermalMassState {
     /// temperature \[°C\]
     pub temp: f64,
@@ -37,7 +41,9 @@ impl Potential for ThermalMassState {
 }
 
 /// Conductance component
-#[derive(Default, Debug, Clone, PartialEq, PartialOrd, HistoryMethods, BareClone)]
+#[derive(
+    Default, Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone,
+)]
 pub struct Conductance {
     /// Thermal conductance \[W/K\] between two temperatures
     pub h: f64,
@@ -69,7 +75,9 @@ impl Flow for Conductance {
 }
 
 /// Struct for tracking flow variables in Conductance
-#[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd, HistoryVec)]
+#[derive(
+    Default, Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec,
+)]
 pub struct ConductanceState {
     /// Heat transfer rate \[W\]
     pub q: f64,

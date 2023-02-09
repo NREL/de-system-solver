@@ -9,6 +9,7 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
     impl_block.extend::<TokenStream2>(quote! {
         impl #ident {
             pub fn walk(&mut self, solver_opts: SolverOptions, end_time: f64) {
+                self.save_state();
                 match solver_opts {
                     SolverOptions::FixedEuler { dt } => {
                         while self.state.time < end_time {
