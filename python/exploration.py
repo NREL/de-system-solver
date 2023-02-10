@@ -44,13 +44,11 @@ ax.plot(
 )
 ax.plot(
     results['history']['time'],
-    np.array(results['m2']['history']['temp'][1:]) * results['m2']['c'],
-    label='m2',
-)
-ax.plot(
-    results['history']['time'],
-    np.array(results['m3']['history']['temp'][1:]) * results['m2']['c'],
-    label='m3',
+    (
+        np.array(results['m1']['history']['temp'][1:]) * results['m1']['c'] +
+        np.array(results['m2']['history']['temp'][1:]) * results['m2']['c']
+    ),
+    label='m1 + m2',
 )
 ax.plot(
     results['history']['time'],
@@ -59,7 +57,7 @@ ax.plot(
         np.array(results['m2']['history']['temp'][1:]) * results['m2']['c'] +
         np.array(results['m3']['history']['temp'][1:]) * results['m3']['c']
     ),
-    label='sum',
+    label='m1 + m2 + m3',
 )
 ax.set_ylabel('Energy [J]')
 ax.set_xlabel('Time [s]')
