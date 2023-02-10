@@ -16,17 +16,17 @@ with open("../dss-examples/temp_results.json", 'r') as file:
 fig, ax = plt.subplots()
 ax.plot(
     results['history']['time'],
-    results['m1']['history']['temp'][1:],
+    results['m1']['history']['temp'],
     label='m1',
 )
 ax.plot(
     results['history']['time'],
-    results['m2']['history']['temp'][1:],
+    results['m2']['history']['temp'],
     label='m2',
 )
 ax.plot(
     results['history']['time'],
-    results['m3']['history']['temp'][1:],
+    results['m3']['history']['temp'],
     label='m3',
 )
 ax.set_ylabel('Temperature [°C]')
@@ -39,23 +39,23 @@ ax.legend()
 fig, ax = plt.subplots()
 ax.plot(
     results['history']['time'],
-    np.array(results['m1']['history']['temp'][1:]) * results['m1']['c'],
+    np.array(results['m1']['history']['temp']) * results['m1']['c'],
     label='m1',
 )
 ax.plot(
     results['history']['time'],
     (
-        np.array(results['m1']['history']['temp'][1:]) * results['m1']['c'] +
-        np.array(results['m2']['history']['temp'][1:]) * results['m2']['c']
+        np.array(results['m1']['history']['temp']) * results['m1']['c'] +
+        np.array(results['m2']['history']['temp']) * results['m2']['c']
     ),
     label='m1 + m2',
 )
 ax.plot(
     results['history']['time'],
     (
-        np.array(results['m1']['history']['temp'][1:]) * results['m1']['c'] +
-        np.array(results['m2']['history']['temp'][1:]) * results['m2']['c'] +
-        np.array(results['m3']['history']['temp'][1:]) * results['m3']['c']
+        np.array(results['m1']['history']['temp']) * results['m1']['c'] +
+        np.array(results['m2']['history']['temp']) * results['m2']['c'] +
+        np.array(results['m3']['history']['temp']) * results['m3']['c']
     ),
     label='m1 + m2 + m3',
 )
@@ -63,4 +63,3 @@ ax.set_ylabel('Energy [J]')
 ax.set_xlabel('Time [s]')
 ax.legend()
 
-# %%

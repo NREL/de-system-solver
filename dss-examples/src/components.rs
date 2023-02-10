@@ -17,7 +17,7 @@ impl ThermalMass {
         Self {
             c,
             state: ThermalMassState { temp: t0 },
-            history: ThermalMassStateHistoryVec { temp: vec![t0] },
+            history: Default::default(),
         }
     }
 }
@@ -59,7 +59,7 @@ impl Conductance {
                 q: q0.unwrap_or_default(),
             },
             history: ConductanceStateHistoryVec {
-                q: vec![q0.unwrap_or_default()],
+                q: Default::default(),
             },
         }
     }
