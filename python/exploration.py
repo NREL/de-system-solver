@@ -6,7 +6,7 @@ import seaborn as sns
 sns.set()
 
 # %%
-with open("../temp_results.json", 'r') as file:
+with open("../dss-examples/temp_results.json", 'r') as file:
     results = json.load(file)
 
 # %%

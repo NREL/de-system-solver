@@ -1,5 +1,6 @@
 use crate::imports::*;
 
+/// Derives `walk` method for struct
 pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
@@ -29,6 +30,8 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
     impl_block.into()
 }
 
+/// Derives `get_state_values` method for struct with fields marked with
+/// `has_state` attribute
 pub(crate) fn get_state_vals_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
