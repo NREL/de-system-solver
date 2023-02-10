@@ -75,7 +75,7 @@ pub struct SystemState {
 }
 
 fn main() {
-    let dt = 0.01;
+    let dt = 0.1;
     let m1 = ThermalMass::new(1.0, 0.0);
     let m2 = ThermalMass::new(2.0, 10.0);
     let h12 = Conductance::new(5.0, None);
