@@ -1,11 +1,9 @@
-use proc_macros::*;
-mod imports;
+use dss_core::prelude::*;
+
+pub mod imports;
 use imports::*;
-mod solver;
-mod traits_and_macros;
-use solver::*;
-mod components;
-use components::*;
+pub mod components;
+pub use components::*;
 
 /// System of connected components
 #[derive(

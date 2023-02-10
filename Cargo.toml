@@ -2,6 +2,7 @@
 
 members = [
     "dss-core", # pure rust core 
+    "dss-examples" # examples of how to run the code
 ]
 
 [profile.dev]
@@ -14,3 +15,6 @@ opt-level = 3
 anyhow = "1.0.57"
 pyo3 = "0.17.2"
 pyo3-log = "*"
+serde = { version = "1.0.152", features = ["derive"]}
+serde_json = "1.0.93"
+serde_yaml = "0.9.17"

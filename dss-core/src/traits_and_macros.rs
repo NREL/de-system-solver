@@ -4,14 +4,6 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
-#[macro_export]
-macro_rules! common_derives {
-    () => {
-        #[derive(
-            Default, Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize
-        )]
-    };
-}
 /// assumes heat flow from source -> sink is positive
 /// calculates flow variable values
 #[macro_export]
