@@ -9,6 +9,7 @@ sns.set()
 with open("../dss-examples/temp_results.json", 'r') as file:
     results = json.load(file)
 
+# %%
 fig, ax = plt.subplots()
 ax.plot(
     results['history']['time'],
