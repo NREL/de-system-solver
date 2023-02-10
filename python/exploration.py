@@ -63,3 +63,5 @@ ax.set_ylabel('Energy [J]')
 ax.set_xlabel('Time [s]')
 ax.legend()
 
+
+# %%

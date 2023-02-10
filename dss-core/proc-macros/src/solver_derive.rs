@@ -11,19 +11,27 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
         impl #ident {
             pub fn walk(&mut self, solver_opts: SolverOptions, end_time: f64) {
                 self.save_state();
+                    while self.state.time < end_time {
+                        self.solve_step(&solver_opts);
+                    }
+                }
+
+            /// Runs `solver_opts` specific step method that calls
+            /// [Self::step] in solver-specific manner
+            pub fn solve_step(&mut self, solver_opts: &SolverOptions) {
                 match solver_opts {
                     SolverOptions::FixedEuler { dt } => {
-                        while self.state.time < end_time {
-                            self.step(dt)
-                        }
+                        self.step(&dt);
+                        self.state.time += dt;
                     },
                     // SolverOptions::RK3Adaptive(rk3a):: => {
-                    //     while self.state.time < end_time {
-                    //         self.step(dt)
-                    //     }
-                    // },
+                        //     while self.state.time < end_time {
+                            //         self.step(dt)
+                            //     }
+                            // },
                     _ => todo!(),
                 }
+                self.save_state();
             }
         }
     });

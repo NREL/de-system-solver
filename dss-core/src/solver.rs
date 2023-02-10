@@ -21,11 +21,6 @@ pub struct RK3Adaptive {
     save: bool,
     /// time step size in previous interval
     dt_prev: f64,
-    /// amount of allowable dt increase from previous time step
-    dt_relax_coeff: f64,
-    /// vector of times at which the solver must report
-    /// if empty, solver chooses time steps to report
-    t_report: Vec<f64>,
     /// iteration history
     history: Vec<SolverHistory>,
 }
