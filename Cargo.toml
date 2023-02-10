@@ -1,0 +1,16 @@
+[workspace]
+
+members = [
+    "dss-core", # pure rust core 
+]
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+
+[workspace.dependencies]
+anyhow = "1.0.57"
+pyo3 = "0.17.2"
+pyo3-log = "*"
