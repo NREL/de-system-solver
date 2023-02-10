@@ -9,6 +9,8 @@ sns.set()
 with open("../dss-examples/temp_results.json", 'r') as file:
     results = json.load(file)
 
+# %% 
+
 fig, ax = plt.subplots()
 ax.plot(
     results['history']['time'],
@@ -28,4 +30,37 @@ ax.plot(
 ax.set_ylabel('Temperature [°C]')
 ax.set_xlabel('Time [s]')
 ax.legend()
+# %%
+
+# conservation of energy based on constant thermal capacity
+
+fig, ax = plt.subplots()
+ax.plot(
+    results['history']['time'],
+    np.array(results['m1']['history']['temp'][1:]) * results['m1']['c'],
+    label='m1',
+)
+ax.plot(
+    results['history']['time'],
+    np.array(results['m2']['history']['temp'][1:]) * results['m2']['c'],
+    label='m2',
+)
+ax.plot(
+    results['history']['time'],
+    np.array(results['m3']['history']['temp'][1:]) * results['m2']['c'],
+    label='m3',
+)
+ax.plot(
+    results['history']['time'],
+    (
+        np.array(results['m1']['history']['temp'][1:]) * results['m1']['c'] +
+        np.array(results['m2']['history']['temp'][1:]) * results['m2']['c'] + 
+        np.array(results['m3']['history']['temp'][1:]) * results['m3']['c']
+    ),
+    label='sum',
+)
+ax.set_ylabel('Energy [J]')
+ax.set_xlabel('Time [s]')
+ax.legend()
+
 # %%
