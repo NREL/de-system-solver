@@ -6,10 +6,12 @@ import seaborn as sns
 sns.set()
 
 # %%
+
+# to generate this file, run `cargo run` in dss-examples/
 with open("../dss-examples/temp_results.json", 'r') as file:
     results = json.load(file)
 
-# %% 
+# %%
 
 fig, ax = plt.subplots()
 ax.plot(
@@ -54,7 +56,7 @@ ax.plot(
     results['history']['time'],
     (
         np.array(results['m1']['history']['temp'][1:]) * results['m1']['c'] +
-        np.array(results['m2']['history']['temp'][1:]) * results['m2']['c'] + 
+        np.array(results['m2']['history']['temp'][1:]) * results['m2']['c'] +
         np.array(results['m3']['history']['temp'][1:]) * results['m3']['c']
     ),
     label='sum',
