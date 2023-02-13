@@ -32,8 +32,7 @@ pub fn walk_derive(input: TokenStream) -> TokenStream {
     output
 }
 
-/// Derives `get_state_values` method for struct with fields marked with
-/// `has_state` attribute
+/// Derives `bare_clone` method
 #[proc_macro_error]
 #[proc_macro_derive(BareClone, attributes(has_state, history))]
 pub fn bare_clone(input: TokenStream) -> TokenStream {
