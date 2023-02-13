@@ -64,15 +64,6 @@ impl System {
         sys
     }
 
-    pub fn get_state_vals(&self) -> Vec<f64> {
-        dbg!();
-        vec![
-            self.m1.state.pot(), 
-            self.m2.state.pot(),
-            self.m3.state.pot(),
-        ]
-    }
-
     /// Steps forward by `dt` and returns Vec of state derivatives
     pub fn step(&mut self, dt: &f64) {
         connect_states!(self, (m1, m2, h12, m1, m3, h13), dt);
