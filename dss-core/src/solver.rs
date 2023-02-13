@@ -1,4 +1,5 @@
 use crate::imports::*;
+use crate::traits_and_macros::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum SolverOptions {
@@ -42,8 +43,6 @@ pub struct SolverHistory {
     norm: f64,
 }
 
-// pub fn rk4fixed(
-//     sys: Box<dyn crate::traits_and_macros::>,
-// ) -> (Box<dyn crate::traits_and_macros::GetStateValues>, Vec<f64>) {
-//     (sys, vec![0.4, 0.5, 0.6])
-// }
+pub fn rk4fixed(sys: Box<dyn Walk>) -> (Box<dyn Walk>, Vec<f64>) {
+    (sys, vec![0.4, 0.5, 0.6])
+}

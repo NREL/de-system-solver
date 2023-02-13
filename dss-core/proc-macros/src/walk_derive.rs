@@ -30,8 +30,8 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
     let mut impl_block = TokenStream2::default();
 
     impl_block.extend::<TokenStream2>(quote! {
-        impl #ident {
-            pub fn walk(&mut self, end_time: f64) {
+        impl dss_core::prelude::Walk for #ident {
+            fn walk(&mut self, end_time: f64) {
                 self.save_state();
                     while self.state.time < end_time {
                         self.solve_step();
@@ -40,7 +40,7 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
 
             /// Runs `solver_opts` specific step method that calls
             /// [Self::step] in solver-specific manner
-            pub fn solve_step(&mut self) {
+            fn solve_step(&mut self) {
                 match self.solver_opts {
                     SolverOptions::FixedEuler { dt } => {
                         self.step(&dt);
@@ -58,9 +58,7 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
                 }
                 self.save_state();
             }
-        }
 
-        impl #ident {
             /// assuming `set_derivs` or `step_derivs` has been called, steps
             /// value of states by deriv * dt
             fn step_states(&mut self, dt: &f64) {

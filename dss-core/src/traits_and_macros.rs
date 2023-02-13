@@ -26,6 +26,14 @@ macro_rules! update_derivs {
     };
 }
 
+/// trait to be implemented via crate::proc_macros::Walk
+pub trait Walk {
+    fn walk(&mut self, end_time: f64);
+    fn solve_step(&mut self);
+    fn step_states(&mut self, dt: &f64);
+    fn reset_derivs(&mut self);
+}
+
 pub trait HasState {
     /// sets value `val` of potential variable (e.g. temperature, pressure, voltage)
     fn set_pot(&mut self, val: f64);
