@@ -17,10 +17,10 @@ pub struct RK3Adaptive {
     pub max_iter: f64,
     /// euclidean error tolerance
     pub tol: f64,
-    /// save iteration history
-    pub save: bool,
     /// time step size in previous interval
     pub dt_prev: f64,
+    /// save iteration history
+    pub save: bool,
     /// iteration history
     pub history: Vec<SolverHistory>,
 }
