@@ -26,10 +26,7 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
 #[proc_macro_error]
 #[proc_macro_derive(Walk)]
 pub fn walk_derive(input: TokenStream) -> TokenStream {
-    let mut output: TokenStream = TokenStream::new();
-    output.extend(solver_derive::walk_derive(input.clone()));
-    output.extend(solver_derive::get_state_vals_derive(input));
-    output
+    solver_derive::walk_derive(input.clone())
 }
 
 /// Derives `bare_clone` method

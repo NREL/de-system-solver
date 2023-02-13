@@ -5,47 +5,51 @@ use std::fs::File;
 use std::path::{Path, PathBuf};
 
 /// assumes heat flow from source -> sink is positive
-/// calculates flow variable values
+/// sets flow variable values
 #[macro_export]
 macro_rules! connect_states {
     ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
-        // update flow variables
         $(
-            $sys.$c.set_flow(&$sys.$s0.state, &$sys.$s1.state);
+            $sys.$c.set_flow(&$sys.$s0, &$sys.$s1);
         )+
     };
 }
 
+/// sets time derivatives of state variables based on connected flow variables
 #[macro_export]
-macro_rules! update_states {
+macro_rules! update_derivs {
     ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
-        // update state variables
         $(
-            $sys.$s0.state.step_pot(-$sys.$c.flow() * $dt / $sys.$s0.c);
-            $sys.$s1.state.step_pot($sys.$c.flow() * $dt / $sys.$s1.c);
-        )+
-
-        $(
-            $sys.$s0.state.step_pot(-$sys.$c.flow() * $dt / $sys.$s0.c);
-            $sys.$s1.state.step_pot($sys.$c.flow() * $dt / $sys.$s1.c);
+            $sys.$s0.step_deriv(-$sys.$c.flow() / $sys.$s0.c);
+            $sys.$s1.step_deriv($sys.$c.flow() / $sys.$s1.c);
         )+
     };
 }
 
-pub trait Potential {
+pub trait HasState {
     /// sets value `val` of potential variable (e.g. temperature, pressure, voltage)
     fn set_pot(&mut self, val: f64);
     /// returns value of potential variable (e.g. temperature, pressure, voltage)
     fn pot(&self) -> f64;
-    /// increments value of potential by `val`
-    fn step_pot(&mut self, val: f64) {
-        self.set_pot(self.pot() + val);
+    /// increments value of potential by multiplying `dt * self.derive()`
+    fn step_pot(&mut self, dt: &f64) {
+        self.set_pot(self.pot() + dt * self.deriv());
     }
+    /// sets value `val` of time derivative of potential variable
+    fn set_deriv(&mut self, val: f64);
+    /// returns value of time derivative of potential variable
+    fn deriv(&self) -> f64;
+    /// incremenents value of time derivative of pontental variable
+    fn step_deriv(&mut self, val: f64) {
+        self.set_deriv(self.deriv() + val)
+    }
+    /// returns value of storage variable (e.g. thermal capacitance \[J/K\])
+    fn storage(&self) -> f64;
 }
 
 pub trait Flow {
     /// Sets flow variable based on difference between two potential variables
-    fn set_flow(&mut self, p0: &dyn Potential, p1: &dyn Potential);
+    fn set_flow(&mut self, p0: &dyn HasState, p1: &dyn HasState);
     /// returns value of flow variable (e.g. heat transfer, fluid flow rate, electrical current)
     fn flow(&self) -> f64;
 }
@@ -166,7 +170,7 @@ pub trait GetStateValues {
     /// Returns Vec of values of all state variables in system
     fn get_state_vals(&self) -> Vec<f64>;
     /// Returns Vec of values of all state variable derivatives in system
-    fn get_state_derivs(&self) -> Vec<f64>{
+    fn get_state_derivs(&self) -> Vec<f64> {
         unimplemented!();
     }
 }

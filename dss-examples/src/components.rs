@@ -13,12 +13,36 @@ pub struct ThermalMass {
 
 impl ThermalMass {
     /// New thermal mass with capacitance `c` and initial temperature `t0`
-    pub fn new(c: f64, t0: f64) -> Self {
+    pub fn new(c: f64, temp0: f64, dtemp0: Option<f64>) -> Self {
         Self {
             c,
-            state: ThermalMassState { temp: t0 },
+            state: ThermalMassState {
+                temp: temp0,
+                dtemp: dtemp0.unwrap_or_default(),
+            },
             history: Default::default(),
         }
+    }
+}
+
+impl HasState for ThermalMass {
+    fn set_pot(&mut self, val: f64) {
+        self.state.temp = val;
+    }
+    fn pot(&self) -> f64 {
+        self.state.temp
+    }
+    fn deriv(&self) -> f64 {
+        self.state.dtemp
+    }
+    fn set_deriv(&mut self, val: f64) {
+        self.state.dtemp = val;
+    }
+    fn step_deriv(&mut self, val: f64) {
+        self.state.dtemp += val;
+    }
+    fn storage(&self) -> f64 {
+        self.c
     }
 }
 
@@ -29,15 +53,8 @@ impl ThermalMass {
 pub struct ThermalMassState {
     /// temperature \[°C\]
     pub temp: f64,
-}
-
-impl Potential for ThermalMassState {
-    fn set_pot(&mut self, val: f64) {
-        self.temp = val
-    }
-    fn pot(&self) -> f64 {
-        self.temp
-    }
+    /// derivative of temperature w.r.t. time \[°C/s\]
+    pub dtemp: f64,
 }
 
 /// Conductance component
@@ -69,7 +86,7 @@ impl Flow for Conductance {
     fn flow(&self) -> f64 {
         self.state.q
     }
-    fn set_flow(&mut self, p0: &dyn Potential, p1: &dyn Potential) {
+    fn set_flow(&mut self, p0: &dyn HasState, p1: &dyn HasState) {
         self.state.q = self.h * (p0.pot() - p1.pot());
     }
 }

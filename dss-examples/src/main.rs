@@ -67,7 +67,8 @@ impl System {
     /// Steps forward by `dt` and returns Vec of state derivatives
     pub fn step(&mut self, dt: &f64) {
         connect_states!(self, (m1, m2, h12, m1, m3, h13), dt);
-        update_states!(self, (m1, m2, h12, m1, m3, h13), dt);
+        update_derivs!(self, (m1, m2, h12, m1, m3, h13), dt);
+        self.step_states(dt);
     }
 }
 
@@ -81,10 +82,10 @@ pub struct SystemState {
 
 fn main() {
     let dt = 0.01;
-    let m1 = ThermalMass::new(1.0, 0.0);
-    let m2 = ThermalMass::new(2.0, 10.0);
+    let m1 = ThermalMass::new(1.0, 0.0, None);
+    let m2 = ThermalMass::new(2.0, 10.0, None);
     let h12 = Conductance::new(5.0, None);
-    let m3 = ThermalMass::new(1.5, 12.0);
+    let m3 = ThermalMass::new(1.5, 12.0, None);
     let h13 = Conductance::new(5.0, None);
 
     let mut system = System::new(m1, m2, h12, m3, h13);

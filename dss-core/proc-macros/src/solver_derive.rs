@@ -19,6 +19,7 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
             /// Runs `solver_opts` specific step method that calls
             /// [Self::step] in solver-specific manner
             pub fn solve_step(&mut self, solver_opts: &SolverOptions) {
+                self.reset_derivs();
                 match solver_opts {
                     SolverOptions::FixedEuler { dt } => {
                         self.step(&dt);
@@ -38,14 +39,6 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
             }
         }
     });
-    impl_block.into()
-}
-
-/// Derives `get_state_values` method for struct with fields marked with
-/// `has_state` attribute
-pub(crate) fn get_state_vals_derive(input: TokenStream) -> TokenStream {
-    let ast = syn::parse_macro_input!(input as syn::DeriveInput);
-    let ident = &ast.ident;
 
     let fields: Vec<Field> = match ast.data {
         syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
@@ -69,14 +62,25 @@ pub(crate) fn get_state_vals_derive(input: TokenStream) -> TokenStream {
         .map(|(f, _hsv)| f.ident.as_ref().unwrap())
         .collect::<Vec<_>>();
 
-    let mut impl_block = TokenStream2::default();
-
     impl_block.extend::<TokenStream2>(quote! {
         impl dss_core::traits_and_macros::GetStateValues for #ident {
             fn get_state_vals(&self) -> Vec<f64> {
                 let mut state_vec: Vec<f64> = vec![];
-                #(state_vec.push(self.#fields_with_state.state.pot());)*
+                #(state_vec.push(self.#fields_with_state.pot());)*
                 state_vec
+            }
+        }
+
+        impl #ident {
+            /// assuming `set_derivs` or `step_derivs` has been called, steps
+            /// value of states by deriv * dt
+            fn step_states(&mut self, dt: &f64) {
+                #(self.#fields_with_state.step_pot(dt);)*
+            }
+
+            /// reset all time derivatives to zero for start of `solve_step`
+            fn reset_derivs(&mut self) {
+                #(self.#fields_with_state.set_deriv(0.0);)*
             }
         }
     });
