@@ -21,6 +21,7 @@ pub use components::*;
     BareClone,
 )]
 pub struct System {
+    solver_opts: SolverOptions,
     // components
     // the `has_state` attribute tells the Walk
     #[has_state]
@@ -37,31 +38,28 @@ pub struct System {
 
     // boiler plate fields (could be generated with proc macro)
     pub state: SystemState,
-    /// number of state variables in system
-    pub n_states: u32,
     pub history: SystemStateHistoryVec,
 }
 
 impl System {
     pub fn new(
+        solver_opts: SolverOptions,
         m1: ThermalMass,
         m2: ThermalMass,
         h12: Conductance,
         m3: ThermalMass,
         h13: Conductance,
     ) -> Self {
-        let mut sys = Self {
+        Self {
+            solver_opts,
             m1,
             m2,
             h12,
             m3,
             h13,
             state: Default::default(),
-            n_states: Default::default(),
             history: Default::default(),
-        };
-        sys.n_states = sys.get_state_vals().len() as u32;
-        sys
+        }
     }
 
     /// Steps forward by `dt` and returns Vec of state derivatives
@@ -85,7 +83,7 @@ fn main() {
     let mut system = mock_system();
     let dt = 0.01;
 
-    system.walk(SolverOptions::FixedEuler { dt }, 2.0);
+    system.walk(2.0);
 
     let mut temp_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
@@ -108,7 +106,7 @@ pub fn mock_system() -> System {
     let m3 = ThermalMass::new(1.5, 12.0, None);
     let h13 = Conductance::new(5.0, None);
 
-    System::new(m1, m2, h12, m3, h13)
+    System::new(Default::default(), m1, m2, h12, m3, h13)
 }
 
 #[cfg(test)]

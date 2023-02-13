@@ -1,3 +1,6 @@
+use crate::imports::*;
+
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum SolverOptions {
     /// Euler with fixed time step
     FixedEuler {
@@ -8,8 +11,13 @@ pub enum SolverOptions {
     ToDo,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+impl Default for SolverOptions {
+    fn default() -> Self {
+        SolverOptions::FixedEuler { dt: 0.01 }
+    }
+}
 
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub struct RK3Adaptive {
     /// max allowable dt
     pub dt_max: f64,
@@ -25,23 +33,11 @@ pub struct RK3Adaptive {
     pub history: Vec<SolverHistory>,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
-
-/// Reasons for stop of iteration
-pub enum SolverReasons {
-    /// iterations stopped because error tolerance was achieved
-    ToleranceAchieved,
-    /// iterations stopped because max_iter was achieved
-    MaxIter,
-}
-
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize, Serialize)]
 
 pub struct SolverHistory {
     /// number of iterations to achieve tolerance
     n_iters: u8,
-    /// reason iteration stopped
-    reason: SolverReasons,
     /// L2 (euclidean) norm
     norm: f64,
 }
