@@ -5,6 +5,28 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
 
+    let fields: Vec<Field> = match ast.data {
+        syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
+        _ => panic!("only works on structs"),
+    };
+
+    let has_state_vec: Vec<bool> = fields
+        .iter()
+        .map(|field| {
+            field
+                .attrs
+                .iter()
+                .any(|attr| attr.path.is_ident("has_state"))
+        })
+        .collect();
+
+    let fields_with_state = fields
+        .iter()
+        .zip(has_state_vec.clone())
+        .filter(|(_f, hsv)| *hsv)
+        .map(|(f, _hsv)| f.ident.as_ref().unwrap())
+        .collect::<Vec<_>>();
+
     let mut impl_block = TokenStream2::default();
 
     impl_block.extend::<TokenStream2>(quote! {
@@ -37,31 +59,7 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
                 self.save_state();
             }
         }
-    });
 
-    let fields: Vec<Field> = match ast.data {
-        syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
-        _ => panic!("only works on structs"),
-    };
-
-    let has_state_vec: Vec<bool> = fields
-        .iter()
-        .map(|field| {
-            field
-                .attrs
-                .iter()
-                .any(|attr| attr.path.is_ident("has_state"))
-        })
-        .collect();
-
-    let fields_with_state = fields
-        .iter()
-        .zip(has_state_vec.clone())
-        .filter(|(_f, hsv)| *hsv)
-        .map(|(f, _hsv)| f.ident.as_ref().unwrap())
-        .collect::<Vec<_>>();
-
-    impl_block.extend::<TokenStream2>(quote! {
         impl #ident {
             /// assuming `set_derivs` or `step_derivs` has been called, steps
             /// value of states by deriv * dt

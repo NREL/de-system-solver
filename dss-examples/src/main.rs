@@ -81,7 +81,10 @@ pub struct SystemState {
 
 fn main() {
     let mut system = mock_system();
-    let dt = 0.01;
+    let dt = match system.solver_opts {
+        SolverOptions::FixedEuler { dt } => dt,
+        _ => unimplemented!(),
+    };
 
     system.walk(2.0);
 
@@ -127,5 +130,20 @@ mod tests {
         assert!(bare_sys.history.is_empty());
         assert!(bare_sys.m1.history.is_empty());
         assert!(bare_sys.h12.history.is_empty());
+    }
+
+    #[test]
+    fn test_against_benchmark() {
+        let mut sys = mock_system();
+        sys.walk(2.0);
+
+        let mut temp_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf();
+        temp_file.push("dss-examples/tests/fixtures/benchmark.yaml");
+
+        let benchmark_sys = System::from_file(temp_file.as_os_str().to_str().unwrap()).unwrap();
+        assert_eq!(sys, benchmark_sys);
     }
 }

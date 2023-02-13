@@ -42,8 +42,8 @@ pub struct SolverHistory {
     norm: f64,
 }
 
-pub fn rk4fixed(
-    sys: Box<dyn crate::traits_and_macros::GetStateValues>,
-) -> (Box<dyn crate::traits_and_macros::GetStateValues>, Vec<f64>) {
-    (sys, vec![0.4, 0.5, 0.6])
-}
+// pub fn rk4fixed(
+//     sys: Box<dyn crate::traits_and_macros::>,
+// ) -> (Box<dyn crate::traits_and_macros::GetStateValues>, Vec<f64>) {
+//     (sys, vec![0.4, 0.5, 0.6])
+// }

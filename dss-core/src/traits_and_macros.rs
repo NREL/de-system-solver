@@ -165,12 +165,3 @@ pub trait SerdeAPI: Serialize + for<'a> Deserialize<'a> {
 }
 
 impl<T> SerdeAPI for T where T: Serialize + for<'a> Deserialize<'a> {}
-
-pub trait GetStateValues {
-    /// Returns Vec of values of all state variables in system
-    fn get_state_vals(&self) -> Vec<f64>;
-    /// Returns Vec of values of all state variable derivatives in system
-    fn get_state_derivs(&self) -> Vec<f64> {
-        unimplemented!();
-    }
-}
