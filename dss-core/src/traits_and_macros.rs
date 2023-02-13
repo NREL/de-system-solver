@@ -32,16 +32,18 @@ pub trait Walk {
     fn solve_step(&mut self);
     fn step_states(&mut self, dt: &f64);
     fn reset_derivs(&mut self);
+    fn get_derivs(&self) -> Vec<f64>;
+    fn get_states(&self) -> Vec<f64>;
 }
 
 pub trait HasState {
     /// sets value `val` of potential variable (e.g. temperature, pressure, voltage)
-    fn set_pot(&mut self, val: f64);
+    fn set_state(&mut self, val: f64);
     /// returns value of potential variable (e.g. temperature, pressure, voltage)
-    fn pot(&self) -> f64;
+    fn state(&self) -> f64;
     /// increments value of potential by multiplying `dt * self.derive()`
-    fn step_pot(&mut self, dt: &f64) {
-        self.set_pot(self.pot() + dt * self.deriv());
+    fn step_state(&mut self, dt: &f64) {
+        self.set_state(self.state() + dt * self.deriv());
     }
     /// sets value `val` of time derivative of potential variable
     fn set_deriv(&mut self, val: f64);

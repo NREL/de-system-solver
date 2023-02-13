@@ -26,10 +26,10 @@ impl ThermalMass {
 }
 
 impl HasState for ThermalMass {
-    fn set_pot(&mut self, val: f64) {
+    fn set_state(&mut self, val: f64) {
         self.state.temp = val;
     }
-    fn pot(&self) -> f64 {
+    fn state(&self) -> f64 {
         self.state.temp
     }
     fn deriv(&self) -> f64 {
@@ -87,7 +87,7 @@ impl Flow for Conductance {
         self.state.q
     }
     fn set_flow(&mut self, p0: &dyn HasState, p1: &dyn HasState) {
-        self.state.q = self.h * (p0.pot() - p1.pot());
+        self.state.q = self.h * (p0.state() - p1.state());
     }
 }
 

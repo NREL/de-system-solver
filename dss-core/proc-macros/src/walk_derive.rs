@@ -62,12 +62,24 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
             /// assuming `set_derivs` or `step_derivs` has been called, steps
             /// value of states by deriv * dt
             fn step_states(&mut self, dt: &f64) {
-                #(self.#fields_with_state.step_pot(dt);)*
+                #(self.#fields_with_state.step_state(dt);)*
             }
 
             /// reset all time derivatives to zero for start of `solve_step`
             fn reset_derivs(&mut self) {
                 #(self.#fields_with_state.set_deriv(0.0);)*
+            }
+
+            fn get_derivs(&self) -> Vec<f64> {
+                let mut derivs: Vec<f64> = Vec::new();
+                #(derivs.push(self.#fields_with_state.deriv());)*
+                derivs
+            }
+
+            fn get_states(&self) -> Vec<f64> {
+                let mut states: Vec<f64> = Vec::new();
+                #(states.push(self.#fields_with_state.state());)*
+                states
             }
         }
     });

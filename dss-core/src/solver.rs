@@ -44,5 +44,6 @@ pub struct SolverHistory {
 }
 
 pub fn rk4fixed(sys: Box<dyn Walk>) -> (Box<dyn Walk>, Vec<f64>) {
-    (sys, vec![0.4, 0.5, 0.6])
+    let k1 = sys.get_derivs();
+    (sys, vec![1.0])
 }
