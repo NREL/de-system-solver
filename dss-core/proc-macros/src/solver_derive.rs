@@ -19,7 +19,6 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
             /// Runs `solver_opts` specific step method that calls
             /// [Self::step] in solver-specific manner
             pub fn solve_step(&mut self, solver_opts: &SolverOptions) {
-                self.reset_derivs();
                 match solver_opts {
                     SolverOptions::FixedEuler { dt } => {
                         self.step(&dt);

@@ -66,6 +66,7 @@ impl System {
 
     /// Steps forward by `dt` and returns Vec of state derivatives
     pub fn step(&mut self, dt: &f64) {
+        self.reset_derivs();
         connect_states!(self, (m1, m2, h12, m1, m3, h13), dt);
         update_derivs!(self, (m1, m2, h12, m1, m3, h13), dt);
         self.step_states(dt);
