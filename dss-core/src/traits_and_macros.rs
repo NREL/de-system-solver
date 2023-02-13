@@ -24,6 +24,11 @@ macro_rules! update_states {
             $sys.$s0.state.step_pot(-$sys.$c.flow() * $dt / $sys.$s0.c);
             $sys.$s1.state.step_pot($sys.$c.flow() * $dt / $sys.$s1.c);
         )+
+
+        $(
+            $sys.$s0.state.step_pot(-$sys.$c.flow() * $dt / $sys.$s0.c);
+            $sys.$s1.state.step_pot($sys.$c.flow() * $dt / $sys.$s1.c);
+        )+
     };
 }
 
@@ -156,3 +161,7 @@ pub trait SerdeAPI: Serialize + for<'a> Deserialize<'a> {
 }
 
 impl<T> SerdeAPI for T where T: Serialize + for<'a> Deserialize<'a> {}
+
+pub trait GetStateValues {
+    fn get_state_vals(&self) -> Vec<f64>;
+}

@@ -50,7 +50,6 @@ pub(crate) fn bare_clone_derive(input: TokenStream) -> TokenStream {
             /// Returns a copy
             pub fn bare_clone(&self) -> Self {
                 let mut new = Self::default();
-                #(new.#fields_to_bare_clone = self.#fields_to_bare_clone.bare_clone();)*
                 #(new.#fields_to_clone = self.#fields_to_clone.clone();)*
                 new
             }

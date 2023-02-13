@@ -12,17 +12,17 @@ pub enum SolverOptions {
 
 pub struct RK3Adaptive {
     /// max allowable dt
-    dt_max: f64,
+    pub dt_max: f64,
     /// max number of iterations per time step
-    max_iter: f64,
+    pub max_iter: f64,
     /// euclidean error tolerance
-    tol: f64,
+    pub tol: f64,
     /// save iteration history
-    save: bool,
+    pub save: bool,
     /// time step size in previous interval
-    dt_prev: f64,
+    pub dt_prev: f64,
     /// iteration history
-    history: Vec<SolverHistory>,
+    pub history: Vec<SolverHistory>,
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -44,4 +44,10 @@ pub struct SolverHistory {
     reason: SolverReasons,
     /// L2 (euclidean) norm
     norm: f64,
+}
+
+pub fn rk4fixed(
+    sys: Box<dyn crate::traits_and_macros::GetStateValues>,
+) -> (Box<dyn crate::traits_and_macros::GetStateValues>, Vec<f64>) {
+    (sys, vec![0.4, 0.5, 0.6])
 }

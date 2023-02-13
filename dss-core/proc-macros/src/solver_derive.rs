@@ -24,11 +24,14 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
                         self.step(&dt);
                         self.state.time += dt;
                     },
-                    // SolverOptions::RK3Adaptive(rk3a):: => {
-                        //     while self.state.time < end_time {
-                            //         self.step(dt)
-                            //     }
-                            // },
+                    // SolverOptions::RK3Adaptive(rk3a) => {
+                    //     // initial guess for time step size
+                    //     let h = rk3a.dt_prev;
+                    //     let k1: Vec<f64> = self.get_state_vals();
+                    //     let k2: Vec<f64> =
+                    //     let rk4states = 666.6;
+                    //     let rk5states = 666.6;
+                    // },
                     _ => todo!(),
                 }
                 self.save_state();
@@ -69,8 +72,8 @@ pub(crate) fn get_state_vals_derive(input: TokenStream) -> TokenStream {
     let mut impl_block = TokenStream2::default();
 
     impl_block.extend::<TokenStream2>(quote! {
-        impl #ident {
-            pub fn get_state_vals(&self) -> Vec<f64> {
+        impl dss_core::traits_and_macros::GetStateValues for #ident {
+            fn get_state_vals(&self) -> Vec<f64> {
                 let mut state_vec: Vec<f64> = vec![];
                 #(state_vec.push(self.#fields_with_state.state.pot());)*
                 state_vec

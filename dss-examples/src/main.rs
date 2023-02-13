@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use dss_core::prelude::*;
 
 pub mod imports;
@@ -16,7 +18,6 @@ pub use components::*;
     Deserialize,
     HistoryMethods,
     Walk,
-    GetStateValues,
     BareClone,
 )]
 pub struct System {
@@ -36,6 +37,8 @@ pub struct System {
 
     // boiler plate fields (could be generated with proc macro)
     pub state: SystemState,
+    /// number of state variables in system
+    pub n_states: u32,
     pub history: SystemStateHistoryVec,
 }
 
@@ -47,17 +50,21 @@ impl System {
         m3: ThermalMass,
         h13: Conductance,
     ) -> Self {
-        Self {
+        let mut sys = Self {
             m1,
             m2,
             h12,
             m3,
             h13,
             state: Default::default(),
+            n_states: Default::default(),
             history: Default::default(),
-        }
+        };
+        sys.n_states = sys.get_state_vals().len() as u32;
+        sys
     }
 
+    /// Steps forward by `dt` and returns Vec of state derivatives
     pub fn step(&mut self, dt: &f64) {
         connect_states!(self, (m1, m2, h12, m1, m3, h13), dt);
         update_states!(self, (m1, m2, h12, m1, m3, h13), dt);
@@ -84,7 +91,15 @@ fn main() {
 
     system.walk(SolverOptions::FixedEuler { dt }, 2.0);
 
-    system.to_file("temp_results.json").unwrap();
+    let mut temp_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+        .parent()
+        .unwrap()
+        .to_path_buf();
+    temp_file.push(format!("target/results dt={dt} s.json"));
+
+    system
+        .to_file(temp_file.as_os_str().to_str().unwrap())
+        .unwrap();
 
     // TODO: make a test around this
     // dbg!(system.bare_clone());
