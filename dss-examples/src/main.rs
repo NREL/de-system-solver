@@ -82,14 +82,8 @@ pub struct SystemState {
 }
 
 fn main() {
+    let mut system = mock_system();
     let dt = 0.01;
-    let m1 = ThermalMass::new(1.0, 0.0, None);
-    let m2 = ThermalMass::new(2.0, 10.0, None);
-    let h12 = Conductance::new(5.0, None);
-    let m3 = ThermalMass::new(1.5, 12.0, None);
-    let h13 = Conductance::new(5.0, None);
-
-    let mut system = System::new(m1, m2, h12, m3, h13);
 
     system.walk(SolverOptions::FixedEuler { dt }, 2.0);
 
@@ -105,4 +99,35 @@ fn main() {
 
     // TODO: make a test around this
     // dbg!(system.bare_clone());
+}
+
+pub fn mock_system() -> System {
+    let m1 = ThermalMass::new(1.0, 0.0, None);
+    let m2 = ThermalMass::new(2.0, 10.0, None);
+    let h12 = Conductance::new(5.0, None);
+    let m3 = ThermalMass::new(1.5, 12.0, None);
+    let h13 = Conductance::new(5.0, None);
+
+    System::new(m1, m2, h12, m3, h13)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_bare_clone() {
+        let mut sys = mock_system();
+        assert!(sys.history.is_empty());
+        assert!(sys.m1.history.is_empty());
+        assert!(sys.h12.history.is_empty());
+        sys.save_state();
+        // verify that at least a couple of the expected changes happened
+        assert!(sys.history.len() == 1);
+        assert!(sys.m1.history.len() == 1);
+        assert!(sys.h12.history.len() == 1);
+        let bare_sys = sys.bare_clone();
+        assert!(bare_sys.history.is_empty());
+        assert!(bare_sys.m1.history.is_empty());
+        assert!(bare_sys.h12.history.is_empty());
+    }
 }

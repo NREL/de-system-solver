@@ -3,8 +3,8 @@ use imports::*;
 mod bare_clone;
 mod history_methods;
 mod history_vec;
-mod solver_derive;
 mod utilities;
+mod walk_derive;
 
 /// generate HistoryVec that acts like a vec of States but
 /// stores each field of state as a vec field.
@@ -21,12 +21,11 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
     history_methods::history_methods_derive(input)
 }
 
-/// Derives `walk` method for struct and `get_state_values` method
-/// fields marked with `has_state` attribute
+/// Derives several methods for struct
 #[proc_macro_error]
 #[proc_macro_derive(Walk)]
 pub fn walk_derive(input: TokenStream) -> TokenStream {
-    solver_derive::walk_derive(input.clone())
+    walk_derive::walk_derive(input.clone())
 }
 
 /// Derives `bare_clone` method
@@ -38,4 +37,3 @@ pub fn bare_clone(input: TokenStream) -> TokenStream {
 
 // TODO: make an attribute-style macro that creates:
 // - pyo3 api
-// - serde api (e.g. to/from_file, json, yaml, bincode)
