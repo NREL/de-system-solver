@@ -35,6 +35,7 @@ pub struct System {
     pub m3: ThermalMass,
     #[save_state]
     pub h13: Conductance,
+    pub t_report: Vec<f64>,
 
     // boiler plate fields (could be generated with proc macro)
     pub state: SystemState,
@@ -49,6 +50,7 @@ impl System {
         h12: Conductance,
         m3: ThermalMass,
         h13: Conductance,
+        t_report: Vec<f64>,
     ) -> Self {
         Self {
             solver_opts,
@@ -57,6 +59,7 @@ impl System {
             h12,
             m3,
             h13,
+            t_report,
             state: Default::default(),
             history: Default::default(),
         }
@@ -75,23 +78,22 @@ impl System {
     Debug, Default, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec,
 )]
 pub struct SystemState {
+    // current index in `t_report`
+    i: usize,
     // current time
     time: f64,
 }
 
 fn main() {
     let mut system = mock_system();
-    let dt = match system.solver_opts {
-        SolverOptions::FixedEuler { dt } => dt,
-        _ => unimplemented!(),
-    };
 
-    system.walk(2.0);
+    system.walk();
 
     let mut temp_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
         .unwrap()
         .to_path_buf();
+    let dt = system.t_report[1] - system.t_report.first().unwrap();
     temp_file.push(format!("target/results dt={dt} s.json"));
 
     system
@@ -108,8 +110,10 @@ pub fn mock_system() -> System {
     let h12 = Conductance::new(5.0, None);
     let m3 = ThermalMass::new(1.5, 12.0, None);
     let h13 = Conductance::new(5.0, None);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 201);
+    dbg!(&t_report);
 
-    System::new(Default::default(), m1, m2, h12, m3, h13)
+    System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
 }
 
 #[cfg(test)]
@@ -135,7 +139,7 @@ mod tests {
     #[test]
     fn test_against_benchmark() {
         let mut sys = mock_system();
-        sys.walk(2.0);
+        sys.walk();
 
         let mut temp_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()

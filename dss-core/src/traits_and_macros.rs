@@ -28,7 +28,7 @@ macro_rules! update_derivs {
 
 /// trait to be implemented via crate::proc_macros::SystemSolver
 pub trait SystemSolver {
-    fn walk(&mut self, end_time: f64);
+    fn walk(&mut self);
     fn solve_step(&mut self);
     fn step_states(&mut self, dt: &f64);
     fn reset_derivs(&mut self);
@@ -175,3 +175,19 @@ pub trait SerdeAPI: Serialize + for<'a> Deserialize<'a> {
 }
 
 impl<T> SerdeAPI for T where T: Serialize + for<'a> Deserialize<'a> {}
+
+pub trait Linspace {
+    fn linspace(start: f64, stop: f64, n_elements: usize) -> Vec<f64> {
+        let n_steps = n_elements - 1;
+        let step_size = (stop - start) / n_steps as f64;
+        let v_norm: Vec<f64> = (0..=n_steps)
+            .collect::<Vec<usize>>()
+            .iter()
+            .map(|x| *x as f64)
+            .collect();
+        let v = v_norm.iter().map(|x| (x * step_size) + start).collect();
+        v
+    }
+}
+
+impl Linspace for Vec<f64> {}

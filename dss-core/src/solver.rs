@@ -1,25 +1,27 @@
 use crate::imports::*;
-use crate::traits_and_macros::*;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum SolverOptions {
     /// Euler with fixed time step
-    FixedEuler {
-        dt: f64,
-    },
+    EulerFixed,
+    // TODO: add this stuff back into fixed options
+    // /// time step to use if `t_report` is larger than `dt`
+    // dt: f64,
+    RK4Fixed,
+    RK5Fixed,
     /// Runge-Kutta, 3rd order, adaptive time step
-    RK3Adaptive(RK3Adaptive),
+    RK45Adaptive(AdaptiveSolver),
     ToDo,
 }
 
 impl Default for SolverOptions {
     fn default() -> Self {
-        SolverOptions::FixedEuler { dt: 0.01 }
+        SolverOptions::EulerFixed
     }
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
-pub struct RK3Adaptive {
+pub struct AdaptiveSolver {
     /// max allowable dt
     pub dt_max: f64,
     /// max number of iterations per time step
@@ -41,10 +43,4 @@ pub struct SolverHistory {
     n_iters: u8,
     /// L2 (euclidean) norm
     norm: f64,
-}
-
-pub fn rk4fixed(sys: Box<dyn SystemSolver>) -> (Box<dyn SystemSolver>, Vec<f64>) {
-    let k1 = sys.get_derivs();
-    // let k2 =
-    (sys, vec![1.0])
 }

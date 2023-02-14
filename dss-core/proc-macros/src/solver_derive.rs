@@ -31,9 +31,9 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
 
     impl_block.extend::<TokenStream2>(quote! {
         impl dss_core::prelude::SystemSolver for #ident {
-            fn walk(&mut self, end_time: f64) {
+            fn walk(&mut self) {
                 self.save_state();
-                    while self.state.time < end_time {
+                    while &self.state.time < self.t_report.last().unwrap() {
                         self.solve_step();
                     }
                 }
@@ -41,21 +41,16 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
             /// Runs `solver_opts` specific step method that calls
             /// [Self::step] in solver-specific manner
             fn solve_step(&mut self) {
-                match self.solver_opts {
-                    SolverOptions::FixedEuler { dt } => {
+                let dt = match self.solver_opts {
+                    SolverOptions::EulerFixed => {
+                        let dt = self.t_report[self.state.i] - self.state.time;
                         self.step(&dt);
-                        self.state.time += dt;
+                        dt
                     },
-                    // SolverOptions::RK3Adaptive(rk3a) => {
-                    //     // initial guess for time step size
-                    //     let h = rk3a.dt_prev;
-                    //     let k1: Vec<f64> = self.get_state_vals();
-                    //     let k2: Vec<f64> =
-                    //     let rk4states = 666.6;
-                    //     let rk5states = 666.6;
-                    // },
                     _ => todo!(),
-                }
+                };
+                self.state.time += dt;
+                self.state.i += 1;
                 self.save_state();
             }
 

@@ -1,4 +1,4 @@
-solver_opts: !FixedEuler
+solver_opts: !EulerFixed
   dt: 0.01
 m1:
   c: 1.0
