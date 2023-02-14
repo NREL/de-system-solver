@@ -13,19 +13,19 @@ pub(crate) fn history_methods_derive(input: TokenStream) -> TokenStream {
         .iter()
         .any(|x| x.ident.as_ref().unwrap().to_string() == "state");
 
-    let has_state_vec: Vec<bool> = fields
+    let use_state_vec: Vec<bool> = fields
         .iter()
         .map(|field| {
             field
                 .attrs
                 .iter()
-                .any(|attr| attr.path.is_ident("has_state") || attr.path.is_ident("history"))
+                .any(|attr| attr.path.is_ident("use_state") || attr.path.is_ident("history"))
         })
         .collect();
 
     let fields_with_state = fields
         .iter()
-        .zip(has_state_vec.clone())
+        .zip(use_state_vec.clone())
         .filter(|(_f, hsv)| *hsv)
         .map(|(f, _hsv)| f.ident.as_ref().unwrap())
         .collect::<Vec<_>>();

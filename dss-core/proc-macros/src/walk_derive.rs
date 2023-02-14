@@ -10,19 +10,19 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
         _ => panic!("only works on structs"),
     };
 
-    let has_state_vec: Vec<bool> = fields
+    let use_state_vec: Vec<bool> = fields
         .iter()
         .map(|field| {
             field
                 .attrs
                 .iter()
-                .any(|attr| attr.path.is_ident("has_state"))
+                .any(|attr| attr.path.is_ident("use_state"))
         })
         .collect();
 
     let fields_with_state = fields
         .iter()
-        .zip(has_state_vec.clone())
+        .zip(use_state_vec.clone())
         .filter(|(_f, hsv)| *hsv)
         .map(|(f, _hsv)| f.ident.as_ref().unwrap())
         .collect::<Vec<_>>();

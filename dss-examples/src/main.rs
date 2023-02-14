@@ -23,15 +23,15 @@ pub use components::*;
 pub struct System {
     solver_opts: SolverOptions,
     // components
-    // the `has_state` attribute tells the Walk
-    #[has_state]
+    // the `use_state` attribute tells the Walk
+    #[use_state]
     pub m1: ThermalMass,
-    #[has_state]
+    #[use_state]
     pub m2: ThermalMass,
     /// h12 connects m1 to m2
     #[history]
     pub h12: Conductance,
-    #[has_state]
+    #[use_state]
     pub m3: ThermalMass,
     #[history]
     pub h13: Conductance,
