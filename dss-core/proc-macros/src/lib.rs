@@ -4,7 +4,7 @@ mod bare_clone;
 mod history_methods;
 mod history_vec;
 mod utilities;
-mod walk_derive;
+mod solver_derive;
 
 /// generate HistoryVec that acts like a vec of States but
 /// stores each field of state as a vec field.
@@ -23,9 +23,9 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
 
 /// Derives several methods for struct
 #[proc_macro_error]
-#[proc_macro_derive(Walk)]
-pub fn walk_derive(input: TokenStream) -> TokenStream {
-    walk_derive::walk_derive(input.clone())
+#[proc_macro_derive(SystemSolver)]
+pub fn solver_derive(input: TokenStream) -> TokenStream {
+    solver_derive::solver_derive(input.clone())
 }
 
 /// Derives `bare_clone` method

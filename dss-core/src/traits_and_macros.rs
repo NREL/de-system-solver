@@ -26,8 +26,8 @@ macro_rules! update_derivs {
     };
 }
 
-/// trait to be implemented via crate::proc_macros::Walk
-pub trait Walk {
+/// trait to be implemented via crate::proc_macros::SystemSolver
+pub trait SystemSolver {
     fn walk(&mut self, end_time: f64);
     fn solve_step(&mut self);
     fn step_states(&mut self, dt: &f64);

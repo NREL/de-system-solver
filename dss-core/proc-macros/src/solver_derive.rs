@@ -1,7 +1,7 @@
 use crate::imports::*;
 
 /// Derives several methods for struct
-pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
+pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as syn::DeriveInput);
     let ident = &ast.ident;
 
@@ -30,7 +30,7 @@ pub(crate) fn walk_derive(input: TokenStream) -> TokenStream {
     let mut impl_block = TokenStream2::default();
 
     impl_block.extend::<TokenStream2>(quote! {
-        impl dss_core::prelude::Walk for #ident {
+        impl dss_core::prelude::SystemSolver for #ident {
             fn walk(&mut self, end_time: f64) {
                 self.save_state();
                     while self.state.time < end_time {

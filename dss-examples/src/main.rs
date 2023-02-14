@@ -17,13 +17,13 @@ pub use components::*;
     Serialize,
     Deserialize,
     HistoryMethods,
-    Walk,
+    SystemSolver,
     BareClone,
 )]
 pub struct System {
     solver_opts: SolverOptions,
     // components
-    // the `use_state` attribute tells the Walk
+    // the `use_state` attribute tells the SystemSolver
     #[use_state]
     pub m1: ThermalMass,
     #[use_state]
