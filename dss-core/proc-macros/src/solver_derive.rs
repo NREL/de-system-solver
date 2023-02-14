@@ -48,10 +48,11 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
                         self.euler(&dt);
                         dt
                     },
-                    // SolverOptions::RK4Fixed => {
-                    //     let (dt, _ks) = self.rk4fixed();
-                    //     dt
-                    // }
+                    SolverOptions::RK4Fixed => {
+                        let dt = self.t_report[self.state.i] - self.state.time;
+                        self.rk4fixed(&dt);
+                        dt
+                    },
                     _ => todo!(),
                 };
                 self.state.time += dt;
@@ -111,9 +112,8 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
 
             /// solves time step with 4th order Runge-Kutta method.
             /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
-            fn rk4fixed(&mut self) {
-                let dt = self.t_report[self.state.i] - self.state.time;
-                let h = &dt;
+            fn rk4fixed(&mut self, dt: &f64) {
+                let h = dt;
                 self.update_derivs();
 
                 // k1 = f(x_i, y_i)

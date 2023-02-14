@@ -4,6 +4,7 @@ use crate::imports::*;
 pub enum SolverOptions {
     /// Euler with fixed time step
     EulerFixed,
+    RK4Fixed,
     // TODO: add this stuff back into fixed options
     // /// time step to use if `t_report` is larger than `dt`
     // dt: f64,
