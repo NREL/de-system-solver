@@ -7,10 +7,9 @@ pub enum SolverOptions {
     // TODO: add this stuff back into fixed options
     // /// time step to use if `t_report` is larger than `dt`
     // dt: f64,
-    RK4Fixed,
-    RK5Fixed,
-    /// Runge-Kutta, 3rd order, adaptive time step
-    RK45Adaptive(AdaptiveSolver),
+    /// Runge-Kutta 4/5 order adaptive, Cash-Karp method
+    /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
+    RK45CashKarp(AdaptiveSolver),
     ToDo,
 }
 

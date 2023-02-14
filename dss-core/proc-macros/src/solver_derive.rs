@@ -77,6 +77,12 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
                 derivs
             }
 
+            /// sets values of derivatives of states
+            fn set_derivs(&mut self, val: Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.set_deriv(iter.next().unwrap().clone());)*
+            }
+
             /// returns values of states
             fn get_states(&self) -> Vec<f64> {
                 let mut states: Vec<f64> = Vec::new();
@@ -84,13 +90,50 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
                 states
             }
 
-            // /// solves time step with 4th order fixed-step Runge-Kutta
-            // /// method and returns k-values
-            // fn rk4fixed(&mut self) -> (dt, Vec<Vec<f64>) {
+            /// sets values of states
+            fn set_states(&mut self, val: Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.set_state(iter.next().unwrap().clone());)*
+            }
+
+            /// solves time step with 4th order Runge-Kutta method
+            fn rk4fixed(&mut self) {
+                let dt = self.t_report[self.state.i] - self.state.time;
+                self.update_derivs();
+                // k1 = f(x_i, y_i)
+                let k1 = self.get_derivs();
+                // k2 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k1 * h)
+                let mut sys1 = self.bare_clone();
+                sys1.step(&(dt / 2.0));
+                sys1.update_derivs();
+                let k2 = sys1.get_derivs();
+
+                // k3 = f(x_i + 3 / 10 * h, y_i + 3 / 40 * k1 * h + 9 / 40 * k2 * h)
+
+                // k4 = f(x_i + 3 / 5 * h, y_i + 3 / 10 * k1 * h - 9 / 10 * k2 * h + 6 / 5 * k3 * h)
+
+                // k5 = f(x_i + h, y_i - 11 / 54 * k1 * h + 5 / 2 * k2 * h - 70 / 27 * k3 * h + 35 / 27 * k4 * h)
+
+                // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k4 * h)
+            }
+
+            // /// solves time step with adaptive Cash-Karp Method (variant of RK45)
+            // /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
+            // fn rk45CashKarp(&mut self) {
             //     let dt = self.t_report[self.state.i] - self.state.time;
             //     self.update_derivs();
+            //     // k1 = f(x_i, y_i)
             //     let k1 = self.get_derivs();
-            //     (dt, vec![k1])
+            //     // k2 = f(x_i + 1 / 5 * h, y_i + 1 / 5 * k1 * h)
+            //     let k2 = self.get_states().iter().zip(k1).map(|(x, k)| *x + k * dt);
+
+            //     // k3 = f(x_i + 3 / 10 * h, y_i + 3 / 40 * k1 * h + 9 / 40 * k2 * h)
+
+            //     // k4 = f(x_i + 3 / 5 * h, y_i + 3 / 10 * k1 * h - 9 / 10 * k2 * h + 6 / 5 * k3 * h)
+
+            //     // k5 = f(x_i + h, y_i - 11 / 54 * k1 * h + 5 / 2 * k2 * h - 70 / 27 * k3 * h + 35 / 27 * k4 * h)
+
+            //     // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k4 * h)
             // }
         }
     });
