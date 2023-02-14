@@ -9,14 +9,14 @@ pub(crate) fn bare_clone_derive(input: TokenStream) -> TokenStream {
         _ => panic!("only works on structs"),
     };
 
-    // all fields with `use_state` or `history` attribute
+    // all fields with `use_state` or `save_state` attribute
     let has_bare_clone: Vec<bool> = fields
         .iter()
         .map(|field| {
             field
                 .attrs
                 .iter()
-                .any(|attr| attr.path.is_ident("use_state") || attr.path.is_ident("history"))
+                .any(|attr| attr.path.is_ident("use_state") || attr.path.is_ident("save_state"))
         })
         .collect();
 

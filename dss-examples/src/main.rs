@@ -29,11 +29,11 @@ pub struct System {
     #[use_state]
     pub m2: ThermalMass,
     /// h12 connects m1 to m2
-    #[history]
+    #[save_state]
     pub h12: Conductance,
     #[use_state]
     pub m3: ThermalMass,
-    #[history]
+    #[save_state]
     pub h13: Conductance,
 
     // boiler plate fields (could be generated with proc macro)

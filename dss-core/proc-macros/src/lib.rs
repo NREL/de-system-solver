@@ -14,9 +14,9 @@ pub fn history_vec_derive(input: TokenStream) -> TokenStream {
 }
 
 /// Derives `save_state` method for struct and all fields marked with
-/// `history` or `use_state` attributes
+/// `save_state` or `use_state` attributes
 #[proc_macro_error]
-#[proc_macro_derive(HistoryMethods, attributes(use_state, history))]
+#[proc_macro_derive(HistoryMethods, attributes(use_state, save_state))]
 pub fn history_methods_derive(input: TokenStream) -> TokenStream {
     history_methods::history_methods_derive(input)
 }
@@ -30,7 +30,7 @@ pub fn walk_derive(input: TokenStream) -> TokenStream {
 
 /// Derives `bare_clone` method
 #[proc_macro_error]
-#[proc_macro_derive(BareClone, attributes(use_state, history))]
+#[proc_macro_derive(BareClone, attributes(use_state, save_state))]
 pub fn bare_clone(input: TokenStream) -> TokenStream {
     bare_clone::bare_clone_derive(input)
 }

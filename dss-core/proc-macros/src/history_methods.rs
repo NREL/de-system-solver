@@ -19,7 +19,7 @@ pub(crate) fn history_methods_derive(input: TokenStream) -> TokenStream {
             field
                 .attrs
                 .iter()
-                .any(|attr| attr.path.is_ident("use_state") || attr.path.is_ident("history"))
+                .any(|attr| attr.path.is_ident("use_state") || attr.path.is_ident("save_state"))
         })
         .collect();
 
