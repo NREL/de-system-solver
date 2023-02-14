@@ -45,7 +45,7 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
                 let dt = match self.solver_opts {
                     SolverOptions::EulerFixed => {
                         let dt = self.t_report[self.state.i] - self.state.time;
-                        self.step(&dt);
+                        self.euler(&dt);
                         dt
                     },
                     // SolverOptions::RK4Fixed => {
@@ -59,9 +59,15 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
                 self.save_state();
             }
 
+            /// Steps forward by `dt`
+            pub fn euler(&mut self, dt: &f64) {
+                self.update_derivs();
+                self.step(dt);
+            }
+
             /// assuming `set_derivs` or `step_derivs` has been called, steps
             /// value of states by deriv * dt
-            fn step_states(&mut self, dt: &f64) {
+            fn step(&mut self, dt: &f64) {
                 #(self.#fields_with_state.step_state(dt);)*
             }
 
@@ -78,7 +84,7 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
             }
 
             /// sets values of derivatives of states
-            fn set_derivs(&mut self, val: Vec<f64>) {
+            fn set_derivs(&mut self, val: &Vec<f64>) {
                 let mut iter = val.iter();
                 #(self.#fields_with_state.set_deriv(iter.next().unwrap().clone());)*
             }
@@ -107,14 +113,10 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
                 sys1.step(&(dt / 2.0));
                 sys1.update_derivs();
                 let k2 = sys1.get_derivs();
-
-                // k3 = f(x_i + 3 / 10 * h, y_i + 3 / 40 * k1 * h + 9 / 40 * k2 * h)
-
-                // k4 = f(x_i + 3 / 5 * h, y_i + 3 / 10 * k1 * h - 9 / 10 * k2 * h + 6 / 5 * k3 * h)
-
-                // k5 = f(x_i + h, y_i - 11 / 54 * k1 * h + 5 / 2 * k2 * h - 70 / 27 * k3 * h + 35 / 27 * k4 * h)
-
-                // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k4 * h)
+                // k3 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k2 * h)
+                let mut sys2 = self.clone();
+                sys2.set_derivs(&k1);
+                // k4 = f(x_i + h, y_i + k3 * h)
             }
 
             // /// solves time step with adaptive Cash-Karp Method (variant of RK45)

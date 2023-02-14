@@ -65,16 +65,12 @@ impl System {
         }
     }
 
+    /// Updates time derivatives of states.
+    /// This method must be user defined.
     pub fn update_derivs(&mut self) {
         self.reset_derivs();
         connect_states!(self, (m1, m2, h12, m1, m3, h13));
         update_derivs!(self, (m1, m2, h12, m1, m3, h13));
-    }
-
-    /// Steps forward by `dt` and returns Vec of state derivatives
-    pub fn step(&mut self, dt: &f64) {
-        self.update_derivs();
-        self.step_states(dt);
     }
 }
 
