@@ -65,11 +65,15 @@ impl System {
         }
     }
 
+    pub fn update_derivs(&mut self) {
+        self.reset_derivs();
+        connect_states!(self, (m1, m2, h12, m1, m3, h13));
+        update_derivs!(self, (m1, m2, h12, m1, m3, h13));
+    }
+
     /// Steps forward by `dt` and returns Vec of state derivatives
     pub fn step(&mut self, dt: &f64) {
-        self.reset_derivs();
-        connect_states!(self, (m1, m2, h12, m1, m3, h13), dt);
-        update_derivs!(self, (m1, m2, h12, m1, m3, h13), dt);
+        self.update_derivs();
         self.step_states(dt);
     }
 }
@@ -89,7 +93,7 @@ fn main() {
 
     system.walk();
 
-    let mut target_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+    let target_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
         .unwrap()
         .to_path_buf();

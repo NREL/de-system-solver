@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 /// sets flow variable values
 #[macro_export]
 macro_rules! connect_states {
-    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
+    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +)) => {
         $(
             $sys.$c.set_flow(&$sys.$s0, &$sys.$s1);
         )+
@@ -18,31 +18,12 @@ macro_rules! connect_states {
 /// sets time derivatives of state variables based on connected flow variables
 #[macro_export]
 macro_rules! update_derivs {
-    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +), $dt: ident) => {
+    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +)) => {
         $(
             $sys.$s0.step_deriv(-$sys.$c.flow() / $sys.$s0.c);
             $sys.$s1.step_deriv($sys.$c.flow() / $sys.$s1.c);
         )+
     };
-}
-
-/// trait to be implemented via crate::proc_macros::SystemSolver
-pub trait SystemSolver {
-    /// iterates through time until last value of `t_report`
-    fn walk(&mut self);
-    /// runs solver at step
-    fn solve_step(&mut self);
-    /// increments states
-    fn step_states(&mut self, dt: &f64);
-    /// zeros out derivatives at start of step
-    fn reset_derivs(&mut self);
-    /// returns derivatives of states
-    fn get_derivs(&self) -> Vec<f64>;
-    /// returns values of states
-    fn get_states(&self) -> Vec<f64>;
-    /// solves time step with 4th order fixed-step Runge-Kutta
-    /// method and returns k-values
-    fn rk4fixed(&mut self) -> Vec<f64>;
 }
 
 pub trait HasState {
