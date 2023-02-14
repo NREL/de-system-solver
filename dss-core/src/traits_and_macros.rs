@@ -4,6 +4,18 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
+/// https://stackoverflow.com/a/62016977/941031
+/// zips multiple vectors into iterators
+#[macro_export]
+macro_rules! zip {
+    ($x: expr) => ($x);
+    ($x: expr, $($y: expr), +) => (
+        $x.iter().zip(
+            zip!($($y), +))
+    )
+}
+
+
 /// assumes heat flow from source -> sink is positive
 /// sets flow variable values
 #[macro_export]
@@ -31,9 +43,14 @@ pub trait HasState {
     fn set_state(&mut self, val: f64);
     /// returns value of potential variable (e.g. temperature, pressure, voltage)
     fn state(&self) -> f64;
-    /// increments value of potential by multiplying `dt * self.derive()`
-    fn step_state(&mut self, dt: &f64) {
+    /// increments value of potential variable by multiplying `dt * self.derive()`
+    /// and adding to previous value
+    fn step_state_by_dt(&mut self, dt: &f64) {
         self.set_state(self.state() + dt * self.deriv());
+    }
+    /// increments value of potential by multiplying `dt * self.derive()`
+    fn step_state(&mut self, val: f64) {
+        self.set_state(self.state() + val);
     }
     /// sets value `val` of time derivative of potential variable
     fn set_deriv(&mut self, val: f64);

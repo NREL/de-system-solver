@@ -62,13 +62,20 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
             /// Steps forward by `dt`
             pub fn euler(&mut self, dt: &f64) {
                 self.update_derivs();
-                self.step(dt);
+                self.step_by_dt(dt);
             }
 
-            /// assuming `set_derivs` or `step_derivs` has been called, steps
+            /// assuming `set_derivs` has been called, steps
             /// value of states by deriv * dt
-            fn step(&mut self, dt: &f64) {
-                #(self.#fields_with_state.step_state(dt);)*
+            fn step_by_dt(&mut self, dt: &f64) {
+                #(self.#fields_with_state.step_state_by_dt(dt);)*
+            }
+
+            /// assuming `set_derivs` has been called, steps
+            /// value of states by deriv * dt
+            fn step(&mut self, val: Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.step_state(iter.next().unwrap().clone());)*
             }
 
             /// reset all time derivatives to zero for start of `solve_step`
@@ -102,21 +109,43 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
                 #(self.#fields_with_state.set_state(iter.next().unwrap().clone());)*
             }
 
-            /// solves time step with 4th order Runge-Kutta method
+            /// solves time step with 4th order Runge-Kutta method.
+            /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
             fn rk4fixed(&mut self) {
                 let dt = self.t_report[self.state.i] - self.state.time;
+                let h = &dt;
                 self.update_derivs();
+
                 // k1 = f(x_i, y_i)
-                let k1 = self.get_derivs();
+                let k1s = self.get_derivs();
+
                 // k2 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k1 * h)
                 let mut sys1 = self.bare_clone();
-                sys1.step(&(dt / 2.0));
+                sys1.step_by_dt(&(h / 2.0));
                 sys1.update_derivs();
-                let k2 = sys1.get_derivs();
+                let k2s = sys1.get_derivs();
+
                 // k3 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k2 * h)
-                let mut sys2 = self.clone();
-                sys2.set_derivs(&k1);
+                let mut sys2 = self.bare_clone();
+                sys2.set_derivs(&k2s);
+                sys2.step_by_dt(&(h / 2.0));
+                sys2.update_derivs();
+                let k3s = sys2.get_derivs();
+
                 // k4 = f(x_i + h, y_i + k3 * h)
+                let mut sys3 = self.bare_clone();
+                sys3.set_derivs(&k3s);
+                sys3.step_by_dt(&h);
+                sys3.update_derivs();
+                let k4s = sys3.get_derivs();
+
+                let mut delta: Vec<f64> = vec![];
+                let zipped = dss_core::zip!(k1s, k2s, k3s, k4s);
+                for (k1, (k2, (k3, k4))) in zipped {
+                    delta.push(1.0 / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4) * h);
+                }
+
+                self.step(delta);
             }
 
             // /// solves time step with adaptive Cash-Karp Method (variant of RK45)
