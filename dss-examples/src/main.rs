@@ -89,19 +89,25 @@ fn main() {
 
     system.walk();
 
-    let mut temp_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+    let mut target_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
         .unwrap()
         .to_path_buf();
     let dt = system.t_report[1] - system.t_report.first().unwrap();
-    temp_file.push(format!("target/results dt={dt} s.json"));
+
+    let mut json_file = target_dir.clone();
+    json_file.push(format!("target/results dt={dt} s.json"));
 
     system
-        .to_file(temp_file.as_os_str().to_str().unwrap())
+        .to_file(json_file.as_os_str().to_str().unwrap())
         .unwrap();
 
-    // TODO: make a test around this
-    // dbg!(system.bare_clone());
+    let mut yaml_file = target_dir.clone();
+    yaml_file.push(format!("target/results dt={dt} s.yaml"));
+
+    system
+        .to_file(yaml_file.as_os_str().to_str().unwrap())
+        .unwrap();
 }
 
 pub fn mock_system() -> System {
@@ -111,7 +117,6 @@ pub fn mock_system() -> System {
     let m3 = ThermalMass::new(1.5, 12.0, None);
     let h13 = Conductance::new(5.0, None);
     let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 201);
-    dbg!(&t_report);
 
     System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
 }

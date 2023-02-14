@@ -76,6 +76,10 @@ pub(crate) fn solver_derive(input: TokenStream) -> TokenStream {
                 #(states.push(self.#fields_with_state.state());)*
                 states
             }
+
+            fn rk4fixed(&mut self) -> Vec<f64> {
+                vec![0.0]
+            }
         }
     });
 

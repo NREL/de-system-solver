@@ -28,12 +28,21 @@ macro_rules! update_derivs {
 
 /// trait to be implemented via crate::proc_macros::SystemSolver
 pub trait SystemSolver {
+    /// iterates through time until last value of `t_report`
     fn walk(&mut self);
+    /// runs solver at step
     fn solve_step(&mut self);
+    /// increments states
     fn step_states(&mut self, dt: &f64);
+    /// zeros out derivatives at start of step
     fn reset_derivs(&mut self);
+    /// returns derivatives of states
     fn get_derivs(&self) -> Vec<f64>;
+    /// returns values of states
     fn get_states(&self) -> Vec<f64>;
+    /// solves time step with 4th order fixed-step Runge-Kutta
+    /// method and returns k-values
+    fn rk4fixed(&mut self) -> Vec<f64>;
 }
 
 pub trait HasState {
