@@ -24,12 +24,12 @@ fn test_against_benchmark() {
     let mut sys = mock_euler_sys();
     sys.walk();
 
-    let mut temp_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+    let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
         .unwrap()
-        .to_path_buf();
-    temp_file.push("dss-examples/tests/fixtures/benchmark.yaml");
+        .to_path_buf()
+        .join("dss-examples/tests/fixtures/benchmark.yaml");
 
-    let benchmark_sys = System::from_file(temp_file.as_os_str().to_str().unwrap()).unwrap();
+    let benchmark_sys = System::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
     assert_eq!(sys, benchmark_sys);
 }
