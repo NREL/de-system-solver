@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::time::Instant;
 
 use dss_core::prelude::*;
 
@@ -85,17 +86,32 @@ pub struct SystemState {
     time: f64,
 }
 
+macro_rules! time_it {
+    ($thing: expr) => {{
+        let t0 = Instant::now();
+        $thing;
+        let t_elapsed = Instant::now() - t0;
+        t_elapsed
+    }};
+}
+
 fn main() {
     // build and run prescribed-step Euler system
     let mut sys_euler = mock_euler_sys();
 
-    sys_euler.walk();
+    let t_euler = time_it!(sys_euler.walk());
 
     let target_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
         .unwrap()
         .to_path_buf();
     let dt = sys_euler.t_report[1] - sys_euler.t_report.first().unwrap();
+
+    println!(
+        "Euler {} s time step elapsed time: {} μs",
+        dt,
+        t_euler.as_micros()
+    );
 
     let mut json_file = target_dir.clone();
     json_file.push(format!("target/results dt={dt} s.json"));
@@ -114,13 +130,19 @@ fn main() {
     // build and run prescribed-step 4th-order Runge-Kutta system
     let mut sys_rk4 = mock_rk4fixed_sys();
 
-    sys_rk4.walk();
+    let t_rk4 = time_it!(sys_rk4.walk());
 
     let target_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
         .unwrap()
         .to_path_buf();
     let dt = sys_rk4.t_report[1] - sys_rk4.t_report.first().unwrap();
+
+    println!(
+        "RK4 {} s time step elapsed time: {} μs",
+        dt,
+        t_rk4.as_micros()
+    );
 
     let mut json_file = target_dir.clone();
     json_file.push(format!("target/rk4 results dt={dt} s.json"));
@@ -143,7 +165,7 @@ pub fn mock_euler_sys() -> System {
     let h12 = Conductance::new(5.0, None);
     let m3 = ThermalMass::new(1.5, 12.0, None);
     let h13 = Conductance::new(5.0, None);
-    let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 51);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
 
     System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
 }
@@ -154,7 +176,7 @@ pub fn mock_rk4fixed_sys() -> System {
     let h12 = Conductance::new(5.0, None);
     let m3 = ThermalMass::new(1.5, 12.0, None);
     let h13 = Conductance::new(5.0, None);
-    let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 51);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 11);
 
     System::new(SolverOptions::RK4Fixed, m1, m2, h12, m3, h13, t_report)
 }
