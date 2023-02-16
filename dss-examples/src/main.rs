@@ -86,27 +86,53 @@ pub struct SystemState {
 }
 
 fn main() {
-    let mut system = mock_euler_sys();
+    // build and run prescribed-step Euler system
+    let mut sys_euler = mock_euler_sys();
 
-    system.walk();
+    sys_euler.walk();
 
     let target_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
         .parent()
         .unwrap()
         .to_path_buf();
-    let dt = system.t_report[1] - system.t_report.first().unwrap();
+    let dt = sys_euler.t_report[1] - sys_euler.t_report.first().unwrap();
 
     let mut json_file = target_dir.clone();
     json_file.push(format!("target/results dt={dt} s.json"));
 
-    system
+    sys_euler
         .to_file(json_file.as_os_str().to_str().unwrap())
         .unwrap();
 
     let mut yaml_file = target_dir.clone();
     yaml_file.push(format!("target/results dt={dt} s.yaml"));
 
-    system
+    sys_euler
+        .to_file(yaml_file.as_os_str().to_str().unwrap())
+        .unwrap();
+
+    // build and run prescribed-step 4th-order Runge-Kutta system
+    let mut sys_rk4 = mock_rk4fixed_sys();
+
+    sys_rk4.walk();
+
+    let target_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+        .parent()
+        .unwrap()
+        .to_path_buf();
+    let dt = sys_rk4.t_report[1] - sys_rk4.t_report.first().unwrap();
+
+    let mut json_file = target_dir.clone();
+    json_file.push(format!("target/rk4 results dt={dt} s.json"));
+
+    sys_rk4
+        .to_file(json_file.as_os_str().to_str().unwrap())
+        .unwrap();
+
+    let mut yaml_file = target_dir.clone();
+    yaml_file.push(format!("target/rk4 results dt={dt} s.yaml"));
+
+    sys_rk4
         .to_file(yaml_file.as_os_str().to_str().unwrap())
         .unwrap();
 }
@@ -128,7 +154,7 @@ pub fn mock_rk4fixed_sys() -> System {
     let h12 = Conductance::new(5.0, None);
     let m3 = ThermalMass::new(1.5, 12.0, None);
     let h13 = Conductance::new(5.0, None);
-    let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 201);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 51);
 
     System::new(SolverOptions::RK4Fixed, m1, m2, h12, m3, h13, t_report)
 }
