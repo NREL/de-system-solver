@@ -6,6 +6,7 @@ pub mod imports;
 use imports::*;
 pub mod components;
 pub use components::*;
+mod tests;
 
 /// System of connected components
 #[derive(
@@ -69,8 +70,8 @@ impl System {
     /// This method must be user defined.
     pub fn update_derivs(&mut self) {
         self.reset_derivs();
-        connect_states!(self, (m1, m2, h12, m1, m3, h13));
-        update_derivs!(self, (m1, m2, h12, m1, m3, h13));
+        connect_states!(self, (m1, m2, h12), (m1, m3, h13));
+        update_derivs!(self, (m1, m2, h12), (m1, m3, h13));
     }
 }
 
@@ -85,7 +86,7 @@ pub struct SystemState {
 }
 
 fn main() {
-    let mut system = mock_system();
+    let mut system = mock_euler_sys();
 
     system.walk();
 
@@ -110,7 +111,7 @@ fn main() {
         .unwrap();
 }
 
-pub fn mock_system() -> System {
+pub fn mock_euler_sys() -> System {
     let m1 = ThermalMass::new(1.0, 0.0, None);
     let m2 = ThermalMass::new(2.0, 10.0, None);
     let h12 = Conductance::new(5.0, None);
@@ -121,38 +122,13 @@ pub fn mock_system() -> System {
     System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_bare_clone() {
-        let mut sys = mock_system();
-        assert!(sys.history.is_empty());
-        assert!(sys.m1.history.is_empty());
-        assert!(sys.h12.history.is_empty());
-        sys.save_state();
-        // verify that at least a couple of the expected changes happened
-        assert!(sys.history.len() == 1);
-        assert!(sys.m1.history.len() == 1);
-        assert!(sys.h12.history.len() == 1);
-        let bare_sys = sys.bare_clone();
-        assert!(bare_sys.history.is_empty());
-        assert!(bare_sys.m1.history.is_empty());
-        assert!(bare_sys.h12.history.is_empty());
-    }
+pub fn mock_rk4fixed_sys() -> System {
+    let m1 = ThermalMass::new(1.0, 0.0, None);
+    let m2 = ThermalMass::new(2.0, 10.0, None);
+    let h12 = Conductance::new(5.0, None);
+    let m3 = ThermalMass::new(1.5, 12.0, None);
+    let h13 = Conductance::new(5.0, None);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 201);
 
-    #[test]
-    fn test_against_benchmark() {
-        let mut sys = mock_system();
-        sys.walk();
-
-        let mut temp_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
-            .parent()
-            .unwrap()
-            .to_path_buf();
-        temp_file.push("dss-examples/tests/fixtures/benchmark.yaml");
-
-        let benchmark_sys = System::from_file(temp_file.as_os_str().to_str().unwrap()).unwrap();
-        assert_eq!(sys, benchmark_sys);
-    }
+    System::new(SolverOptions::RK4Fixed, m1, m2, h12, m3, h13, t_report)
 }

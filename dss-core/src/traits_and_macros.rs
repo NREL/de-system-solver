@@ -4,8 +4,8 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
-/// https://stackoverflow.com/a/62016977/941031
 /// zips multiple vectors into iterators
+/// https://stackoverflow.com/a/62016977/941031
 #[macro_export]
 macro_rules! zip {
     ($x: expr) => ($x);
@@ -15,12 +15,11 @@ macro_rules! zip {
     )
 }
 
-
 /// assumes heat flow from source -> sink is positive
 /// sets flow variable values
 #[macro_export]
 macro_rules! connect_states {
-    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +)) => {
+    ($sys: ident, $(($s0: ident, $s1: ident, $c: ident)), +) => {
         $(
             $sys.$c.set_flow(&$sys.$s0, &$sys.$s1);
         )+
@@ -30,7 +29,7 @@ macro_rules! connect_states {
 /// sets time derivatives of state variables based on connected flow variables
 #[macro_export]
 macro_rules! update_derivs {
-    ($sys: ident, ($($s0: ident, $s1: ident, $c: ident), +)) => {
+    ($sys: ident, $(($s0: ident, $s1: ident, $c: ident)), +) => {
         $(
             $sys.$s0.step_deriv(-$sys.$c.flow() / $sys.$s0.c);
             $sys.$s1.step_deriv($sys.$c.flow() / $sys.$s1.c);
