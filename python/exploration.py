@@ -8,7 +8,7 @@ sns.set()
 # %%
 
 # to generate this file, run `cargo run` in dss-examples/
-with open("../target/results dt=0.01 s.json", 'r') as file:
+with open("../target/results dt=0.04 s.json", 'r') as file:
     res_euler = json.load(file)
 
 # to generate this file, run `cargo run` in dss-examples/

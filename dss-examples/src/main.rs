@@ -143,7 +143,7 @@ pub fn mock_euler_sys() -> System {
     let h12 = Conductance::new(5.0, None);
     let m3 = ThermalMass::new(1.5, 12.0, None);
     let h13 = Conductance::new(5.0, None);
-    let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 201);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 2.0, 51);
 
     System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
 }
