@@ -28,7 +28,18 @@ fn test_against_benchmark() {
         .parent()
         .unwrap()
         .to_path_buf()
-        .join("dss-examples/tests/fixtures/benchmark.yaml");
+        .join("dss-examples/tests/fixtures/euler benchmark.yaml");
+
+    let benchmark_sys = System::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
+    assert_eq!(sys, benchmark_sys);
+
+    let mut sys = mock_rk4fixed_sys();
+    sys.walk();
+    let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+        .parent()
+        .unwrap()
+        .to_path_buf()
+        .join("dss-examples/tests/fixtures/rk4 benchmark.yaml");
 
     let benchmark_sys = System::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
     assert_eq!(sys, benchmark_sys);

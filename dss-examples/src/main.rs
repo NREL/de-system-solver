@@ -135,13 +135,13 @@ fn main() {
         .to_file(yaml_file.as_os_str().to_str().unwrap())
         .unwrap();
 
-    let overwrite_benchmark: bool = false;
-    if overwrite_benchmark {
+    let overwrite_euler_benchmark: bool = false;
+    if overwrite_euler_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dss-examples/tests/fixtures/benchmark.yaml");
+            .join("dss-examples/tests/fixtures/euler benchmark.yaml");
 
         sys_euler
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -174,6 +174,19 @@ fn main() {
     sys_rk4
         .to_file(yaml_file.as_os_str().to_str().unwrap())
         .unwrap();
+
+    let overwrite_rk_benchmark: bool = false;
+    if overwrite_rk_benchmark {
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dss-examples/tests/fixtures/rk4 benchmark.yaml");
+
+        sys_rk4
+            .to_file(benchmark_file.as_os_str().to_str().unwrap())
+            .unwrap();
+    }
 }
 
 pub fn mock_euler_sys() -> System {
