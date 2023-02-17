@@ -6,7 +6,7 @@ pub(crate) fn history_methods_derive(input: TokenStream) -> TokenStream {
 
     let fields: Vec<Field> = match ast.data {
         syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
-        _ => panic!("only works on structs"),
+        _ => abort!(ident.span(), "only works on structs"),
     };
 
     let struct_has_state = fields
@@ -62,7 +62,7 @@ pub(crate) fn history_methods_derive(input: TokenStream) -> TokenStream {
         });
     } else {
         // struct does not have state and has no fields with state
-        panic!("HistoryMethods does not work here.");
+        abort!(ident.span(), "HistoryMethods does not work here.");
     }
     impl_block.into()
 }

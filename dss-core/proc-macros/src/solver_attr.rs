@@ -8,7 +8,7 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
 
     let fields: Vec<Field> = match ast.data {
         syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
-        _ => panic!("only works on structs"),
+        _ => abort!(ident.span(), "only works on structs"),
     };
 
     let use_state_vec: Vec<bool> = fields
