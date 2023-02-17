@@ -2,7 +2,16 @@ use crate::imports::*;
 
 /// ThermalMass component with capacitance, state, and history
 #[derive(
-    Default, Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone,
+    Default,
+    Debug,
+    Clone,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    Deserialize,
+    HistoryMethods,
+    BareClone,
+    Pyo3Api,
 )]
 pub struct ThermalMass {
     /// thermal capacitance \[J/K\]
@@ -48,7 +57,7 @@ impl HasState for ThermalMass {
 
 /// State for tracking temperature of [ThermalMass]
 #[derive(
-    Default, Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec,
+    Default, Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec, Pyo3Api,
 )]
 pub struct ThermalMassState {
     /// temperature \[°C\]
@@ -59,7 +68,16 @@ pub struct ThermalMassState {
 
 /// Conductance component
 #[derive(
-    Default, Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone,
+    Default,
+    Debug,
+    Clone,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    Deserialize,
+    HistoryMethods,
+    BareClone,
+    Pyo3Api,
 )]
 pub struct Conductance {
     /// Thermal conductance \[W/K\] between two temperatures
@@ -93,7 +111,7 @@ impl Flow for Conductance {
 
 /// Struct for tracking flow variables in Conductance
 #[derive(
-    Default, Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec,
+    Default, Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec, Pyo3Api,
 )]
 pub struct ConductanceState {
     /// Heat transfer rate \[W\]

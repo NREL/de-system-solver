@@ -1,9 +1,9 @@
 use crate::imports::*;
 
 /// Derives several methods for struct
-pub(crate) fn solver_attr(_attr: TokenStream, input: TokenStream) -> TokenStream {
-    let ast_input = input.clone();
-    let ast = syn::parse_macro_input!(ast_input as syn::DeriveInput);
+pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let ast_item = item.clone();
+    let ast = syn::parse_macro_input!(ast_item as syn::DeriveInput);
     let ident = &ast.ident;
 
     let fields: Vec<Field> = match ast.data {
@@ -30,7 +30,7 @@ pub(crate) fn solver_attr(_attr: TokenStream, input: TokenStream) -> TokenStream
 
     let mut impl_block = TokenStream2::default();
 
-    impl_block.extend::<TokenStream2>(input.clone().into());
+    impl_block.extend::<TokenStream2>(item.clone().into());
 
     impl_block.extend::<TokenStream2>(quote! {
         impl #ident {

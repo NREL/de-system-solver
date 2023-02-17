@@ -12,7 +12,7 @@ mod tests;
 
 /// System of connected components
 #[derive(
-    Debug, Default, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone,
+    Debug, Default, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone, Pyo3Api
 )]
 #[solver]
 pub struct System {

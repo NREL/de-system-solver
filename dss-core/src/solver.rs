@@ -20,8 +20,7 @@ impl Default for SolverOptions {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
-#[pyo3_api]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, Pyo3Api)]
 pub struct AdaptiveSolver {
     /// max allowable dt
     pub dt_max: f64,
@@ -37,8 +36,7 @@ pub struct AdaptiveSolver {
     pub history: Vec<SolverHistory>,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize, Serialize)]
-
+#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize, Serialize, Pyo3Api)]
 pub struct SolverHistory {
     /// number of iterations to achieve tolerance
     n_iters: u8,

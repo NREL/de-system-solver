@@ -26,8 +26,8 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
 /// Generates several methods for struct to create solver framework
 #[proc_macro_error]
 #[proc_macro_attribute]
-pub fn solver(attr: TokenStream, input: TokenStream) -> TokenStream {
-    solver_attr::solver_attr(attr, input)
+pub fn solver(attr: TokenStream, item: TokenStream) -> TokenStream {
+    solver_attr::solver_attr(attr, item)
 }
 
 /// Derives `bare_clone` method
@@ -38,9 +38,12 @@ pub fn bare_clone(input: TokenStream) -> TokenStream {
 }
 
 // TODO: make an attribute-style macro that creates:
-/// Generates pyo3 api for struct
+/// Generates pyo3 api for struct.  
+/// Helper attributes:
+/// `skip_get` -- skips generating getter for field
+/// `walk` -- at struct level, tells macro to generate `walk_py` method that calls `walk`
 #[proc_macro_error]
-#[proc_macro_attribute]
-pub fn pyo3_api(attr: TokenStream, input: TokenStream) -> TokenStream {
-    pyo3_api::pyo3_api(attr, input)
+#[proc_macro_derive(Pyo3Api, attributes(skip_get, walk))]
+pub fn pyo3_api(item: TokenStream) -> TokenStream {
+    pyo3_api::pyo3_api(item)
 }
