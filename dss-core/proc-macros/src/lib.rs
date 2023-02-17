@@ -47,3 +47,16 @@ pub fn bare_clone(input: TokenStream) -> TokenStream {
 pub fn pyo3_api(item: TokenStream) -> TokenStream {
     pyo3_api::pyo3_api(item)
 }
+
+/// Generates list of commonly used derives
+#[proc_macro_error]
+#[proc_macro_attribute]
+pub fn common_derives(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let item: TokenStream2 = item.into();
+    let output: TokenStream2 = quote! {
+        #[derive(Debug, Default, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+        #item
+    };
+
+    output.into()
+}

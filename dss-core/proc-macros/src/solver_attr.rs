@@ -28,11 +28,11 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
         .map(|(f, _hsv)| f.ident.as_ref().unwrap())
         .collect::<Vec<_>>();
 
-    let mut impl_block = TokenStream2::default();
+    let mut item_and_impl_block = TokenStream2::default();
 
-    impl_block.extend::<TokenStream2>(item.clone().into());
+    item_and_impl_block.extend::<TokenStream2>(item.clone().into());
 
-    impl_block.extend::<TokenStream2>(quote! {
+    item_and_impl_block.extend::<TokenStream2>(quote! {
         impl #ident {
             /// iterates through time until last value of `t_report`
             fn walk(&mut self) {
@@ -172,5 +172,5 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
         }
     });
 
-    impl_block.into()
+    item_and_impl_block.into()
 }

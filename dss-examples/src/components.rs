@@ -1,18 +1,8 @@
 use crate::imports::*;
 
 /// ThermalMass component with capacitance, state, and history
-#[derive(
-    Default,
-    Debug,
-    Clone,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    Deserialize,
-    HistoryMethods,
-    BareClone,
-    Pyo3Api,
-)]
+#[derive(HistoryMethods, BareClone, Pyo3Api)]
+#[common_derives]
 pub struct ThermalMass {
     /// thermal capacitance \[J/K\]
     pub c: f64,
