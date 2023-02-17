@@ -20,9 +20,9 @@ mod tests;
     Serialize,
     Deserialize,
     HistoryMethods,
-    SystemSolver,
     BareClone,
 )]
+#[solver_derive]
 pub struct System {
     solver_opts: SolverOptions,
     // components

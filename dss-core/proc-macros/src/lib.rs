@@ -3,11 +3,12 @@ use imports::*;
 mod bare_clone;
 mod history_methods;
 mod history_vec;
-mod utilities;
 mod solver_derive;
+mod utilities;
 
 /// generate HistoryVec that acts like a vec of States but
 /// stores each field of state as a vec field.
+#[proc_macro_error]
 #[proc_macro_derive(HistoryVec)]
 pub fn history_vec_derive(input: TokenStream) -> TokenStream {
     history_vec::history_vec_derive(input)
@@ -23,9 +24,9 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
 
 /// Derives several methods for struct
 #[proc_macro_error]
-#[proc_macro_derive(SystemSolver)]
-pub fn solver_derive(input: TokenStream) -> TokenStream {
-    solver_derive::solver_derive(input.clone())
+#[proc_macro_attribute]
+pub fn solver_derive(attr: TokenStream, input: TokenStream) -> TokenStream {
+    solver_derive::solver_derive(attr, input)
 }
 
 /// Derives `bare_clone` method
