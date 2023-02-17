@@ -21,6 +21,7 @@ impl Default for SolverOptions {
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[pyo3_api]
 pub struct AdaptiveSolver {
     /// max allowable dt
     pub dt_max: f64,

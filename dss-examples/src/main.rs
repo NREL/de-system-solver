@@ -14,7 +14,7 @@ mod tests;
 #[derive(
     Debug, Default, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone,
 )]
-#[solver_attr]
+#[solver]
 pub struct System {
     solver_opts: SolverOptions,
     // components
