@@ -12,3 +12,8 @@ proc-macros = { path = "proc-macros" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
+# optional
+pyo3 = { workspace = true, features = ["extension-module", "anyhow"], optional = true }
+
+[features]
+pyo3 = ["dep:pyo3"]
