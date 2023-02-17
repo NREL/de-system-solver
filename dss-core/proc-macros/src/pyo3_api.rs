@@ -1,10 +1,16 @@
 use crate::imports::*;
 
 /// Derives several methods for struct
-pub(crate) fn pyo3_api(item: TokenStream) -> TokenStream {
-    let mut ast = syn::parse_macro_input!(item as syn::ItemStruct);
+pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let ast_item = item.clone();
+    let mut ast = syn::parse_macro_input!(ast_item as syn::ItemStruct);
     let ident = &ast.ident;
     let has_walk = ast.attrs.iter().any(|attr| attr.path.is_ident("walk"));
+
+    let mut item_block: TokenStream2 = quote! {
+        #[derive(Pyo3ApiCleanup)]
+    };
+    item_block.extend::<TokenStream2>(item.into());
 
     let walk_block = if has_walk {
         quote! {
@@ -107,5 +113,7 @@ pub(crate) fn pyo3_api(item: TokenStream) -> TokenStream {
         }
     };
 
-    py_impl_block.into()
+    let mut item_and_impl_block = py_impl_block;
+    item_and_impl_block.extend(item_block);
+    item_and_impl_block.into()
 }
