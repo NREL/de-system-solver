@@ -11,7 +11,8 @@ pub use components::*;
 mod tests;
 
 /// System of connected components
-#[derive(HistoryMethods, BareClone, Pyo3Api)]
+#[derive(HistoryMethods, BareClone)]
+#[pyo3_api]
 #[solver]
 #[common_derives]
 pub struct System {
