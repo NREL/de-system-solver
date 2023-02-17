@@ -15,7 +15,7 @@ pub enum SolverOptions {
     ToDo,
 }
 
-#[derive(Pyo3Api)]
+// #[pyo3_api]
 #[common_derives]
 pub struct AdaptiveSolver {
     /// max allowable dt
@@ -32,8 +32,9 @@ pub struct AdaptiveSolver {
     pub history: Vec<SolverHistory>,
 }
 
-#[derive(Pyo3Api)]
+// #[pyo3_api]
 #[common_derives]
+// #[pyo3_api]
 pub struct SolverHistory {
     /// number of iterations to achieve tolerance
     n_iters: u8,

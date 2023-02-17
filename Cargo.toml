@@ -2,7 +2,8 @@
 
 members = [
     "dss-core", # pure rust core 
-    "dss-examples" # examples of how to run the code
+    "dss-examples", # examples of how to run the code,
+    "dss-pyo3", # pyo3 api for dss-core
 ]
 
 [profile.dev]

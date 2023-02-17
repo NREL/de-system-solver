@@ -43,9 +43,17 @@ pub fn bare_clone(input: TokenStream) -> TokenStream {
 /// `skip_get` -- skips generating getter for field
 /// `walk` -- at struct level, tells macro to generate `walk_py` method that calls `walk`
 #[proc_macro_error]
-#[proc_macro_derive(Pyo3Api, attributes(skip_get, walk))]
-pub fn pyo3_api(item: TokenStream) -> TokenStream {
-    pyo3_api::pyo3_api(item)
+#[proc_macro_attribute]
+pub fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
+    pyo3_api::pyo3_api(attr, item)
+}
+
+/// Dummy derive macro for registering [pyo3_api] attributes.  
+/// This may not be the cleanest way to do this.
+#[proc_macro_error]
+#[proc_macro_derive(Pyo3ApiCleanup, attributes(skip_get))]
+pub fn pyo3_api_cleanup(_item: TokenStream) -> TokenStream {
+    TokenStream::new()
 }
 
 /// Generates list of commonly used derives

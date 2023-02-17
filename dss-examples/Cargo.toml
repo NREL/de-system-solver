@@ -11,3 +11,7 @@ dss-core = { path = "../dss-core"}
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
+pyo3 = { workspace = true, features = ["extension-module", "anyhow"], optional = true }
+
+[features]
+pyo3 = ["dep:pyo3", "dss-core/pyo3"]
