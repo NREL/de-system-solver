@@ -3,7 +3,7 @@ use imports::*;
 mod bare_clone;
 mod history_methods;
 mod history_vec;
-mod solver_derive;
+mod solver_attr;
 mod utilities;
 
 /// generate HistoryVec that acts like a vec of States but
@@ -25,8 +25,8 @@ pub fn history_methods_derive(input: TokenStream) -> TokenStream {
 /// Derives several methods for struct
 #[proc_macro_error]
 #[proc_macro_attribute]
-pub fn solver_derive(attr: TokenStream, input: TokenStream) -> TokenStream {
-    solver_derive::solver_derive(attr, input)
+pub fn solver_attr(attr: TokenStream, input: TokenStream) -> TokenStream {
+    solver_attr::solver_attr(attr, input)
 }
 
 /// Derives `bare_clone` method

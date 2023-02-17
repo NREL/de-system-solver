@@ -1,7 +1,7 @@
 use crate::imports::*;
 
 /// Derives several methods for struct
-pub(crate) fn solver_derive(_attr: TokenStream, input: TokenStream) -> TokenStream {
+pub(crate) fn solver_attr(_attr: TokenStream, input: TokenStream) -> TokenStream {
     let ast_input = input.clone();
     let ast = syn::parse_macro_input!(ast_input as syn::DeriveInput);
     let ident = &ast.ident;

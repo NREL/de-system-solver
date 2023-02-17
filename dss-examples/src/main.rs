@@ -12,17 +12,9 @@ mod tests;
 
 /// System of connected components
 #[derive(
-    Debug,
-    Default,
-    Clone,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    Deserialize,
-    HistoryMethods,
-    BareClone,
+    Debug, Default, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone,
 )]
-#[solver_derive]
+#[solver_attr]
 pub struct System {
     solver_opts: SolverOptions,
     // components
