@@ -11,10 +11,9 @@ pub use components::*;
 mod tests;
 
 /// System of connected components
-#[derive(
-    Debug, Default, Clone, PartialEq, PartialOrd, Serialize, Deserialize, HistoryMethods, BareClone, Pyo3Api
-)]
+#[derive(HistoryMethods, BareClone, Pyo3Api)]
 #[solver]
+#[common_derives]
 pub struct System {
     solver_opts: SolverOptions,
     // components
@@ -69,9 +68,8 @@ impl System {
     }
 }
 
-#[derive(
-    Debug, Default, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec,
-)]
+#[derive(Copy, HistoryVec)]
+#[common_derives]
 pub struct SystemState {
     // current index in `t_report`
     i: usize,

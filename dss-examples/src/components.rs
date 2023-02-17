@@ -46,9 +46,8 @@ impl HasState for ThermalMass {
 }
 
 /// State for tracking temperature of [ThermalMass]
-#[derive(
-    Default, Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec, Pyo3Api,
-)]
+#[derive(Copy, HistoryVec, Pyo3Api)]
+#[common_derives]
 pub struct ThermalMassState {
     /// temperature \[°C\]
     pub temp: f64,
@@ -57,18 +56,8 @@ pub struct ThermalMassState {
 }
 
 /// Conductance component
-#[derive(
-    Default,
-    Debug,
-    Clone,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    Deserialize,
-    HistoryMethods,
-    BareClone,
-    Pyo3Api,
-)]
+#[derive(HistoryMethods, BareClone, Pyo3Api)]
+#[common_derives]
 pub struct Conductance {
     /// Thermal conductance \[W/K\] between two temperatures
     pub h: f64,
@@ -100,9 +89,8 @@ impl Flow for Conductance {
 }
 
 /// Struct for tracking flow variables in Conductance
-#[derive(
-    Default, Debug, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize, HistoryVec, Pyo3Api,
-)]
+#[derive(Copy, HistoryVec, Pyo3Api)]
+#[common_derives]
 pub struct ConductanceState {
     /// Heat transfer rate \[W\]
     pub q: f64,

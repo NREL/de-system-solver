@@ -1,8 +1,9 @@
 use crate::imports::*;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[common_derives]
 pub enum SolverOptions {
     /// Euler with fixed time step
+    #[default]
     EulerFixed,
     RK4Fixed,
     // TODO: add this stuff back into fixed options
@@ -14,13 +15,8 @@ pub enum SolverOptions {
     ToDo,
 }
 
-impl Default for SolverOptions {
-    fn default() -> Self {
-        SolverOptions::EulerFixed
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize, Pyo3Api)]
+#[derive(Pyo3Api)]
+#[common_derives]
 pub struct AdaptiveSolver {
     /// max allowable dt
     pub dt_max: f64,
@@ -36,7 +32,8 @@ pub struct AdaptiveSolver {
     pub history: Vec<SolverHistory>,
 }
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Deserialize, Serialize, Pyo3Api)]
+#[derive(Pyo3Api)]
+#[common_derives]
 pub struct SolverHistory {
     /// number of iterations to achieve tolerance
     n_iters: u8,
