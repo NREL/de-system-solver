@@ -19,6 +19,9 @@ with open("../target/results/rk4 dt=0.02 s.json", 'r') as file:
 
 # Get the default color cycle
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+euler_markersize = 1
+rk4_markersize = 2
+rk4_marker = 'o'
 
 fig, ax = plt.subplots()
 # m1
@@ -28,6 +31,9 @@ ax.plot(
     res_euler['m1']['history']['temp'],
     label='m1',
     color=default_colors[0],
+    markersize=euler_markersize,
+    linestyle='',
+    marker=rk4_marker,
 )
 # rk4
 ax.plot(
@@ -35,7 +41,9 @@ ax.plot(
     res_rk4['m1']['history']['temp'],
     label='m1 rk4',
     color=default_colors[0],
-    linestyle='--'
+    markersize=rk4_markersize,
+    linestyle='',
+    marker='s'
 )
 # m2
 # euler
@@ -44,6 +52,9 @@ ax.plot(
     res_euler['m2']['history']['temp'],
     label='m2',
     color=default_colors[1],
+    markersize=euler_markersize,
+    linestyle='',
+    marker=rk4_marker,
 )
 # rk4
 ax.plot(
@@ -51,7 +62,9 @@ ax.plot(
     res_rk4['m2']['history']['temp'],
     label='m2 rk4',
     color=default_colors[1],
-    linestyle='--'
+    markersize=rk4_markersize,
+    linestyle='',
+    marker='s'
 )
 # m3
 # euler
@@ -60,6 +73,9 @@ ax.plot(
     res_euler['m3']['history']['temp'],
     label='m3',
     color=default_colors[2],
+    markersize=euler_markersize,
+    linestyle='',
+    marker=rk4_marker,
 )
 # rk4
 ax.plot(
@@ -67,7 +83,9 @@ ax.plot(
     res_rk4['m3']['history']['temp'],
     label='m3 rk4',
     color=default_colors[2],
-    linestyle='--'
+    markersize=rk4_markersize,
+    linestyle='',
+    marker='s'
 )
 ax.set_ylabel('Temperature [°C]')
 ax.set_xlabel('Time [s]')
@@ -84,6 +102,9 @@ ax.plot(
     np.array(res_euler['m1']['history']['temp']) * res_euler['m1']['c'],
     label='m1',
     color=default_colors[0],
+    markersize=euler_markersize,
+    linestyle='',
+    marker=rk4_marker,
 )
 # rk4
 ax.plot(
@@ -91,7 +112,9 @@ ax.plot(
     np.array(res_rk4['m1']['history']['temp']) * res_rk4['m1']['c'],
     label='m1 rk4',
     color=default_colors[0],
-    linestyle='--'
+    markersize=rk4_markersize,
+    linestyle='',
+    marker='s'
 )
 # m1 + m2
 # euler
@@ -103,6 +126,9 @@ ax.plot(
     ),
     label='m1 + m2',
     color=default_colors[1],
+    markersize=euler_markersize,
+    linestyle='',
+    marker=rk4_marker,
 )
 # rk4
 ax.plot(
@@ -113,7 +139,9 @@ ax.plot(
     ),
     label='m1 + m2 rk4',
     color=default_colors[1],
-    linestyle='--'
+    markersize=rk4_markersize,
+    linestyle='',
+    marker='s'
 )
 # m1 + m2 + m3
 # euler
@@ -126,6 +154,9 @@ ax.plot(
     ),
     label='m1 + m2 + m3',
     color=default_colors[2],
+    markersize=euler_markersize,
+    linestyle='',
+    marker=rk4_marker,
 )
 # euler
 ax.plot(
@@ -137,7 +168,9 @@ ax.plot(
     ),
     label='m1 + m2 + m3 rk4',
     color=default_colors[2],
-    linestyle='--'
+    markersize=rk4_markersize,
+    linestyle='',
+    marker='s'
 )
 ax.set_ylabel('Energy [J]')
 ax.set_xlabel('Time [s]')
