@@ -3,7 +3,7 @@ use crate::imports::*;
 /// ThermalMass component with capacitance, state, and history
 #[derive(HistoryMethods, BareClone)]
 #[common_derives]
-// #[pyo3_api]
+#[pyo3_api]
 pub struct ThermalMass {
     /// thermal capacitance \[J/K\]
     pub c: f64,
@@ -49,7 +49,7 @@ impl HasState for ThermalMass {
 /// State for tracking temperature of [ThermalMass]
 #[derive(Copy, HistoryVec)]
 #[common_derives]
-// #[pyo3_api]
+#[pyo3_api]
 pub struct ThermalMassState {
     /// temperature \[°C\]
     pub temp: f64,
@@ -59,7 +59,7 @@ pub struct ThermalMassState {
 
 /// Conductance component
 #[derive(HistoryMethods, BareClone)]
-// #[pyo3_api]
+#[pyo3_api]
 #[common_derives]
 pub struct Conductance {
     /// Thermal conductance \[W/K\] between two temperatures
@@ -94,7 +94,7 @@ impl Flow for Conductance {
 /// Struct for tracking flow variables in Conductance
 #[derive(Copy, HistoryVec)]
 #[common_derives]
-// #[pyo3_api]
+#[pyo3_api]
 pub struct ConductanceState {
     /// Heat transfer rate \[W\]
     pub q: f64,

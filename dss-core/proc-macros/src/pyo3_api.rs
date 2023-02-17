@@ -9,7 +9,7 @@ pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let mut item_block: TokenStream2 = quote! {
         #[derive(Pyo3ApiCleanup)]
-        #[pyclass]
+        #[cfg_attr(feature = "pyo3", pyclass)]
     };
     item_block.extend::<TokenStream2>(item.into());
 

@@ -12,7 +12,7 @@ mod tests;
 
 /// System of connected components
 #[derive(HistoryMethods, BareClone)]
-// #[pyo3_api]
+#[pyo3_api]
 #[solver]
 #[common_derives]
 pub struct System {
