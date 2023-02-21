@@ -35,7 +35,7 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
     item_and_impl_block.extend::<TokenStream2>(quote! {
         impl #ident {
             /// iterates through time until last value of `t_report`
-            fn walk(&mut self) {
+            pub fn walk(&mut self) {
                 self.save_state();
                     while &self.state.time < self.t_report.last().unwrap() {
                         self.solve_step();
@@ -44,7 +44,7 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
 
             /// Runs `solver_opts` specific step method that calls
             /// [Self::step] in solver-specific manner
-            fn solve_step(&mut self) {
+            pub fn solve_step(&mut self) {
                 let dt = match self.solver_opts {
                     SolverOptions::EulerFixed => {
                         let dt = self.t_report[self.state.i] - self.state.time;
@@ -71,51 +71,51 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
 
             /// assuming `set_derivs` has been called, steps
             /// value of states by deriv * dt
-            fn step_by_dt(&mut self, dt: &f64) {
+            pub fn step_by_dt(&mut self, dt: &f64) {
                 #(self.#fields_with_state.step_state_by_dt(dt);)*
             }
 
             /// assuming `set_derivs` has been called, steps
             /// value of states by deriv * dt
-            fn step(&mut self, val: Vec<f64>) {
+            pub fn step(&mut self, val: Vec<f64>) {
                 let mut iter = val.iter();
                 #(self.#fields_with_state.step_state(iter.next().unwrap().clone());)*
             }
 
             /// reset all time derivatives to zero for start of `solve_step`
-            fn reset_derivs(&mut self) {
+            pub fn reset_derivs(&mut self) {
                 #(self.#fields_with_state.set_deriv(0.0);)*
             }
 
             /// returns derivatives of states
-            fn get_derivs(&self) -> Vec<f64> {
+            pub fn get_derivs(&self) -> Vec<f64> {
                 let mut derivs: Vec<f64> = Vec::new();
                 #(derivs.push(self.#fields_with_state.deriv());)*
                 derivs
             }
 
             /// sets values of derivatives of states
-            fn set_derivs(&mut self, val: &Vec<f64>) {
+            pub fn set_derivs(&mut self, val: &Vec<f64>) {
                 let mut iter = val.iter();
                 #(self.#fields_with_state.set_deriv(iter.next().unwrap().clone());)*
             }
 
             /// returns values of states
-            fn get_states(&self) -> Vec<f64> {
+            pub fn get_states(&self) -> Vec<f64> {
                 let mut states: Vec<f64> = Vec::new();
                 #(states.push(self.#fields_with_state.state());)*
                 states
             }
 
             /// sets values of states
-            fn set_states(&mut self, val: Vec<f64>) {
+            pub fn set_states(&mut self, val: Vec<f64>) {
                 let mut iter = val.iter();
                 #(self.#fields_with_state.set_state(iter.next().unwrap().clone());)*
             }
 
             /// solves time step with 4th order Runge-Kutta method.
             /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
-            fn rk4fixed(&mut self, dt: &f64) {
+            pub fn rk4fixed(&mut self, dt: &f64) {
                 let h = dt;
                 self.update_derivs();
 
@@ -153,7 +153,7 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
 
             // /// solves time step with adaptive Cash-Karp Method (variant of RK45)
             // /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-            // fn rk45CashKarp(&mut self) {
+            // pub fn rk45CashKarp(&mut self) {
             //     let dt = self.t_report[self.state.i] - self.state.time;
             //     self.update_derivs();
             //     // k1 = f(x_i, y_i)
