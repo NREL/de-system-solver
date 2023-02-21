@@ -143,7 +143,7 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
                 let k4s = sys3.get_derivs();
 
                 let mut delta: Vec<f64> = vec![];
-                let zipped = dss_core::zip!(k1s, k2s, k3s, k4s);
+                let zipped = dess_core::zip!(k1s, k2s, k3s, k4s);
                 for (k1, (k2, (k3, k4))) in zipped {
                     delta.push(1.0 / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4) * h);
                 }

@@ -1,5 +1,5 @@
 [package]
-name = "dss-examples"
+name = "dess-core"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,11 +7,13 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-dss-core = { path = "../dss-core"}
+bincode = "1.3.3"
+proc-macros = { path = "proc-macros" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = { workspace = true }
+# optional
 pyo3 = { workspace = true, features = ["extension-module", "anyhow"], optional = true }
 
 [features]
-pyo3 = ["dep:pyo3", "dss-core/pyo3"]
+pyo3 = ["dep:pyo3"]

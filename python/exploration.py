@@ -7,11 +7,11 @@ sns.set()
 
 # %%
 
-# to generate this file, run `cargo run` in dss-examples/
+# to generate this file, run `cargo run` in dess-examples/
 with open("../target/results/euler dt=0.005 s.json", 'r') as file:
     res_euler = json.load(file)
 
-# to generate this file, run `cargo run` in dss-examples/
+# to generate this file, run `cargo run` in dess-examples/
 with open("../target/results/rk4 dt=0.02 s.json", 'r') as file:
     res_rk4 = json.load(file)
 
@@ -175,6 +175,3 @@ ax.plot(
 ax.set_ylabel('Energy [J]')
 ax.set_xlabel('Time [s]')
 ax.legend()
-
-
-# %%

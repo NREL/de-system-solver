@@ -1,13 +1,13 @@
 [package]
-name = "dss-pyo3"
+name = "dess-pyo3"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "dss_pyo3"
+name = "dess_pyo3"
 crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { workspace = true, features = ["extension-module"] }
-dss-core = { path = "../dss-core", features = ["pyo3"] }
+dess-core = { path = "../dess-core", features = ["pyo3"] }

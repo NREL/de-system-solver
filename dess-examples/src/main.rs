@@ -2,7 +2,7 @@ use std::fs::DirBuilder;
 use std::path::PathBuf;
 use std::time::Instant;
 
-use dss_core::prelude::*;
+use dess_core::prelude::*;
 
 pub mod imports;
 use imports::*;
@@ -132,7 +132,7 @@ fn main() {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dss-examples/tests/fixtures/euler benchmark.yaml");
+            .join("dess-examples/tests/fixtures/euler benchmark.yaml");
 
         sys_euler
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -172,7 +172,7 @@ fn main() {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dss-examples/tests/fixtures/rk4 benchmark.yaml");
+            .join("dess-examples/tests/fixtures/rk4 benchmark.yaml");
 
         sys_rk4
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
