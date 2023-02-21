@@ -54,6 +54,12 @@ pub(crate) fn history_vec_derive(input: TokenStream) -> TokenStream {
     .unwrap();
     generated.append_all(quote! {
         #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+        #[pyo3_api(
+            #[pyo3(name = "len")]
+            fn len_py(&self) -> usize {
+                self.len()
+            }
+        )]
         #struct_doc
         pub struct #new_name {
             #vec_fields
