@@ -17,6 +17,7 @@ pub enum SolverOptions {
 
 #[pyo3_api]
 #[common_derives]
+#[derive(Builder)]
 pub struct AdaptiveSolver {
     /// max allowable dt
     pub dt_max: f64,
