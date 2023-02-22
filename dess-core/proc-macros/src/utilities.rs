@@ -25,6 +25,7 @@ impl<T: Iterator<Item = proc_macro2::TokenStream>> TokenStreamIterator for T {
     }
 }
 
+#[allow(unused)]
 /// Checks if a field is a vec
 pub fn is_vec(field: &Field) -> bool {
     if let Type::Path(type_path) = &field.ty {

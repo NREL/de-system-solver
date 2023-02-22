@@ -1,5 +1,4 @@
 use crate::imports::*;
-use crate::utilities::*;
 
 /// Derives several methods for struct
 pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
