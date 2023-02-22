@@ -24,3 +24,15 @@ impl<T: Iterator<Item = proc_macro2::TokenStream>> TokenStreamIterator for T {
         self.concat_by(|a, b| quote! { #a #b })
     }
 }
+
+/// Checks if a field is a vec
+pub fn is_vec(field: &Field) -> bool {
+    if let Type::Path(type_path) = &field.ty {
+        if let Some(segment) = type_path.path.segments.first() {
+            if segment.ident == "Vec" {
+                return true;
+            }
+        }
+    }
+    false
+}

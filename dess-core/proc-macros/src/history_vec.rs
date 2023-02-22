@@ -16,7 +16,7 @@ pub(crate) fn history_vec_derive(input: TokenStream) -> TokenStream {
                 fields.push(field.clone());
             }
         }
-        _ => abort!(ast.span(), "#[derive(HistoryVec)] only works on structs"),
+        _ => abort!(&ast.span(), "#[derive(HistoryVec)] only works on structs"),
     }
     let field_names = fields
         .iter()

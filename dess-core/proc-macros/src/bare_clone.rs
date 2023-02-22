@@ -6,7 +6,7 @@ pub(crate) fn bare_clone_derive(input: TokenStream) -> TokenStream {
 
     let fields: Vec<Field> = match ast.data {
         syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
-        _ => abort!(ident.span(), "only works on structs"),
+        _ => abort!(&ident.span(), "only works on structs"),
     };
 
     // all fields with `use_state` or `save_state` attribute

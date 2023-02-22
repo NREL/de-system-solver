@@ -1,4 +1,5 @@
 use crate::imports::*;
+use crate::utilities::*;
 
 /// Derives several methods for struct
 pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -24,7 +25,7 @@ pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
         TokenStream2::new()
     };
 
-    let mut pyo3_fns = Vec::new();
+    let mut pyo3_fns: Vec<TokenStream2> = Vec::new();
 
     if let syn::Fields::Named(syn::FieldsNamed { named, .. }) = &mut ast.fields {
         // struct with named fields
@@ -32,16 +33,21 @@ pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
             let fname = field.ident.as_ref().unwrap();
 
             // Conditionally add setter function
-            if field.attrs.iter().any(|a| a.path.is_ident("skip_get")) {
-                pyo3_fns.push(quote! {
-                    fn get_ #fname(&mut self) -> #field.ty {
-                        self.#fname
+            if !field.attrs.iter().any(|a| a.path.is_ident("skip_get")) {
+                let fn_get_fname: TokenStream2 =
+                    format!("fn get_{}(&mut self)", &fname).parse().unwrap();
+                let field_type = &field.ty;
+                let fn_body: TokenStream2 = format!("self.{}.clone()", &fname).parse().unwrap();
+                let new_fn = quote! {
+                    #fn_get_fname -> #field_type {
+                        #fn_body
                     }
-                });
+                };
+                pyo3_fns.push(new_fn);
             }
         }
     } else {
-        abort!(ident.span(), "Only works on structs with named fields.");
+        abort!(&ident.span(), "Only works on structs with named fields.");
     }
 
     let py_impl_block = quote! {

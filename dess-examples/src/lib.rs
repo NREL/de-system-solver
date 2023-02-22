@@ -10,6 +10,7 @@ mod tests;
 #[solver]
 #[common_derives]
 pub struct System {
+    #[skip_get]
     solver_opts: SolverOptions,
     // components
     // the `use_state` attribute tells the SystemSolver
