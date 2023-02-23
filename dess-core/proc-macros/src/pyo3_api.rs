@@ -38,6 +38,7 @@ pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
                 let field_type = &field.ty;
                 let fn_body: TokenStream2 = format!("self.{}.clone()", &fname).parse().unwrap();
                 let new_fn = quote! {
+                    #[getter]
                     #fn_get_fname -> #field_type {
                         #fn_body
                     }

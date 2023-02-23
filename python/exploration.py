@@ -4,18 +4,9 @@ import numpy as np
 import json
 import matplotlib.pyplot as plt
 import seaborn as sns
+import time
 sns.set()
 
-
-# %%
-
-# to generate this file, run `cargo run` in dess-examples/
-with open("../target/results/euler dt=0.005 s.json", 'r') as file:
-    res_euler = json.load(file)
-
-# to generate this file, run `cargo run` in dess-examples/
-with open("../target/results/rk4 dt=0.02 s.json", 'r') as file:
-    res_rk4 = json.load(file)
 
 # %%
 m1 = dess_pyo3.ThermalMass(1.0, 2.0)
@@ -23,7 +14,8 @@ m2 = dess_pyo3.ThermalMass(2.0, 10.0)
 h12 = dess_pyo3.Conductance(5.0)
 m3 = dess_pyo3.ThermalMass(1.5, 12.0)
 h13 = dess_pyo3.Conductance(5.0)
-t_report = np.linspace(0.0, 1.0, 201).tolist()
+t_report_euler = np.linspace(0.0, 1.0, 201).tolist()
+t_report_rk4 = np.linspace(0.0, 1.0, 11).tolist()
 
 
 sys_rk4 = dess_pyo3.System(
@@ -33,7 +25,25 @@ sys_rk4 = dess_pyo3.System(
     h12,
     m3,
     h13,
-    t_report,)
+    t_report_rk4,)
+t0 = time.perf_counter()
+sys_rk4.walk()
+t1 = time.perf_counter()
+print(f"Elapsed time to run `sys_rk4.walk()`: {t1-t0:.3g}")
+
+sys_euler = dess_pyo3.System(
+    '"EulerFixed"',
+    m1,
+    m2,
+    h12,
+    m3,
+    h13,
+    t_report_euler,)
+
+t0 = time.perf_counter()
+sys_euler.walk()
+t1 = time.perf_counter()
+print(f"Elapsed time to run `sys_euler.walk()`: {t1-t0:.3g}")
 
 
 # %%
@@ -48,8 +58,8 @@ fig, ax = plt.subplots()
 # m1
 # euler
 ax.plot(
-    res_euler['history']['time'],
-    res_euler['m1']['history']['temp'],
+    sys_euler.history.time,
+    sys_euler.m1.history.temp,
     label='m1',
     color=default_colors[0],
     markersize=euler_markersize,
@@ -58,8 +68,8 @@ ax.plot(
 )
 # rk4
 ax.plot(
-    res_rk4['history']['time'],
-    res_rk4['m1']['history']['temp'],
+    sys_rk4.history.time,
+    sys_rk4.m1.history.temp,
     label='m1 rk4',
     color=default_colors[0],
     markersize=rk4_markersize,
@@ -69,8 +79,8 @@ ax.plot(
 # m2
 # euler
 ax.plot(
-    res_euler['history']['time'],
-    res_euler['m2']['history']['temp'],
+    sys_euler.history.time,
+    sys_euler.m2.history.temp,
     label='m2',
     color=default_colors[1],
     markersize=euler_markersize,
@@ -79,8 +89,8 @@ ax.plot(
 )
 # rk4
 ax.plot(
-    res_rk4['history']['time'],
-    res_rk4['m2']['history']['temp'],
+    sys_rk4.history.time,
+    sys_rk4.m2.history.temp,
     label='m2 rk4',
     color=default_colors[1],
     markersize=rk4_markersize,
@@ -90,8 +100,8 @@ ax.plot(
 # m3
 # euler
 ax.plot(
-    res_euler['history']['time'],
-    res_euler['m3']['history']['temp'],
+    sys_euler.history.time,
+    sys_euler.m3.history.temp,
     label='m3',
     color=default_colors[2],
     markersize=euler_markersize,
@@ -100,8 +110,8 @@ ax.plot(
 )
 # rk4
 ax.plot(
-    res_rk4['history']['time'],
-    res_rk4['m3']['history']['temp'],
+    sys_rk4.history.time,
+    sys_rk4.m3.history.temp,
     label='m3 rk4',
     color=default_colors[2],
     markersize=rk4_markersize,
@@ -119,8 +129,8 @@ fig, ax = plt.subplots()
 # m1
 # euler
 ax.plot(
-    res_euler['history']['time'],
-    np.array(res_euler['m1']['history']['temp']) * res_euler['m1']['c'],
+    sys_euler.history.time,
+    np.array(sys_euler.m1.history.temp) * sys_euler.m1.c,
     label='m1',
     color=default_colors[0],
     markersize=euler_markersize,
@@ -129,8 +139,8 @@ ax.plot(
 )
 # rk4
 ax.plot(
-    res_rk4['history']['time'],
-    np.array(res_rk4['m1']['history']['temp']) * res_rk4['m1']['c'],
+    sys_rk4.history.time,
+    np.array(sys_rk4.m1.history.temp) * sys_rk4.m1.c,
     label='m1 rk4',
     color=default_colors[0],
     markersize=rk4_markersize,
@@ -140,10 +150,10 @@ ax.plot(
 # m1 + m2
 # euler
 ax.plot(
-    res_euler['history']['time'],
+    sys_euler.history.time,
     (
-        np.array(res_euler['m1']['history']['temp']) * res_euler['m1']['c'] +
-        np.array(res_euler['m2']['history']['temp']) * res_euler['m2']['c']
+        np.array(sys_euler.m1.history.temp) * sys_euler.m1.c +
+        np.array(sys_euler.m2.history.temp) * sys_euler.m2.c
     ),
     label='m1 + m2',
     color=default_colors[1],
@@ -153,10 +163,10 @@ ax.plot(
 )
 # rk4
 ax.plot(
-    res_rk4['history']['time'],
+    sys_rk4.history.time,
     (
-        np.array(res_rk4['m1']['history']['temp']) * res_rk4['m1']['c'] +
-        np.array(res_rk4['m2']['history']['temp']) * res_rk4['m2']['c']
+        np.array(sys_rk4.m1.history.temp) * sys_rk4.m1.c +
+        np.array(sys_rk4.m2.history.temp) * sys_rk4.m2.c
     ),
     label='m1 + m2 rk4',
     color=default_colors[1],
@@ -167,11 +177,11 @@ ax.plot(
 # m1 + m2 + m3
 # euler
 ax.plot(
-    res_euler['history']['time'],
+    sys_euler.history.time,
     (
-        np.array(res_euler['m1']['history']['temp']) * res_euler['m1']['c'] +
-        np.array(res_euler['m2']['history']['temp']) * res_euler['m2']['c'] +
-        np.array(res_euler['m3']['history']['temp']) * res_euler['m3']['c']
+        np.array(sys_euler.m1.history.temp) * sys_euler.m1.c +
+        np.array(sys_euler.m2.history.temp) * sys_euler.m2.c +
+        np.array(sys_euler.m3.history.temp) * sys_euler.m3.c
     ),
     label='m1 + m2 + m3',
     color=default_colors[2],
@@ -181,11 +191,11 @@ ax.plot(
 )
 # euler
 ax.plot(
-    res_rk4['history']['time'],
+    sys_rk4.history.time,
     (
-        np.array(res_rk4['m1']['history']['temp']) * res_rk4['m1']['c'] +
-        np.array(res_rk4['m2']['history']['temp']) * res_rk4['m2']['c'] +
-        np.array(res_rk4['m3']['history']['temp']) * res_rk4['m3']['c']
+        np.array(sys_rk4.m1.history.temp) * sys_rk4.m1.c +
+        np.array(sys_rk4.m2.history.temp) * sys_rk4.m2.c +
+        np.array(sys_rk4.m3.history.temp) * sys_rk4.m3.c
     ),
     label='m1 + m2 + m3 rk4',
     color=default_colors[2],
@@ -196,3 +206,5 @@ ax.plot(
 ax.set_ylabel('Energy [J]')
 ax.set_xlabel('Time [s]')
 ax.legend()
+
+# %%
