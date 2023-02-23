@@ -66,6 +66,41 @@ pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
                 Ok(Self::default())
             }
 
+            /// Save current data structure to file. Method adaptively calls serialization methods
+            /// dependent on the suffix of the file given as str.
+            ///
+            /// # Argument:
+            ///
+            /// * `filename`: a `str` storing the targeted file name. Currently `.json` and `.yaml` suffixes are
+            /// supported
+            ///
+            /// # Returns:
+            ///
+            /// A Rust Result
+            #[pyo3(name = "to_file")]
+            fn to_file_py(&self, filename: &str) -> PyResult<()> {
+                Ok(self.to_file(filename)?)
+            }
+
+            /// Read from file and return instantiated struct. Method adaptively calls deserialization
+            /// methods dependent on the suffix of the file name given as str.
+            /// Function returns a dynamic Error Result if it fails.
+            ///
+            /// # Argument:
+            ///
+            /// * `filename`: a `str` storing the targeted file name. Currently `.json` and `.yaml` suffixes are
+            /// supported
+            ///
+            /// # Returns:
+            ///
+            /// A Rust Result wrapping data structure if method is called successfully; otherwise a dynamic
+            /// Error.
+            #[classmethod]
+            #[pyo3(name = "from_file")]
+            fn from_file_py(_cls: &PyType, filename: &str) -> PyResult<Self> {
+                Ok(Self::from_file(filename)?)
+            }
+
             /// json serialization method.
             #[pyo3(name = "to_json")]
             fn to_json_py(&self) -> PyResult<String> {
