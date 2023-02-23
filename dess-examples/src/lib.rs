@@ -6,7 +6,28 @@ mod tests;
 
 /// System of connected components
 #[derive(HistoryMethods, BareClone)]
-#[pyo3_api]
+#[pyo3_api(
+    #[new]
+    fn __new__(
+        solver_opts: String,
+        m1: ThermalMass,
+        m2: ThermalMass,
+        h12: Conductance,
+        m3: ThermalMass,
+        h13: Conductance,
+        t_report: Vec<f64>,
+    ) -> Self {
+        Self::new(
+            SolverOptions::from_json(&solver_opts).unwrap(),
+            m1,
+            m2,
+            h12,
+            m3,
+            h13,
+            t_report,
+        )
+    }
+)]
 #[solver]
 #[common_derives]
 pub struct System {

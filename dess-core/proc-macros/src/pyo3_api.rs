@@ -1,7 +1,7 @@
 use crate::imports::*;
 
 /// Derives several methods for struct
-pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
     let ast_item = item.clone();
     let mut ast = syn::parse_macro_input!(ast_item as syn::ItemStruct);
     let ident = &ast.ident;
@@ -49,10 +49,13 @@ pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
         abort!(&ident.span(), "Only works on structs with named fields.");
     }
 
+    let attr_ts2: TokenStream2 = attr.into();
+
     let py_impl_block = quote! {
         #[cfg(feature = "pyo3")]
         #[pymethods]
         impl #ident {
+            #attr_ts2
             #(#pyo3_fns)*
             #walk_block
             #[classmethod]
