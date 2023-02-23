@@ -3,8 +3,8 @@ use crate::imports::*;
 #[common_derives]
 pub enum SolverOptions {
     /// Euler with fixed time step
-    #[default]
     EulerFixed,
+    #[default]
     RK4Fixed,
     // TODO: add this stuff back into fixed options
     // /// time step to use if `t_report` is larger than `dt`

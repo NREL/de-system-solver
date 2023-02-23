@@ -113,7 +113,7 @@ pub fn mock_euler_sys() -> System {
     let h13 = Conductance::new(5.0, None);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
 
-    System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
+    System::new(SolverOptions::EulerFixed, m1, m2, h12, m3, h13, t_report)
 }
 
 pub fn mock_rk4fixed_sys() -> System {
@@ -124,5 +124,5 @@ pub fn mock_rk4fixed_sys() -> System {
     let h13 = Conductance::new(5.0, None);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
-    System::new(SolverOptions::RK4Fixed, m1, m2, h12, m3, h13, t_report)
+    System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
 }
