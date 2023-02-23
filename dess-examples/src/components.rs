@@ -3,7 +3,13 @@ use crate::imports::*;
 /// ThermalMass component with capacitance, state, and history
 #[derive(HistoryMethods, BareClone)]
 #[common_derives]
-#[pyo3_api]
+#[pyo3_api(
+    #[new]
+    /// New thermal mass with capacitance `c` and initial temperature `t0`
+    pub fn __new__(c: f64, temp0: f64) -> Self {
+        Self::new(c, temp0)
+    }
+)]
 pub struct ThermalMass {
     /// thermal capacitance \[J/K\]
     pub c: f64,
@@ -13,12 +19,12 @@ pub struct ThermalMass {
 
 impl ThermalMass {
     /// New thermal mass with capacitance `c` and initial temperature `t0`
-    pub fn new(c: f64, temp0: f64, dtemp0: Option<f64>) -> Self {
+    pub fn new(c: f64, temp0: f64) -> Self {
         Self {
             c,
             state: ThermalMassState {
                 temp: temp0,
-                dtemp: dtemp0.unwrap_or_default(),
+                dtemp: Default::default(),
             },
             history: Default::default(),
         }
@@ -59,7 +65,12 @@ pub struct ThermalMassState {
 
 /// Conductance component
 #[derive(HistoryMethods, BareClone)]
-#[pyo3_api]
+#[pyo3_api(
+    #[new]
+    fn __new__(h: f64) -> Self {
+        Self::new(h)
+    }
+)]
 #[common_derives]
 pub struct Conductance {
     /// Thermal conductance \[W/K\] between two temperatures
@@ -69,11 +80,11 @@ pub struct Conductance {
 }
 
 impl Conductance {
-    pub fn new(h: f64, q0: Option<f64>) -> Self {
+    pub fn new(h: f64) -> Self {
         Self {
             h,
             state: ConductanceState {
-                q: q0.unwrap_or_default(),
+                q: Default::default(),
             },
             history: ConductanceStateHistoryVec {
                 q: Default::default(),

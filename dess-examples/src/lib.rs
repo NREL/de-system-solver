@@ -27,6 +27,11 @@ mod tests;
             t_report,
         )
     }
+
+    #[pyo3(name = "walk")]
+    fn walk_py(&mut self) {
+        self.walk();
+    }
 )]
 #[solver]
 #[common_derives]
@@ -106,22 +111,22 @@ macro_rules! time_it {
 }
 
 pub fn mock_euler_sys() -> System {
-    let m1 = ThermalMass::new(1.0, 0.0, None);
-    let m2 = ThermalMass::new(2.0, 10.0, None);
-    let h12 = Conductance::new(5.0, None);
-    let m3 = ThermalMass::new(1.5, 12.0, None);
-    let h13 = Conductance::new(5.0, None);
+    let m1 = ThermalMass::new(1.0, 0.0);
+    let m2 = ThermalMass::new(2.0, 10.0);
+    let h12 = Conductance::new(5.0);
+    let m3 = ThermalMass::new(1.5, 12.0);
+    let h13 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
 
     System::new(SolverOptions::EulerFixed, m1, m2, h12, m3, h13, t_report)
 }
 
 pub fn mock_rk4fixed_sys() -> System {
-    let m1 = ThermalMass::new(1.0, 0.0, None);
-    let m2 = ThermalMass::new(2.0, 10.0, None);
-    let h12 = Conductance::new(5.0, None);
-    let m3 = ThermalMass::new(1.5, 12.0, None);
-    let h13 = Conductance::new(5.0, None);
+    let m1 = ThermalMass::new(1.0, 0.0);
+    let m2 = ThermalMass::new(2.0, 10.0);
+    let h12 = Conductance::new(5.0);
+    let m3 = ThermalMass::new(1.5, 12.0);
+    let h13 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
     System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
