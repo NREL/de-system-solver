@@ -1,5 +1,5 @@
 # %%
-import dess_pyo3 as dep
+import dess_pyo3
 import numpy as np
 import json
 import matplotlib.pyplot as plt
@@ -16,6 +16,25 @@ with open("../target/results/euler dt=0.005 s.json", 'r') as file:
 # to generate this file, run `cargo run` in dess-examples/
 with open("../target/results/rk4 dt=0.02 s.json", 'r') as file:
     res_rk4 = json.load(file)
+
+# %%
+m1 = dess_pyo3.ThermalMass(1.0, 2.0)
+m2 = dess_pyo3.ThermalMass(2.0, 10.0)
+h12 = dess_pyo3.Conductance(5.0)
+m3 = dess_pyo3.ThermalMass(1.5, 12.0)
+h13 = dess_pyo3.Conductance(5.0)
+t_report = np.linspace(0.0, 1.0, 201).tolist()
+
+
+sys_rk4 = dess_pyo3.System(
+    '"RK4Fixed"',
+    m1,
+    m2,
+    h12,
+    m3,
+    h13,
+    t_report,)
+
 
 # %%
 

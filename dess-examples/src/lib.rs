@@ -28,6 +28,11 @@ mod tests;
         )
     }
 
+    #[getter]
+    fn get_solver_opts(&self) -> String {
+        self.solver_opts.to_json()
+    }
+
     #[pyo3(name = "walk")]
     fn walk_py(&mut self) {
         self.walk();
