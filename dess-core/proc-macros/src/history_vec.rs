@@ -16,7 +16,7 @@ pub(crate) fn history_vec_derive(input: TokenStream) -> TokenStream {
                 fields.push(field.clone());
             }
         }
-        _ => abort!(ast.span(), "#[derive(HistoryVec)] only works on structs"),
+        _ => abort!(&ast.span(), "#[derive(HistoryVec)] only works on structs"),
     }
     let field_names = fields
         .iter()
@@ -54,6 +54,12 @@ pub(crate) fn history_vec_derive(input: TokenStream) -> TokenStream {
     .unwrap();
     generated.append_all(quote! {
         #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, PartialOrd)]
+        #[pyo3_api(
+            #[pyo3(name = "len")]
+            fn len_py(&self) -> usize {
+                self.len()
+            }
+        )]
         #struct_doc
         pub struct #new_name {
             #vec_fields

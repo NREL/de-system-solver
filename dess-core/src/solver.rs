@@ -3,8 +3,8 @@ use crate::imports::*;
 #[common_derives]
 pub enum SolverOptions {
     /// Euler with fixed time step
-    #[default]
     EulerFixed,
+    #[default]
     RK4Fixed,
     // TODO: add this stuff back into fixed options
     // /// time step to use if `t_report` is larger than `dt`
@@ -32,11 +32,14 @@ pub struct AdaptiveSolver {
     pub history: Vec<SolverHistory>,
 }
 
-#[pyo3_api]
 #[common_derives]
+#[pyo3_api]
 pub struct SolverHistory {
     /// number of iterations to achieve tolerance
     n_iters: u8,
     /// L2 (euclidean) norm
     norm: f64,
+    // TODO: put more things here
+    // - vec of time steps taken between elements of `t_report`
+    // - vec of vec of states at each time step
 }

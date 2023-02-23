@@ -1,8 +1,9 @@
 [workspace]
 
 members = [
-    "dss-core", # pure rust core 
-    "dss-examples" # examples of how to run the code
+    "dess-core", # pure rust core 
+    "dess-examples", # examples of how to run the code,
+    "dess-pyo3", # pyo3 api for dess-core
 ]
 
 [profile.dev]

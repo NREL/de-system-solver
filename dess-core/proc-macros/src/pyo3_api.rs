@@ -1,7 +1,7 @@
 use crate::imports::*;
 
 /// Derives several methods for struct
-pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
     let ast_item = item.clone();
     let mut ast = syn::parse_macro_input!(ast_item as syn::ItemStruct);
     let ident = &ast.ident;
@@ -9,6 +9,7 @@ pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let mut item_block: TokenStream2 = quote! {
         #[derive(Pyo3ApiCleanup)]
+        #[cfg_attr(feature = "pyo3", pyclass)]
     };
     item_block.extend::<TokenStream2>(item.into());
 
@@ -23,7 +24,7 @@ pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
         TokenStream2::new()
     };
 
-    let mut pyo3_fns = Vec::new();
+    let mut pyo3_fns: Vec<TokenStream2> = Vec::new();
 
     if let syn::Fields::Named(syn::FieldsNamed { named, .. }) = &mut ast.fields {
         // struct with named fields
@@ -31,22 +32,31 @@ pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
             let fname = field.ident.as_ref().unwrap();
 
             // Conditionally add setter function
-            if field.attrs.iter().any(|a| a.path.is_ident("skip_get")) {
-                pyo3_fns.push(quote! {
-                    fn get_ #fname(&mut self) -> #field.ty {
-                        self.#fname
+            if !field.attrs.iter().any(|a| a.path.is_ident("skip_get")) {
+                let fn_get_fname: TokenStream2 =
+                    format!("fn get_{}(&mut self)", &fname).parse().unwrap();
+                let field_type = &field.ty;
+                let fn_body: TokenStream2 = format!("self.{}.clone()", &fname).parse().unwrap();
+                let new_fn = quote! {
+                    #[getter]
+                    #fn_get_fname -> #field_type {
+                        #fn_body
                     }
-                });
+                };
+                pyo3_fns.push(new_fn);
             }
         }
     } else {
-        abort!(ident.span(), "Only works on structs with named fields.");
+        abort!(&ident.span(), "Only works on structs with named fields.");
     }
+
+    let attr_ts2: TokenStream2 = attr.into();
 
     let py_impl_block = quote! {
         #[cfg(feature = "pyo3")]
         #[pymethods]
         impl #ident {
+            #attr_ts2
             #(#pyo3_fns)*
             #walk_block
             #[classmethod]
@@ -54,6 +64,41 @@ pub(crate) fn pyo3_api(_attr: TokenStream, item: TokenStream) -> TokenStream {
             /// Exposes `default` to python.
             fn default_py(_cls: &PyType) -> PyResult<Self> {
                 Ok(Self::default())
+            }
+
+            /// Save current data structure to file. Method adaptively calls serialization methods
+            /// dependent on the suffix of the file given as str.
+            ///
+            /// # Argument:
+            ///
+            /// * `filename`: a `str` storing the targeted file name. Currently `.json` and `.yaml` suffixes are
+            /// supported
+            ///
+            /// # Returns:
+            ///
+            /// A Rust Result
+            #[pyo3(name = "to_file")]
+            fn to_file_py(&self, filename: &str) -> PyResult<()> {
+                Ok(self.to_file(filename)?)
+            }
+
+            /// Read from file and return instantiated struct. Method adaptively calls deserialization
+            /// methods dependent on the suffix of the file name given as str.
+            /// Function returns a dynamic Error Result if it fails.
+            ///
+            /// # Argument:
+            ///
+            /// * `filename`: a `str` storing the targeted file name. Currently `.json` and `.yaml` suffixes are
+            /// supported
+            ///
+            /// # Returns:
+            ///
+            /// A Rust Result wrapping data structure if method is called successfully; otherwise a dynamic
+            /// Error.
+            #[classmethod]
+            #[pyo3(name = "from_file")]
+            fn from_file_py(_cls: &PyType, filename: &str) -> PyResult<Self> {
+                Ok(Self::from_file(filename)?)
             }
 
             /// json serialization method.

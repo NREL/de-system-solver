@@ -1,5 +1,4 @@
 #![cfg(test)]
-
 use crate::*;
 
 #[test]
@@ -28,7 +27,7 @@ fn test_against_benchmark() {
         .parent()
         .unwrap()
         .to_path_buf()
-        .join("dss-examples/tests/fixtures/euler benchmark.yaml");
+        .join("dess-examples/tests/fixtures/euler benchmark.yaml");
 
     let benchmark_sys = System::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
     assert_eq!(sys, benchmark_sys);
@@ -39,7 +38,7 @@ fn test_against_benchmark() {
         .parent()
         .unwrap()
         .to_path_buf()
-        .join("dss-examples/tests/fixtures/rk4 benchmark.yaml");
+        .join("dess-examples/tests/fixtures/rk4 benchmark.yaml");
 
     let benchmark_sys = System::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
     assert_eq!(sys, benchmark_sys);
