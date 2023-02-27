@@ -1,12 +1,19 @@
 use crate::imports::*;
 
 #[common_derives]
-#[derive(Default)]
 pub enum SolverOptions {
-    /// Euler with fixed time step
-    EulerFixed,
-    #[default]
-    RK4Fixed,
+    /// Euler with fixed time step.
+    /// parameter `dt` provides time step size for whenever solver is between
+    /// `t_report` times.  
+    EulerFixed {
+        dt: f64,
+    },
+    /// Runge-Kutta 4th order with fixed time step.  
+    /// parameter `dt` provides time step size for whenever solver is between
+    /// `t_report` times.  
+    RK4Fixed {
+        dt: f64,
+    },
     // TODO: add this stuff back into fixed options
     // /// time step to use if `t_report` is larger than `dt`
     // dt: f64,
@@ -14,6 +21,12 @@ pub enum SolverOptions {
     /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
     RK45CashKarp(AdaptiveSolver),
     ToDo,
+}
+
+impl Default for SolverOptions {
+    fn default() -> Self {
+        SolverOptions::RK4Fixed { dt: 1.0 }
+    }
 }
 
 #[pyo3_api]

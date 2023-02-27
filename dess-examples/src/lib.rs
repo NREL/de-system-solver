@@ -59,7 +59,6 @@ pub struct System {
     pub h13: Conductance,
     pub t_report: Vec<f64>,
 
-    // boiler plate fields (could be generated with proc macro)
     pub state: SystemState,
     pub history: SystemStateHistoryVec,
 }
@@ -124,7 +123,7 @@ pub fn mock_euler_sys() -> System {
     let h13 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
 
-    System::new(SolverOptions::EulerFixed, m1, m2, h12, m3, h13, t_report)
+    System::new(SolverOptions::EulerFixed{dt: 5e-3}, m1, m2, h12, m3, h13, t_report)
 }
 
 pub fn mock_rk4fixed_sys() -> System {

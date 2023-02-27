@@ -14,7 +14,7 @@ fn main() {
         t_euler.as_micros()
     );
 
-    let overwrite_euler_benchmark: bool = false;
+    let overwrite_euler_benchmark: bool = true;
     if overwrite_euler_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
@@ -40,7 +40,7 @@ fn main() {
         t_rk4.as_micros()
     );
 
-    let overwrite_rk_benchmark: bool = false;
+    let overwrite_rk_benchmark: bool = true;
     if overwrite_rk_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()

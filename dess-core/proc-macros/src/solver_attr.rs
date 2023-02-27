@@ -37,30 +37,32 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
             /// iterates through time until last value of `t_report`
             pub fn walk(&mut self) {
                 self.save_state();
-                    while &self.state.time < self.t_report.last().unwrap() {
-                        self.solve_step();
-                    }
+                while &self.state.time < self.t_report.last().unwrap() {
+                    self.solve_step();
+                    self.state.i += 1;
+                    self.save_state();
                 }
+            }
 
             /// Runs `solver_opts` specific step method that calls
             /// [Self::step] in solver-specific manner
             pub fn solve_step(&mut self) {
-                let dt = match self.solver_opts {
-                    SolverOptions::EulerFixed => {
-                        let dt = self.t_report[self.state.i] - self.state.time;
-                        self.euler(&dt);
-                        dt
-                    },
-                    SolverOptions::RK4Fixed => {
-                        let dt = self.t_report[self.state.i] - self.state.time;
-                        self.rk4fixed(&dt);
-                        dt
-                    },
-                    _ => todo!(),
-                };
-                self.state.time += dt;
-                self.state.i += 1;
-                self.save_state();
+                while self.state.time < self.t_report[self.state.i] {
+                    let dt = match self.solver_opts {
+                        SolverOptions::EulerFixed{dt} => {
+                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt);
+                            self.euler(&dt);
+                            dt
+                        },
+                        SolverOptions::RK4Fixed{dt} => {
+                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt);
+                            self.rk4fixed(&dt);
+                            dt
+                        },
+                        _ => todo!(),
+                    };
+                    self.state.time += dt;
+                }
             }
 
             /// Steps forward by `dt`
