@@ -40,6 +40,7 @@ mod tests;
 )]
 #[solver]
 #[common_derives]
+#[derive(Default)]
 pub struct System {
     #[skip_get]
     solver_opts: SolverOptions,
@@ -95,7 +96,7 @@ impl System {
     }
 }
 
-#[derive(Copy, HistoryVec)]
+#[derive(Copy, HistoryVec, Default)]
 #[common_derives]
 #[pyo3_api]
 pub struct SystemState {

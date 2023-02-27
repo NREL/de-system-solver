@@ -62,7 +62,7 @@ pub fn pyo3_api_cleanup(_item: TokenStream) -> TokenStream {
 pub fn common_derives(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let item: TokenStream2 = item.into();
     let output: TokenStream2 = quote! {
-        #[derive(Debug, Default, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+        #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
         #item
     };
 

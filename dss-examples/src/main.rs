@@ -11,7 +11,7 @@ pub use components::*;
 mod tests;
 
 /// System of connected components
-#[derive(HistoryMethods, BareClone)]
+#[derive(HistoryMethods, BareClone, Default)]
 #[pyo3_api]
 #[solver]
 #[common_derives]
@@ -69,7 +69,7 @@ impl System {
     }
 }
 
-#[derive(Copy, HistoryVec)]
+#[derive(Copy, HistoryVec, Default)]
 #[common_derives]
 pub struct SystemState {
     // current index in `t_report`

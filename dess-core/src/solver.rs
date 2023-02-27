@@ -1,6 +1,7 @@
 use crate::imports::*;
 
 #[common_derives]
+#[derive(Default)]
 pub enum SolverOptions {
     /// Euler with fixed time step
     EulerFixed,
@@ -17,6 +18,7 @@ pub enum SolverOptions {
 
 #[pyo3_api]
 #[common_derives]
+#[derive(Default)]
 pub struct AdaptiveSolver {
     /// max allowable dt
     pub dt_max: f64,
@@ -34,6 +36,7 @@ pub struct AdaptiveSolver {
 
 #[common_derives]
 #[pyo3_api]
+#[derive(Default)]
 pub struct SolverHistory {
     /// number of iterations to achieve tolerance
     n_iters: u8,
