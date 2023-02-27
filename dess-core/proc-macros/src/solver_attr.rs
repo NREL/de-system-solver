@@ -36,7 +36,6 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
         impl #ident {
             /// iterates through time until last value of `t_report`
             pub fn walk(&mut self) {
-                self.save_state();
                 while &self.state.time < self.t_report.last().unwrap() {
                     self.solve_step();
                     self.state.i += 1;
