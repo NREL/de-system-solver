@@ -19,7 +19,7 @@ fn test_bare_clone() {
 }
 
 #[test]
-fn test_against_benchmark() {
+fn test_euler_against_benchmark() {
     let mut sys = mock_euler_sys();
     sys.walk();
 
@@ -31,7 +31,10 @@ fn test_against_benchmark() {
 
     let benchmark_sys = System::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
     assert_eq!(sys, benchmark_sys);
+}
 
+#[test]
+fn test_rk4_against_benchmark() {
     let mut sys = mock_rk4fixed_sys();
     sys.walk();
     let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
