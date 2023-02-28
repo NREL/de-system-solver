@@ -39,9 +39,8 @@ mod tests;
     }
 )]
 #[solver(
-    //
     /// Updates time derivatives of states.
-    /// This method must be user defined.
+    /// This method must be user defined in `solver` macro args.
     fn update_derivs(&mut self) {
         self.reset_derivs();
         connect_states!(self, (m1, m2, h12), (m1, m3, h13));

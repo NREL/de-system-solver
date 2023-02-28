@@ -112,7 +112,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         },
                         // SolverOptions::RK45CashKarp(solver) => {
                         //     let dt = self.t_report[self.state.i] - self.state.time;
-                        //     self.rk45_cash_karp(&dt)
+                        //     self.rk45_cash_karp(&dt, solver)
                         // },
                         _ => todo!(),
                     };
