@@ -114,5 +114,6 @@ ax.plot(
 ax.set_ylabel('Temperature [°C]')
 ax.set_xlabel('Time [s]')
 ax.legend()
+ax.text(0.2, 5.5, "RK4 is very robust!")
 
 # %%
