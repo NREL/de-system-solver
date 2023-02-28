@@ -197,3 +197,81 @@ pub trait Linspace {
 }
 
 impl Linspace for Vec<f64> {}
+
+pub trait BareClone {
+    fn bare_clone(&self) -> Self;
+}
+
+pub trait SolverBase: BareClone + Sized {
+    /// assuming `set_derivs` has been called, steps
+    /// value of states by deriv * dt
+    fn step_by_dt(&mut self, dt: &f64);
+
+    /// assuming `set_derivs` has been called, steps
+    /// value of states by deriv * dt
+    fn step(&mut self, val: Vec<f64>);
+
+    /// reset all time derivatives to zero for start of `solve_step`
+    fn reset_derivs(&mut self);
+
+    /// returns derivatives of states
+    fn get_derivs(&self) -> Vec<f64>;
+
+    /// sets values of derivatives of states
+    fn set_derivs(&mut self, val: &Vec<f64>);
+    /// returns values of states
+    fn get_states(&self) -> Vec<f64>;
+
+    /// sets values of states
+    fn set_states(&mut self, val: Vec<f64>);
+
+    /// Updates time derivatives of states.
+    /// This method must be user defined.
+    fn update_derivs(&mut self);
+}
+
+pub trait SolverVariantMethods: SolverBase {
+    /// Steps forward by `dt`
+    fn euler(&mut self, dt: &f64) {
+        self.update_derivs();
+        self.step_by_dt(dt);
+    }
+
+    /// solves time step with 4th order Runge-Kutta method.
+    /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
+    fn rk4fixed(&mut self, dt: &f64) {
+        let h = dt;
+        self.update_derivs();
+
+        // k1 = f(x_i, y_i)
+        let k1s = self.get_derivs();
+
+        // k2 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k1 * h)
+        let mut sys1 = self.bare_clone();
+        sys1.step_by_dt(&(h / 2.0));
+        sys1.update_derivs();
+        let k2s = sys1.get_derivs();
+
+        // k3 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k2 * h)
+        let mut sys2 = self.bare_clone();
+        sys2.set_derivs(&k2s);
+        sys2.step_by_dt(&(h / 2.0));
+        sys2.update_derivs();
+        let k3s = sys2.get_derivs();
+
+        // k4 = f(x_i + h, y_i + k3 * h)
+        let mut sys3 = self.bare_clone();
+        sys3.set_derivs(&k3s);
+        sys3.step_by_dt(&h);
+        sys3.update_derivs();
+        let k4s = sys3.get_derivs();
+
+        let mut delta: Vec<f64> = vec![];
+        let zipped = crate::zip!(k1s, k2s, k3s, k4s);
+        for (k1, (k2, (k3, k4))) in zipped {
+            delta.push(1.0 / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4) * h);
+        }
+
+        self.step(delta);
+    }
+}

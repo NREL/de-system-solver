@@ -38,7 +38,16 @@ mod tests;
         self.walk();
     }
 )]
-#[solver]
+#[solver(
+    //
+    /// Updates time derivatives of states.
+    /// This method must be user defined.
+    fn update_derivs(&mut self) {
+        self.reset_derivs();
+        connect_states!(self, (m1, m2, h12), (m1, m3, h13));
+        update_derivs!(self, (m1, m2, h12), (m1, m3, h13));
+    }
+)]
 #[common_derives]
 #[derive(Default)]
 pub struct System {
@@ -85,14 +94,6 @@ impl System {
             history: Default::default(),
         }
     }
-
-    /// Updates time derivatives of states.
-    /// This method must be user defined.
-    pub fn update_derivs(&mut self) {
-        self.reset_derivs();
-        connect_states!(self, (m1, m2, h12), (m1, m3, h13));
-        update_derivs!(self, (m1, m2, h12), (m1, m3, h13));
-    }
 }
 
 #[derive(Copy, HistoryVec, Default)]
@@ -123,7 +124,15 @@ pub fn mock_euler_sys() -> System {
     let h13 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
 
-    System::new(SolverOptions::EulerFixed{dt: 5e-3}, m1, m2, h12, m3, h13, t_report)
+    System::new(
+        SolverOptions::EulerFixed { dt: 5e-3 },
+        m1,
+        m2,
+        h12,
+        m3,
+        h13,
+        t_report,
+    )
 }
 
 pub fn mock_rk4fixed_sys() -> System {

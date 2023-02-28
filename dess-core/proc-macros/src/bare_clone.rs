@@ -46,9 +46,9 @@ pub(crate) fn bare_clone_derive(input: TokenStream) -> TokenStream {
     let mut impl_block = TokenStream2::default();
 
     impl_block.extend::<TokenStream2>(quote! {
-        impl #ident {
+        impl dess_core::traits_and_macros::BareClone for #ident {
             /// Returns a copy
-            pub fn bare_clone(&self) -> Self {
+            fn bare_clone(&self) -> Self {
                 let mut new = Self::default();
                 #(new.#fields_to_bare_clone = self.#fields_to_bare_clone.bare_clone();)*
                 #(new.#fields_to_clone = self.#fields_to_clone.clone();)*
