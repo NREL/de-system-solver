@@ -5,7 +5,8 @@ use dess_examples::*;
 #[pymodule]
 fn dess_pyo3(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<AdaptiveSolver>()?;
-    m.add_class::<SolverHistory>()?;
+    m.add_class::<SolverState>()?;
+    m.add_class::<SolverStateHistoryVec>()?;
     m.add_class::<System>()?;
     m.add_class::<SystemState>()?;
     m.add_class::<SystemStateHistoryVec>()?;

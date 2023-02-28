@@ -43,19 +43,20 @@ pub struct AdaptiveSolver {
     pub dt_prev: f64,
     /// save iteration history
     pub save: bool,
+    /// current iteration variables
+    pub state: SolverState,
     /// iteration history
-    pub history: Vec<SolverHistory>,
+    pub history: SolverStateHistoryVec,
 }
 
 #[common_derives]
 #[pyo3_api]
-#[derive(Default)]
-pub struct SolverHistory {
+#[derive(Default, HistoryVec)]
+pub struct SolverState {
     /// number of iterations to achieve tolerance
     n_iters: u8,
     /// L2 (euclidean) norm
     norm: f64,
-    // TODO: put more things here
-    // - vec of time steps taken between elements of `t_report`
-    // - vec of vec of states at each time step
+    /// current system time used in solver
+    t_solver_step: f64,
 }
