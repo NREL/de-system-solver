@@ -19,7 +19,7 @@ pub enum SolverOptions {
     // dt: f64,
     /// Runge-Kutta 4/5 order adaptive, Cash-Karp method
     /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-    RK45CashKarp(AdaptiveSolver),
+    RK45CashKarp(AdaptiveSolverConfig),
     ToDo,
 }
 
@@ -32,17 +32,32 @@ impl Default for SolverOptions {
 #[pyo3_api(
     #[new]
     fn new_py(
-        dt_max: f64,
-        max_iter: u32,
-        tol: f64,
-        save: bool,
+        dt_init: f64,
+        dt_max: Option<f64>,
+        max_iter: Option<u32>,
+        tol: Option<f64>,
+        save: Option<bool>,
     ) -> Self {
-        Self::new(dt_max, max_iter, tol, save)
+        let mut solver = Self::default();
+        solver.state.dt_prev = dt_init;
+        if let Some(dt_max) = dt_max {
+            solver.dt_max = dt_max;
+        }
+        if let Some(max_iter) = max_iter {
+            solver.max_iter = max_iter;
+        }
+        if let Some(tol) = tol {
+            solver.tol = tol;
+        }
+        if let Some(save) = save {
+            solver.save = save;
+        }
+        solver
     }
 )]
 #[common_derives]
 #[derive(HistoryMethods)]
-pub struct AdaptiveSolver {
+pub struct AdaptiveSolverConfig {
     /// max allowable dt
     pub dt_max: f64,
     /// max number of iterations per time step
@@ -57,19 +72,23 @@ pub struct AdaptiveSolver {
     pub history: SolverStateHistoryVec,
 }
 
-impl AdaptiveSolver {
-    pub fn new(dt_max: f64, max_iter: u32, tol: f64, save: bool) -> Self {
+impl AdaptiveSolverConfig {
+    pub fn new(dt_init: f64, dt_max: f64, max_iter: u32, tol: f64, save: bool) -> Self {
         Self {
             dt_max,
             max_iter,
             tol,
             save,
+            state: SolverState {
+                dt_prev: dt_init,
+                ..Default::default()
+            },
             ..Default::default()
         }
     }
 }
 
-impl Default for AdaptiveSolver {
+impl Default for AdaptiveSolverConfig {
     fn default() -> Self {
         Self {
             dt_max: 1.0,

@@ -86,7 +86,7 @@ sys_rk4_large_dt = dess_pyo3.System(
 )
 sys_rk4_large_dt.walk()
 
-solver = dess_pyo3.AdaptiveSolver.default()
+solver = dess_pyo3.AdaptiveSolverConfig(dt_init=1e-1)
 
 sys_rk45 = dess_pyo3.System.new_rk45_cash_karp(
     solver,
@@ -130,7 +130,7 @@ ax[2].plot(
     marker='s',
     linestyle='',
 )
-ax[2].set_title(f'dt = {dt_large}')
+ax[2].set_title(f'dt = {dt_large:.3g}')
 ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_rk4_small_dt.m1.history.temp),
@@ -157,8 +157,20 @@ ax[2].plot(
     linestyle='',
 )
 
+ax[2].plot(
+    sys_rk45.history.time,
+    np.array(sys_rk45.m1.history.temp),
+    label=f'rk45',
+    color=default_colors[0],
+    markersize=markersize,
+    linestyle='',
+    marker='x',
+)
+
+
 ax[0].set_ylabel('Temp. [°C]')
 ax[-1].set_xlabel('Time [s]')
 ax[0].legend()
+ax[-1].legend()
 
 # %%

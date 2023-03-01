@@ -31,7 +31,7 @@ mod tests;
     #[classmethod]
     fn new_rk45_cash_karp(
         _cls: &PyType, 
-        sol: AdaptiveSolver,
+        sol: AdaptiveSolverConfig,
         m1: ThermalMass,
         m2: ThermalMass,
         h12: Conductance,

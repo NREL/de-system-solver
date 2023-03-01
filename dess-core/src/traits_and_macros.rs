@@ -1,5 +1,5 @@
 use crate::imports::*;
-use crate::solver::AdaptiveSolver;
+use crate::solver::AdaptiveSolverConfig;
 use bincode::{deserialize, serialize};
 use std::ffi::OsStr;
 use std::fs::File;
@@ -277,7 +277,7 @@ pub trait SolverVariantMethods: SolverBase {
 
     /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
     /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-    fn rk45_cash_karp(&mut self, dt_max: &f64, sol: AdaptiveSolver) -> f64 {
+    fn rk45_cash_karp(&mut self, dt_max: &f64, sol: AdaptiveSolverConfig) -> f64 {
         let dt = dt_max.min(sol.state.dt_prev);
         self.update_derivs();
 
