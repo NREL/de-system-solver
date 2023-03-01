@@ -9,7 +9,7 @@ mod tests;
 #[pyo3_api(
     #[new]
     fn __new__(
-        solver_opts: String,
+        solver_conf: String,
         m1: ThermalMass,
         m2: ThermalMass,
         h12: Conductance,
@@ -18,7 +18,7 @@ mod tests;
         t_report: Vec<f64>,
     ) -> Self {
         Self::new(
-            SolverOptions::from_json(&solver_opts).unwrap(),
+            SolverOptions::from_json(&solver_conf).unwrap(),
             m1,
             m2,
             h12,
@@ -51,8 +51,17 @@ mod tests;
     }
 
     #[getter]
-    fn get_solver_opts(&self) -> String {
-        self.solver_opts.to_json()
+    fn get_solver_conf(&self) -> String {
+        self.solver_conf.to_json()
+    }
+
+    #[getter]
+    fn get_rk45_solver_conf(&self) -> Option<AdaptiveSolverConfig> {
+        if let SolverOptions::RK45CashKarp(solver_conf) = &self.solver_conf {
+            Some(solver_conf.clone())
+        } else {
+            None
+        }
     }
 
     #[pyo3(name = "walk")]
@@ -73,7 +82,7 @@ mod tests;
 #[derive(Default)]
 pub struct System {
     #[skip_get]
-    solver_opts: SolverOptions,
+    solver_conf: SolverOptions,
     // components
     // the `use_state` attribute tells the SystemSolver
     #[use_state]
@@ -95,7 +104,7 @@ pub struct System {
 
 impl System {
     pub fn new(
-        solver_opts: SolverOptions,
+        solver_conf: SolverOptions,
         m1: ThermalMass,
         m2: ThermalMass,
         h12: Conductance,
@@ -104,7 +113,7 @@ impl System {
         t_report: Vec<f64>,
     ) -> Self {
         Self {
-            solver_opts,
+            solver_conf,
             m1,
             m2,
             h12,

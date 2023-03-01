@@ -1,4 +1,4 @@
-solver_opts: !RK4Fixed
+solver_conf: !RK4Fixed
   dt: 0.1
 m1:
   c: 1.0
