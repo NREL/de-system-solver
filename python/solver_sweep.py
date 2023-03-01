@@ -1,7 +1,6 @@
 # %%
 import dess_pyo3
 import numpy as np
-import json
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
@@ -86,6 +85,20 @@ sys_rk4_large_dt = dess_pyo3.System(
     t_report,
 )
 sys_rk4_large_dt.walk()
+
+solver = dess_pyo3.AdaptiveSolver.default()
+
+sys_rk45 = dess_pyo3.System.new_rk45_cash_karp(
+    solver,
+    m1,
+    m2,
+    h12,
+    m3,
+    h13,
+    t_report,
+)
+sys_rk45.walk()
+
 markersize = 3
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 

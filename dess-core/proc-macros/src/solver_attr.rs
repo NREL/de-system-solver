@@ -99,21 +99,21 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             /// [Self::step] in solver-specific manner
             pub fn solve_step(&mut self) {
                 while self.state.time < self.t_report[self.state.i] {
-                    let dt = match self.solver_opts {
+                    let dt = match &self.solver_opts {
                         SolverOptions::EulerFixed{dt} => {
-                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt);
+                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt.clone());
                             self.euler(&dt);
                             dt
                         },
                         SolverOptions::RK4Fixed{dt} => {
-                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt);
+                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt.clone());
                             self.rk4fixed(&dt);
                             dt
                         },
-                        // SolverOptions::RK45CashKarp(solver) => {
-                        //     let dt = self.t_report[self.state.i] - self.state.time;
-                        //     self.rk45_cash_karp(&dt, solver)
-                        // },
+                        SolverOptions::RK45CashKarp(solver) => {
+                            let dt = self.t_report[self.state.i] - self.state.time;
+                            self.rk45_cash_karp(&dt, solver.clone())
+                        },
                         _ => todo!(),
                     };
                     self.state.time += dt;

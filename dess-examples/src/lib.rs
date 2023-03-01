@@ -28,6 +28,28 @@ mod tests;
         )
     }
 
+    #[classmethod]
+    fn new_rk45_cash_karp(
+        _cls: &PyType, 
+        sol: AdaptiveSolver,
+        m1: ThermalMass,
+        m2: ThermalMass,
+        h12: Conductance,
+        m3: ThermalMass,
+        h13: Conductance,
+        t_report: Vec<f64>,
+    ) -> Self {
+        Self::new(
+            SolverOptions::RK45CashKarp(sol),
+            m1,
+            m2,
+            h12,
+            m3,
+            h13,
+            t_report
+        )
+    }
+
     #[getter]
     fn get_solver_opts(&self) -> String {
         self.solver_opts.to_json()

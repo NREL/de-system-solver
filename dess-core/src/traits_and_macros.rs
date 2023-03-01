@@ -277,8 +277,8 @@ pub trait SolverVariantMethods: SolverBase {
 
     /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
     /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-    fn rk45_cash_karp(&mut self, dt_max: &f64, sol: &mut AdaptiveSolver) -> f64 {
-        let dt = dt_max.clone().min(sol.dt_prev);
+    fn rk45_cash_karp(&mut self, dt_max: &f64, sol: AdaptiveSolver) -> f64 {
+        let dt = dt_max.min(sol.state.dt_prev);
         self.update_derivs();
 
         // k1 = f(x_i, y_i)

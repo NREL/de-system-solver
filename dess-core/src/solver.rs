@@ -25,22 +25,30 @@ pub enum SolverOptions {
 
 impl Default for SolverOptions {
     fn default() -> Self {
-        SolverOptions::RK4Fixed { dt: 1.0 }
+        SolverOptions::RK4Fixed { dt: 0.1 }
     }
 }
 
-#[pyo3_api]
+#[pyo3_api(
+    #[new]
+    fn new_py(
+        dt_max: f64,
+        max_iter: u32,
+        tol: f64,
+        save: bool,
+    ) -> Self {
+        Self::new(dt_max, max_iter, tol, save)
+    }
+)]
 #[common_derives]
-#[derive(Default)]
+#[derive(HistoryMethods)]
 pub struct AdaptiveSolver {
     /// max allowable dt
     pub dt_max: f64,
     /// max number of iterations per time step
-    pub max_iter: f64,
+    pub max_iter: u32,
     /// euclidean error tolerance
     pub tol: f64,
-    /// time step size in previous interval
-    pub dt_prev: f64,
     /// save iteration history
     pub save: bool,
     /// current iteration variables
@@ -49,14 +57,52 @@ pub struct AdaptiveSolver {
     pub history: SolverStateHistoryVec,
 }
 
+impl AdaptiveSolver {
+    pub fn new(dt_max: f64, max_iter: u32, tol: f64, save: bool) -> Self {
+        Self {
+            dt_max,
+            max_iter,
+            tol,
+            save,
+            ..Default::default()
+        }
+    }
+}
+
+impl Default for AdaptiveSolver {
+    fn default() -> Self {
+        Self {
+            dt_max: 1.0,
+            max_iter: 2,
+            tol: 1e-6,
+            save: false,
+            state: Default::default(),
+            history: Default::default(),
+        }
+    }
+}
+
 #[common_derives]
 #[pyo3_api]
-#[derive(Default, HistoryVec)]
+#[derive(HistoryVec, Copy)]
 pub struct SolverState {
+    /// time step size in previous interval
+    pub dt_prev: f64,
     /// number of iterations to achieve tolerance
-    n_iters: u8,
+    pub n_iters: u8,
     /// L2 (euclidean) norm
-    norm: f64,
+    pub norm: f64,
     /// current system time used in solver
-    t_solver_step: f64,
+    pub t_curr: f64,
+}
+
+impl Default for SolverState {
+    fn default() -> Self {
+        Self {
+            dt_prev: 0.1,
+            n_iters: 0,
+            norm: 0.0,
+            t_curr: 0.0,
+        }
+    }
 }
