@@ -1,4 +1,4 @@
-solver_conf: !RK4Fixed
+solver_type: !RK4Fixed
   dt: 0.1
 m1:
   c: 1.0
@@ -604,3 +604,9 @@ history:
   - 0.96
   - 0.98
   - 1.0
+solver_state: null
+solver_history:
+  dt_prev: []
+  n_iters: []
+  norm: []
+  t_curr: []

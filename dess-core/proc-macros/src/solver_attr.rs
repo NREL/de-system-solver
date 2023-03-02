@@ -95,29 +95,59 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                 }
             }
 
-            /// Runs `solver_conf` specific step method that calls
+            /// Runs `solver_type` specific step method that calls
             /// [Self::step] in solver-specific manner
             pub fn solve_step(&mut self) {
                 while self.state.time < self.t_report[self.state.i] {
-                    let dt = match &self.solver_conf {
-                        SolverOptions::EulerFixed{dt} => {
-                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt.clone());
+                    let dt = self.t_report[self.state.i] - self.state.time;
+                    match &self.solver_type {
+                        SolverTypes::EulerFixed{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
                             self.euler(&dt);
-                            dt
+                            self.state.time += dt;
                         },
-                        SolverOptions::RK4Fixed{dt} => {
-                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt.clone());
+                        SolverTypes::RK4Fixed{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
                             self.rk4fixed(&dt);
-                            dt
+                            self.state.time += dt;
                         },
-                        SolverOptions::RK45CashKarp(solver) => {
-                            let dt = self.t_report[self.state.i] - self.state.time;
-                            self.rk45_cash_karp(&dt, solver.clone())
+                        SolverTypes::RK45CashKarp(_solver_conf) => {
+                            let dt = self.rk45_cash_karp(&dt);
+                            self.state.time += dt;
                         },
                         _ => todo!(),
-                    };
-                    self.state.time += dt;
+                    }
                 }
+            }
+
+            /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
+            /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
+            fn rk45_cash_karp(&mut self, dt_max: &f64) -> f64 {
+                let solver_conf = match &mut self.solver_type {
+                    SolverTypes::RK45CashKarp(sc) => sc,
+                    _ => unreachable!(),
+                };
+
+                let mut dt = dt_max.min(solver_conf.dt_prev);
+
+                let delta5 = loop {
+                    let (delta4, delta5) = self.rk45_cash_karp_step(dt);
+                    let norm = delta4
+                        .iter()
+                        .zip(&delta5)
+                        .map(|(d4, d5)| d4.powi(2) - d5.powi(2))
+                        .collect::<Vec<f64>>()
+                        .iter()
+                        .sum::<f64>()
+                        .sqrt();
+
+                    break delta5
+                };
+
+                // increment forward with 5th order solution
+                self.step(delta5);
+
+                dt.clone()
             }
         }
     });

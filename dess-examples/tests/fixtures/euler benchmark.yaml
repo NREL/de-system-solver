@@ -1,4 +1,4 @@
-solver_conf: !EulerFixed
+solver_type: !EulerFixed
   dt: 0.005
 m1:
   c: 1.0
@@ -2254,3 +2254,9 @@ history:
   - 0.99
   - 0.995
   - 1.0
+solver_state: null
+solver_history:
+  dt_prev: []
+  n_iters: []
+  norm: []
+  t_curr: []

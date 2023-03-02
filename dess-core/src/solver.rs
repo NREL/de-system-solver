@@ -1,7 +1,7 @@
 use crate::imports::*;
 
 #[common_derives]
-pub enum SolverOptions {
+pub enum SolverTypes {
     /// Euler with fixed time step.
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
@@ -23,9 +23,9 @@ pub enum SolverOptions {
     ToDo,
 }
 
-impl Default for SolverOptions {
+impl Default for SolverTypes {
     fn default() -> Self {
-        SolverOptions::RK4Fixed { dt: 0.1 }
+        SolverTypes::RK4Fixed { dt: 0.1 }
     }
 }
 
@@ -39,7 +39,7 @@ impl Default for SolverOptions {
         save: Option<bool>,
     ) -> Self {
         let mut solver = Self::default();
-        solver.state.dt_prev = dt_init;
+        solver.dt_prev = dt_init;
         if let Some(dt_max) = dt_max {
             solver.dt_max = dt_max;
         }
@@ -56,8 +56,9 @@ impl Default for SolverOptions {
     }
 )]
 #[common_derives]
-#[derive(HistoryMethods)]
 pub struct AdaptiveSolverConfig {
+    /// starting dt
+    pub dt_prev: f64,
     /// max allowable dt
     pub dt_max: f64,
     /// max number of iterations per time step
@@ -66,23 +67,20 @@ pub struct AdaptiveSolverConfig {
     pub tol: f64,
     /// save iteration history
     pub save: bool,
-    /// current iteration variables
+    /// solver state
     pub state: SolverState,
-    /// iteration history
+    /// history of solver state
     pub history: SolverStateHistoryVec,
 }
 
 impl AdaptiveSolverConfig {
     pub fn new(dt_init: f64, dt_max: f64, max_iter: u32, tol: f64, save: bool) -> Self {
         Self {
+            dt_prev: dt_init,
             dt_max,
             max_iter,
             tol,
             save,
-            state: SolverState {
-                dt_prev: dt_init,
-                ..Default::default()
-            },
             ..Default::default()
         }
     }
@@ -91,6 +89,7 @@ impl AdaptiveSolverConfig {
 impl Default for AdaptiveSolverConfig {
     fn default() -> Self {
         Self {
+            dt_prev: 1e-2,
             dt_max: 1.0,
             max_iter: 2,
             tol: 1e-6,
@@ -98,6 +97,12 @@ impl Default for AdaptiveSolverConfig {
             state: Default::default(),
             history: Default::default(),
         }
+    }
+}
+
+impl AsMut<AdaptiveSolverConfig> for AdaptiveSolverConfig {
+    fn as_mut(&mut self) -> &mut AdaptiveSolverConfig {
+        self
     }
 }
 
@@ -125,7 +130,6 @@ impl Default for SolverState {
         }
     }
 }
-
 
 pub trait SolverBase: BareClone + Sized {
     /// assuming `set_derivs` has been called, steps
@@ -199,10 +203,7 @@ pub trait SolverVariantMethods: SolverBase {
         self.step(delta);
     }
 
-    /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
-    /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-    fn rk45_cash_karp(&mut self, dt_max: &f64, sol: AdaptiveSolverConfig) -> f64 {
-        let dt = dt_max.min(sol.state.dt_prev);
+    fn rk45_cash_karp_step(&mut self, dt: f64) -> (Vec<f64>, Vec<f64>) {
         self.update_derivs();
 
         // k1 = f(x_i, y_i)
@@ -260,10 +261,6 @@ pub trait SolverVariantMethods: SolverBase {
                     * dt,
             );
         }
-
-        // increment forward with 5th order solution
-        self.step(delta5);
-
-        dt.clone()
+        (delta4, delta5)
     }
 }

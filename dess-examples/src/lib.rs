@@ -9,7 +9,7 @@ mod tests;
 #[pyo3_api(
     #[new]
     fn __new__(
-        solver_conf: String,
+        solver_type: String,
         m1: ThermalMass,
         m2: ThermalMass,
         h12: Conductance,
@@ -18,7 +18,7 @@ mod tests;
         t_report: Vec<f64>,
     ) -> Self {
         Self::new(
-            SolverOptions::from_json(&solver_conf).unwrap(),
+            SolverTypes::from_json(&solver_type).unwrap(),
             m1,
             m2,
             h12,
@@ -40,7 +40,7 @@ mod tests;
         t_report: Vec<f64>,
     ) -> Self {
         Self::new(
-            SolverOptions::RK45CashKarp(sol),
+            SolverTypes::RK45CashKarp(sol),
             m1,
             m2,
             h12,
@@ -51,17 +51,8 @@ mod tests;
     }
 
     #[getter]
-    fn get_solver_conf(&self) -> String {
-        self.solver_conf.to_json()
-    }
-
-    #[getter]
-    fn get_rk45_solver_conf(&self) -> Option<AdaptiveSolverConfig> {
-        if let SolverOptions::RK45CashKarp(solver_conf) = &self.solver_conf {
-            Some(solver_conf.clone())
-        } else {
-            None
-        }
+    fn get_solver_type(&self) -> String {
+        self.solver_type.to_json()
     }
 
     #[pyo3(name = "walk")]
@@ -82,7 +73,7 @@ mod tests;
 #[derive(Default)]
 pub struct System {
     #[skip_get]
-    solver_conf: SolverOptions,
+    solver_type: SolverTypes,
     // components
     // the `use_state` attribute tells the SystemSolver
     #[use_state]
@@ -96,15 +87,15 @@ pub struct System {
     pub m3: ThermalMass,
     #[save_state]
     pub h13: Conductance,
+    // fields needed by `solver` procedural macro
     pub t_report: Vec<f64>,
-
     pub state: SystemState,
     pub history: SystemStateHistoryVec,
 }
 
 impl System {
     pub fn new(
-        solver_conf: SolverOptions,
+        solver_type: SolverTypes,
         m1: ThermalMass,
         m2: ThermalMass,
         h12: Conductance,
@@ -113,7 +104,7 @@ impl System {
         t_report: Vec<f64>,
     ) -> Self {
         Self {
-            solver_conf,
+            solver_type,
             m1,
             m2,
             h12,
@@ -155,7 +146,7 @@ pub fn mock_euler_sys() -> System {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
 
     System::new(
-        SolverOptions::EulerFixed { dt: 5e-3 },
+        SolverTypes::EulerFixed { dt: 5e-3 },
         m1,
         m2,
         h12,
