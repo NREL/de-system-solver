@@ -131,7 +131,11 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
 
                 let delta5 = loop {
                     let (delta4, delta5) = self.rk45_cash_karp_step(dt);
-                    let norm = delta4
+                    let sc = match &mut self.solver_type {
+                        SolverTypes::RK45CashKarp(sc) => sc,
+                        _ => unreachable!(),
+                    };
+                    sc.state.norm = delta4
                         .iter()
                         .zip(&delta5)
                         .map(|(d4, d5)| d4.powi(2) - d5.powi(2))
@@ -139,16 +143,28 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         .iter()
                         .sum::<f64>()
                         .sqrt();
-
-                    let sc = match &mut self.solver_type {
-                        SolverTypes::RK45CashKarp(sc) => sc,
-                        _ => unreachable!(),
-                    };
                     sc.state.n_iter += 1;
 
-                    if sc.state.n_iter >= sc.max_iter{
+                    /// TODO: think about the epsilon arg (3rd arg) here:
+                    let tol_met: bool = almost_eq(sc.state.norm, sc.tol, Some(1e-3));
+
+                    if tol_met || sc.state.n_iter >= sc.max_iter {
+                        sc.state.dt_prev = dt;
+                        sc.state.t_curr = self.state.time;
+                        if sc.save {
+                            sc.history.push(sc.state);
+                        }
                         break delta5
-                    }
+                    };
+
+                    let dt_coeff = (sc.tol / sc.state.norm).abs().powf(
+                        if sc.state.norm < sc.tol {
+                            0.2
+                        } else {
+                            0.25
+                        }
+                    );
+                    dt *= dt_coeff;
                 };
 
                 // increment forward with 5th order solution

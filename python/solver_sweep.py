@@ -29,7 +29,9 @@ sys_small_dt = dess_pyo3.System(
     h13,
     t_report,
 )
+t0 = time.perf_counter()
 sys_small_dt.walk()
+print(f"small dt elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_medium_dt = dess_pyo3.System(
     f'{{"EulerFixed": {{"dt": {dt_medium}}}}}',
@@ -40,7 +42,9 @@ sys_medium_dt = dess_pyo3.System(
     h13,
     t_report,
 )
+t0 = time.perf_counter()
 sys_medium_dt.walk()
+print(f"medium dt elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_large_dt = dess_pyo3.System(
     f'{{"EulerFixed": {{"dt": {dt_large}}}}}',
@@ -51,7 +55,9 @@ sys_large_dt = dess_pyo3.System(
     h13,
     t_report,
 )
+t0 = time.perf_counter()
 sys_large_dt.walk()
+print(f"large dt elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_rk4_small_dt = dess_pyo3.System(
     f'{{"RK4Fixed": {{"dt": {dt_small}}}}}',
@@ -62,7 +68,9 @@ sys_rk4_small_dt = dess_pyo3.System(
     h13,
     t_report,
 )
+t0 = time.perf_counter()
 sys_rk4_small_dt.walk()
+print(f"rk4 small dt elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_rk4_medium_dt = dess_pyo3.System(
     f'{{"RK4Fixed": {{"dt": {dt_medium}}}}}',
@@ -73,7 +81,9 @@ sys_rk4_medium_dt = dess_pyo3.System(
     h13,
     t_report,
 )
+t0 = time.perf_counter()
 sys_rk4_medium_dt.walk()
+print(f"rk4 medium dt elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_rk4_large_dt = dess_pyo3.System(
     f'{{"RK4Fixed": {{"dt": {dt_large}}}}}',
@@ -84,7 +94,9 @@ sys_rk4_large_dt = dess_pyo3.System(
     h13,
     t_report,
 )
+t0 = time.perf_counter()
 sys_rk4_large_dt.walk()
+print(f"rk4 large dt elapsed: {time.perf_counter() - t0:.3g} s")
 
 solver = dess_pyo3.AdaptiveSolverConfig(dt_init=1e-1)
 
@@ -97,7 +109,9 @@ sys_rk45 = dess_pyo3.System.new_rk45_cash_karp(
     h13,
     t_report,
 )
+t0 = time.time()
 sys_rk45.walk()
+print(f"rk45 dt elapsed: {time.perf_counter() - t0:.3g} s")
 
 markersize = 3
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -157,7 +171,7 @@ ax[2].plot(
     linestyle='',
 )
 
-ax[2].plot(
+ax[0].plot(
     sys_rk45.history.time,
     np.array(sys_rk45.m1.history.temp),
     label=f'rk45',
@@ -171,6 +185,5 @@ ax[2].plot(
 ax[0].set_ylabel('Temp. [°C]')
 ax[-1].set_xlabel('Time [s]')
 ax[0].legend()
-ax[-1].legend()
 
 # %%
