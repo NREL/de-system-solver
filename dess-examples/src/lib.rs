@@ -51,6 +51,14 @@ mod tests;
     }
 
     #[getter]
+    fn get_solver_conf(&self) -> Option<AdaptiveSolverConfig> {
+        match &self.solver_type {
+            SolverTypes::RK45CashKarp(sc) => Some(sc.clone()),
+            _ => None,
+        }
+    }
+
+    #[getter]
     fn get_solver_type(&self) -> String {
         self.solver_type.to_json()
     }

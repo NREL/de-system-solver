@@ -151,9 +151,6 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     if tol_met || sc.state.n_iter >= sc.max_iter {
                         sc.state.dt_prev = dt;
                         sc.state.t_curr = self.state.time;
-                        if sc.save {
-                            sc.history.push(sc.state);
-                        }
                         break delta5
                     };
 
@@ -170,7 +167,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                 // increment forward with 5th order solution
                 self.step(delta5);
 
-                dt.clone()
+                dt
             }
         }
     });

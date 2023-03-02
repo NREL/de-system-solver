@@ -109,7 +109,7 @@ sys_rk45 = dess_pyo3.System.new_rk45_cash_karp(
     h13,
     t_report,
 )
-t0 = time.time()
+t0 = time.perf_counter()
 sys_rk45.walk()
 print(f"rk45 dt elapsed: {time.perf_counter() - t0:.3g} s")
 
