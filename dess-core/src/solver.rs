@@ -34,7 +34,7 @@ impl Default for SolverTypes {
     fn new_py(
         dt_init: f64,
         dt_max: Option<f64>,
-        max_iter: Option<u32>,
+        max_iter: Option<u8>,
         tol: Option<f64>,
         save: Option<bool>,
     ) -> Self {
@@ -60,7 +60,7 @@ pub struct AdaptiveSolverConfig {
     /// max allowable dt
     pub dt_max: f64,
     /// max number of iterations per time step
-    pub max_iter: u32,
+    pub max_iter: u8,
     /// euclidean error tolerance
     pub tol: f64,
     /// save iteration history
@@ -72,7 +72,7 @@ pub struct AdaptiveSolverConfig {
 }
 
 impl AdaptiveSolverConfig {
-    pub fn new(dt_init: f64, dt_max: f64, max_iter: u32, tol: f64, save: bool) -> Self {
+    pub fn new(dt_init: f64, dt_max: f64, max_iter: u8, tol: f64, save: bool) -> Self {
         let mut state = SolverState::default();
         state.dt_prev = dt_init;
         Self {

@@ -146,7 +146,9 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     };
                     sc.state.n_iter += 1;
 
-                    break delta5
+                    if sc.state.n_iter >= sc.max_iter{
+                        break delta5
+                    }
                 };
 
                 // increment forward with 5th order solution
