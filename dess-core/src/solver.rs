@@ -39,7 +39,7 @@ impl Default for SolverTypes {
         save: Option<bool>,
     ) -> Self {
         let mut solver = Self::default();
-        solver.dt_prev = dt_init;
+        solver.state.dt_prev = dt_init;
         if let Some(dt_max) = dt_max {
             solver.dt_max = dt_max;
         }
@@ -57,8 +57,6 @@ impl Default for SolverTypes {
 )]
 #[common_derives]
 pub struct AdaptiveSolverConfig {
-    /// starting dt
-    pub dt_prev: f64,
     /// max allowable dt
     pub dt_max: f64,
     /// max number of iterations per time step
@@ -75,12 +73,14 @@ pub struct AdaptiveSolverConfig {
 
 impl AdaptiveSolverConfig {
     pub fn new(dt_init: f64, dt_max: f64, max_iter: u32, tol: f64, save: bool) -> Self {
+        let mut state = SolverState::default();
+        state.dt_prev = dt_init;
         Self {
-            dt_prev: dt_init,
             dt_max,
             max_iter,
             tol,
             save,
+            state,
             ..Default::default()
         }
     }
@@ -89,7 +89,6 @@ impl AdaptiveSolverConfig {
 impl Default for AdaptiveSolverConfig {
     fn default() -> Self {
         Self {
-            dt_prev: 1e-2,
             dt_max: 1.0,
             max_iter: 2,
             tol: 1e-6,
@@ -113,7 +112,7 @@ pub struct SolverState {
     /// time step size in previous interval
     pub dt_prev: f64,
     /// number of iterations to achieve tolerance
-    pub n_iters: u8,
+    pub n_iter: u8,
     /// L2 (euclidean) norm
     pub norm: f64,
     /// current system time used in solver
@@ -124,7 +123,7 @@ impl Default for SolverState {
     fn default() -> Self {
         Self {
             dt_prev: 0.1,
-            n_iters: 0,
+            n_iter: 0,
             norm: 0.0,
             t_curr: 0.0,
         }

@@ -607,6 +607,6 @@ history:
 solver_state: null
 solver_history:
   dt_prev: []
-  n_iters: []
+  n_iter: []
   norm: []
   t_curr: []

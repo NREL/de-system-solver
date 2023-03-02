@@ -111,7 +111,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                             self.rk4fixed(&dt);
                             self.state.time += dt;
                         },
-                        SolverTypes::RK45CashKarp(_solver_conf) => {
+                        SolverTypes::RK45CashKarp(_sc) => {
                             let dt = self.rk45_cash_karp(&dt);
                             self.state.time += dt;
                         },
@@ -123,12 +123,11 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
             /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
             fn rk45_cash_karp(&mut self, dt_max: &f64) -> f64 {
-                let solver_conf = match &mut self.solver_type {
+                let sc = match &self.solver_type {
                     SolverTypes::RK45CashKarp(sc) => sc,
                     _ => unreachable!(),
                 };
-
-                let mut dt = dt_max.min(solver_conf.dt_prev);
+                let mut dt = dt_max.min(sc.state.dt_prev);
 
                 let delta5 = loop {
                     let (delta4, delta5) = self.rk45_cash_karp_step(dt);
@@ -140,6 +139,12 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         .iter()
                         .sum::<f64>()
                         .sqrt();
+
+                    let sc = match &mut self.solver_type {
+                        SolverTypes::RK45CashKarp(sc) => sc,
+                        _ => unreachable!(),
+                    };
+                    sc.state.n_iter += 1;
 
                     break delta5
                 };
