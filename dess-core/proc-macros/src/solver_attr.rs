@@ -1,7 +1,7 @@
 use crate::imports::*;
 
 /// Derives several methods for struct
-pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
     let ast_item = item.clone();
     let ast = syn::parse_macro_input!(ast_item as syn::DeriveInput);
     let ident = &ast.ident;
@@ -32,7 +32,65 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
 
     item_and_impl_block.extend::<TokenStream2>(item.clone().into());
 
+    let attr: TokenStream2 = attr.into();
+
     item_and_impl_block.extend::<TokenStream2>(quote! {
+        impl SolverBase for #ident {
+            /// assuming `set_derivs` has been called, steps
+            /// value of states by deriv * dt
+            fn step_by_dt(&mut self, dt: &f64) {
+                #(self.#fields_with_state.step_state_by_dt(dt);)*
+                self.step_time(dt);
+            }
+
+            /// steps dt without affecting states
+            fn step_time(&mut self, dt: &f64) {
+                self.state.time += dt;
+            }
+
+            /// assuming `set_derivs` has been called, steps
+            /// value of states by deriv * dt
+            fn step(&mut self, val: Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.step_state(iter.next().unwrap().clone());)*
+            }
+
+            /// reset all time derivatives to zero for start of `solve_step`
+            fn reset_derivs(&mut self) {
+                #(self.#fields_with_state.set_deriv(0.0);)*
+            }
+
+            /// returns derivatives of states
+            fn get_derivs(&self) -> Vec<f64> {
+                let mut derivs: Vec<f64> = Vec::new();
+                #(derivs.push(self.#fields_with_state.deriv());)*
+                derivs
+            }
+
+            /// sets values of derivatives of states
+            fn set_derivs(&mut self, val: &Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.set_deriv(iter.next().unwrap().clone());)*
+            }
+
+            /// returns values of states
+            fn get_states(&self) -> Vec<f64> {
+                let mut states: Vec<f64> = Vec::new();
+                #(states.push(self.#fields_with_state.state());)*
+                states
+            }
+
+            /// sets values of states
+            fn set_states(&mut self, val: Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.set_state(iter.next().unwrap().clone());)*
+            }
+
+            #attr
+        }
+
+        impl SolverVariantMethods for #ident{}
+
         impl #ident {
             /// iterates through time until last value of `t_report`
             pub fn walk(&mut self) {
@@ -43,133 +101,154 @@ pub(crate) fn solver_attr(_attr: TokenStream, item: TokenStream) -> TokenStream 
                 }
             }
 
-            /// Runs `solver_opts` specific step method that calls
+            /// Runs `solver_type` specific step method that calls
             /// [Self::step] in solver-specific manner
             pub fn solve_step(&mut self) {
                 while self.state.time < self.t_report[self.state.i] {
-                    let dt = match self.solver_opts {
-                        SolverOptions::EulerFixed{dt} => {
-                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt);
+                    let dt = self.t_report[self.state.i] - self.state.time;
+                    match &self.solver_type {
+                        SolverTypes::EulerFixed{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
                             self.euler(&dt);
-                            dt
                         },
-                        SolverOptions::RK4Fixed{dt} => {
-                            let dt = (self.t_report[self.state.i] - self.state.time).min(dt);
+                        SolverTypes::RK4Fixed{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
                             self.rk4fixed(&dt);
-                            dt
+                        },
+                        SolverTypes::RK45CashKarp(_sc) => {
+                            let dt = self.rk45_cash_karp(&dt);
                         },
                         _ => todo!(),
+                    }
+                }
+            }
+
+            /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
+            /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
+            fn rk45_cash_karp(&mut self, dt_max: &f64) -> f64 {
+                // reset iteration counter
+                match &mut self.solver_type {
+                    SolverTypes::RK45CashKarp(sc) => sc.state.n_iter = 0,
+                    _ => unreachable!(),
+                }
+
+                let delta5 = loop {
+                    let sc = match &mut self.solver_type {
+                        SolverTypes::RK45CashKarp(sc) => sc,
+                        _ => unreachable!(),
                     };
-                    self.state.time += dt;
-                }
+
+                    let low_cutoff = if sc.state.n_iter == 0 {
+                        1.0
+                    } else {
+                        // if a step has already been taken that gets us below `atol` or `rtol`,
+                        // we just use that step as is, without any further iteration on step size,
+                        // unless it's an absurdly small step.
+                        0.1
+                    };
+
+                    // adapt dt based on `rtol` if it is Some; use `atol` otherwise
+                    let dt_coeff = match sc.state.norm_err_rel {
+                        Some(norm_err_rel) => {
+                            (sc.rtol / norm_err_rel).powf(
+                                if norm_err_rel < low_cutoff * sc.rtol {
+                                    // if `norm_err_rel` is smaller than `sc.rtol`, that means the time step is too small
+                                    // so we'll increase the time step
+                                    0.2
+                                } else {
+                                    // if `norm_err_rel` is larger than `sc.tol`, that means the time step is too large
+                                    // so we'll increase the time step
+                                    0.25
+                                }
+                            )
+                        },
+                        None => {
+                            match sc.state.norm_err {
+                                Some(norm_err) => {
+                                    (sc.atol / norm_err).powf(
+                                        if norm_err < low_cutoff * sc.atol {
+                                            // if `norm_err` is smaller than `sc.atol`, that means the time step is too small
+                                            // so we'll increase the time step
+                                            0.2
+                                        } else {
+                                            // if `norm_err` is larger than `sc.atol`, that means the time step is too large
+                                            // so we'll increase the time step
+                                            0.25
+                                        }
+                                    )
+                                },
+                                None => 1.0, // don't adapt if there is not enough information to do so
+                            }
+                        }
+                    };
+                    sc.state.dt *= dt_coeff;
+                    sc.state.dt = sc.state.dt.min(dt_max.clone());
+                    // to avoid borrow problems
+                    let dt = sc.state.dt.clone();
+
+                    let (delta4, delta5) = self.rk45_cash_karp_step(dt);
+                    let sc = match &mut self.solver_type {
+                        SolverTypes::RK45CashKarp(sc) => sc,
+                        _ => unreachable!(),
+                    };
+
+                    sc.state.n_iter += 1;
+                    sc.state.norm_err = Some(delta4
+                        .iter()
+                        .zip(&delta5)
+                        .map(|(d4, d5)| (d4 - d5).powi(2))
+                        .collect::<Vec<f64>>()
+                        .iter()
+                        .sum::<f64>()
+                        .sqrt());
+                    let norm_d5 = delta5
+                        .iter()
+                        .map(|d5| d5.powi(2))
+                        .collect::<Vec<f64>>()
+                        .iter()
+                        .sum::<f64>()
+                        .sqrt();
+
+                    sc.state.norm_err_rel = if norm_d5 > sc.atol {
+                        // `unwrap` is ok here because `norm_err` will always be some by this point
+                        Some(sc.state.norm_err.unwrap() / norm_d5)
+                    } else {
+                        // avoid dividing by a really small denominator
+                        None
+                    };
+
+                    // conditions for breaking loop
+                    let rtol_met = match sc.state.norm_err_rel {
+                        Some(norm_err_rel) => norm_err_rel <= sc.rtol,
+                        None => false,
+                    };
+                    let dt_too_large = sc.state.dt > sc.dt_max;
+                    let break_cond = sc.state.n_iter >= sc.max_iter
+                        || sc.state.norm_err.unwrap() < sc.atol
+                        || rtol_met
+                        || dt_too_large;
+
+                    if break_cond {
+                        if sc.save {
+                            sc.history.push(sc.state);
+                        }
+                        sc.state.t_curr = self.state.time;
+                        break delta5
+                    };
+                };
+
+                // increment forward with 5th order solution
+                self.step(delta5);
+                let sc = match &self.solver_type {
+                    SolverTypes::RK45CashKarp(sc) => sc,
+                    _ => unreachable!(),
+                };
+                let dt_used = sc.state.dt;
+                self.step_time(&dt_used);
+                // dbg!(self.state.time);
+                // dbg!(self.t_report[self.state.i]);
+                dt_used
             }
-
-            /// Steps forward by `dt`
-            pub fn euler(&mut self, dt: &f64) {
-                self.update_derivs();
-                self.step_by_dt(dt);
-            }
-
-            /// assuming `set_derivs` has been called, steps
-            /// value of states by deriv * dt
-            pub fn step_by_dt(&mut self, dt: &f64) {
-                #(self.#fields_with_state.step_state_by_dt(dt);)*
-            }
-
-            /// assuming `set_derivs` has been called, steps
-            /// value of states by deriv * dt
-            pub fn step(&mut self, val: Vec<f64>) {
-                let mut iter = val.iter();
-                #(self.#fields_with_state.step_state(iter.next().unwrap().clone());)*
-            }
-
-            /// reset all time derivatives to zero for start of `solve_step`
-            pub fn reset_derivs(&mut self) {
-                #(self.#fields_with_state.set_deriv(0.0);)*
-            }
-
-            /// returns derivatives of states
-            pub fn get_derivs(&self) -> Vec<f64> {
-                let mut derivs: Vec<f64> = Vec::new();
-                #(derivs.push(self.#fields_with_state.deriv());)*
-                derivs
-            }
-
-            /// sets values of derivatives of states
-            pub fn set_derivs(&mut self, val: &Vec<f64>) {
-                let mut iter = val.iter();
-                #(self.#fields_with_state.set_deriv(iter.next().unwrap().clone());)*
-            }
-
-            /// returns values of states
-            pub fn get_states(&self) -> Vec<f64> {
-                let mut states: Vec<f64> = Vec::new();
-                #(states.push(self.#fields_with_state.state());)*
-                states
-            }
-
-            /// sets values of states
-            pub fn set_states(&mut self, val: Vec<f64>) {
-                let mut iter = val.iter();
-                #(self.#fields_with_state.set_state(iter.next().unwrap().clone());)*
-            }
-
-            /// solves time step with 4th order Runge-Kutta method.
-            /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
-            pub fn rk4fixed(&mut self, dt: &f64) {
-                let h = dt;
-                self.update_derivs();
-
-                // k1 = f(x_i, y_i)
-                let k1s = self.get_derivs();
-
-                // k2 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k1 * h)
-                let mut sys1 = self.bare_clone();
-                sys1.step_by_dt(&(h / 2.0));
-                sys1.update_derivs();
-                let k2s = sys1.get_derivs();
-
-                // k3 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k2 * h)
-                let mut sys2 = self.bare_clone();
-                sys2.set_derivs(&k2s);
-                sys2.step_by_dt(&(h / 2.0));
-                sys2.update_derivs();
-                let k3s = sys2.get_derivs();
-
-                // k4 = f(x_i + h, y_i + k3 * h)
-                let mut sys3 = self.bare_clone();
-                sys3.set_derivs(&k3s);
-                sys3.step_by_dt(&h);
-                sys3.update_derivs();
-                let k4s = sys3.get_derivs();
-
-                let mut delta: Vec<f64> = vec![];
-                let zipped = dess_core::zip!(k1s, k2s, k3s, k4s);
-                for (k1, (k2, (k3, k4))) in zipped {
-                    delta.push(1.0 / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4) * h);
-                }
-
-                self.step(delta);
-            }
-
-            // /// solves time step with adaptive Cash-Karp Method (variant of RK45)
-            // /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-            // pub fn rk45CashKarp(&mut self) {
-            //     let dt = self.t_report[self.state.i] - self.state.time;
-            //     self.update_derivs();
-            //     // k1 = f(x_i, y_i)
-            //     let k1 = self.get_derivs();
-            //     // k2 = f(x_i + 1 / 5 * h, y_i + 1 / 5 * k1 * h)
-            //     let k2 = self.get_states().iter().zip(k1).map(|(x, k)| *x + k * dt);
-
-            //     // k3 = f(x_i + 3 / 10 * h, y_i + 3 / 40 * k1 * h + 9 / 40 * k2 * h)
-
-            //     // k4 = f(x_i + 3 / 5 * h, y_i + 3 / 10 * k1 * h - 9 / 10 * k2 * h + 6 / 5 * k3 * h)
-
-            //     // k5 = f(x_i + h, y_i - 11 / 54 * k1 * h + 5 / 2 * k2 * h - 70 / 27 * k3 * h + 35 / 27 * k4 * h)
-
-            //     // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k4 * h)
-            // }
         }
     });
 

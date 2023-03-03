@@ -5,3 +5,4 @@ use proc_macros;
 pub(crate) mod pyo3_imports;
 mod solver;
 pub mod traits_and_macros;
+pub mod utilities;

@@ -53,14 +53,14 @@ fn test_rk4_dt_behavior() {
 
     // system for checking if small dt results in relatively higher accuracy
     let mut sys_dt_smaller_than_t_report = System {
-        solver_opts: SolverOptions::RK4Fixed { dt: 1e-3 },
+        solver_type: SolverTypes::RK4Fixed { dt: 1e-3 },
         ..base_sys.clone()
     };
     sys_dt_smaller_than_t_report.walk();
 
     // system for checking if dt slightly less than t_report works ok
     let mut sys_dt_slightly_less_than_t_report = System {
-        solver_opts: SolverOptions::RK4Fixed {
+        solver_type: SolverTypes::RK4Fixed {
             dt: (base_sys.t_report[1].clone() - base_sys.t_report[0].clone()) * 0.9,
         },
         ..base_sys.clone()
@@ -73,7 +73,7 @@ fn test_rk4_dt_behavior() {
 
     // system for checking that t_report overrides dt when dt is slightly larger than t_report
     let mut sys_dt_slightly_larger_than_t_report = System {
-        solver_opts: SolverOptions::RK4Fixed {
+        solver_type: SolverTypes::RK4Fixed {
             dt: (base_sys.t_report[1].clone() - base_sys.t_report[0].clone()) * 1.1,
         },
         ..base_sys.clone()
@@ -83,7 +83,7 @@ fn test_rk4_dt_behavior() {
 
     // system for checking that t_report overrides dt when dt is large
     let mut sys_dt_larger_than_t_report = System {
-        solver_opts: SolverOptions::RK4Fixed {
+        solver_type: SolverTypes::RK4Fixed {
             dt: (base_sys.t_report[1].clone() - base_sys.t_report[0].clone()) * 10.0,
         },
         ..base_sys.clone()
@@ -96,4 +96,18 @@ fn test_rk4_dt_behavior() {
     assert!(
         sys_dt_larger_than_t_report.m1.history == sys_dt_slightly_larger_than_t_report.m1.history
     );
+}
+
+#[test]
+fn test_rk45_against_benchmark() {
+    let mut sys = mock_rk45_sys();
+    sys.walk();
+    let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+        .parent()
+        .unwrap()
+        .to_path_buf()
+        .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
+
+    let benchmark_sys = System::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
+    assert_eq!(sys, benchmark_sys);
 }
