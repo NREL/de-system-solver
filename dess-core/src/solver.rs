@@ -45,7 +45,7 @@ impl Default for SolverTypes {
             max_iter,
             rtol,
             atol,
-            save,
+            save.unwrap_or_default(),
         )
     }
 )]
@@ -75,7 +75,7 @@ impl AdaptiveSolverConfig {
         rtol: Option<f64>,
         atol: Option<f64>,
         // tol_deadband: Option<f64,
-        save: Option<bool>,
+        save: bool,
     ) -> Self {
         let mut state = SolverState::default();
         state.dt = dt_init;
@@ -84,24 +84,16 @@ impl AdaptiveSolverConfig {
             max_iter: max_iter.unwrap_or(2),
             rtol: rtol.unwrap_or(1e-3),
             atol: atol.unwrap_or(1e-6),
-            save: save.unwrap_or_default(),
+            save,
             state,
-            ..Default::default()
+            history: Default::default(),
         }
     }
 }
 
 impl Default for AdaptiveSolverConfig {
     fn default() -> Self {
-        Self {
-            dt_max: 1.0,
-            max_iter: 2,
-            rtol: 1e-3,
-            atol: 1e-6,
-            save: false,
-            state: Default::default(),
-            history: Default::default(),
-        }
+        Self::new(0.1, None, None, None, None, false)
     }
 }
 

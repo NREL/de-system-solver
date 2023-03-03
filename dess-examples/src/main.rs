@@ -61,7 +61,7 @@ fn main() {
     let dt = sys_rk45.t_report[1] - sys_rk45.t_report.first().unwrap();
 
     println!(
-        "RK45 Adaptive {} s time step elapsed time: {} μs",
+        "RK45 Adaptive {} s init time step elapsed time: {} μs",
         dt,
         t_rk45.as_micros()
     );
