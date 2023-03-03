@@ -97,3 +97,17 @@ fn test_rk4_dt_behavior() {
         sys_dt_larger_than_t_report.m1.history == sys_dt_slightly_larger_than_t_report.m1.history
     );
 }
+
+#[test]
+fn test_rk45_against_benchmark() {
+    let mut sys = mock_rk45_sys();
+    sys.walk();
+    let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+        .parent()
+        .unwrap()
+        .to_path_buf()
+        .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
+
+    let benchmark_sys = System::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
+    assert_eq!(sys, benchmark_sys);
+}

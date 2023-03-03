@@ -142,7 +142,8 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         1.0
                     } else {
                         // if a step has already been taken that gets us below `atol` or `rtol`,
-                        // we just use that step as is before proceeding
+                        // we just use that step as is, without any further iteration on step size,
+                        // unless it's an absurdly small step.
                         0.1
                     };
 
@@ -220,7 +221,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         Some(norm_err_rel) => norm_err_rel <= sc.rtol,
                         None => false,
                     };
-                    let dt_too_large = sc.state.dt > sc.dt_max && dt_coeff > 1.0;
+                    let dt_too_large = sc.state.dt > sc.dt_max;
                     let break_cond = sc.state.n_iter >= sc.max_iter
                         || sc.state.norm_err.unwrap() < sc.atol
                         || rtol_met
