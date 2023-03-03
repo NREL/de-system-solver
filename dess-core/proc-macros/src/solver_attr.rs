@@ -40,6 +40,12 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             /// value of states by deriv * dt
             fn step_by_dt(&mut self, dt: &f64) {
                 #(self.#fields_with_state.step_state_by_dt(dt);)*
+                self.step_dt(dt);
+            }
+
+            /// steps dt without affecting states
+            fn step_dt(&mut self, dt: &f64) {
+                self.state.time += dt;
             }
 
             /// assuming `set_derivs` has been called, steps
@@ -104,16 +110,13 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         SolverTypes::EulerFixed{dt: dt_fixed} => {
                             let dt = dt.min(dt_fixed.clone());
                             self.euler(&dt);
-                            self.state.time += dt;
                         },
                         SolverTypes::RK4Fixed{dt: dt_fixed} => {
                             let dt = dt.min(dt_fixed.clone());
                             self.rk4fixed(&dt);
-                            self.state.time += dt;
                         },
                         SolverTypes::RK45CashKarp(_sc) => {
                             let dt = self.rk45_cash_karp(&dt);
-                            self.state.time += dt;
                         },
                         _ => todo!(),
                     }
@@ -211,7 +214,11 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         Some(norm_err_rel) => norm_err_rel <= sc.rtol,
                         None => false,
                     };
-                    let break_cond = sc.state.n_iter >= sc.max_iter || sc.state.norm_err.unwrap() < sc.atol || rtol_met;
+                    let dt_too_large = sc.state.dt > sc.dt_max && dt_coeff > 1.0;
+                    let break_cond = sc.state.n_iter >= sc.max_iter
+                        || sc.state.norm_err.unwrap() < sc.atol
+                        || rtol_met
+                        || dt_too_large;
 
                     if break_cond {
                         sc.state.t_curr = self.state.time;
