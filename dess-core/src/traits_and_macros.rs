@@ -37,6 +37,40 @@ macro_rules! update_derivs {
     };
 }
 
+/// Given pairs of arbitrary keys and values, prints "key: value" to python intepreter.  
+/// Given str, prints str.  
+/// Using this will break `cargo test` but work with `maturin develop`.  
+#[macro_export]
+macro_rules! print_to_py {
+    ( $( $x:expr, $y:expr ),* ) => {
+        #[cfg(feature = "pyo3")]
+        pyo3::Python::with_gil(|py| {
+            let locals = pyo3::types::PyDict::new(py);
+            $(
+                locals.set_item($x, $y).unwrap();
+                py.run(
+                    &format!("print(f\"{}: {{{}:.3g}}\")", $x, $x),
+                    None,
+                    Some(locals),
+                )
+                .expect(&format!("printing `{}` failed", $x));
+            )*
+        });
+    };
+    ( $x:expr ) => {
+        // use pyo3::py_run;
+        #[cfg(feature = "pyo3")]
+        pyo3::Python::with_gil(|py| {
+                py.run(
+                    &format!("print({})", $x),
+                    None,
+                    None,
+                )
+                .expect(&format!("printing `{}` failed", $x));
+        });
+    }
+}
+
 pub trait HasState {
     /// sets value `val` of potential variable (e.g. temperature, pressure, voltage)
     fn set_state(&mut self, val: f64);
