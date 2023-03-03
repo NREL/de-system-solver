@@ -123,51 +123,110 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
             /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
             fn rk45_cash_karp(&mut self, dt_max: &f64) -> f64 {
-                let sc = match &self.solver_type {
-                    SolverTypes::RK45CashKarp(sc) => sc,
-                    _ => unreachable!(),
-                };
-                let mut dt = dt_max.min(sc.state.dt_prev);
-
                 let delta5 = loop {
+                    let sc = match &mut self.solver_type {
+                        SolverTypes::RK45CashKarp(sc) => sc,
+                        _ => unreachable!(),
+                    };
+
+                    let low_cutoff = if sc.state.n_iter == 0 {
+                        1.0
+                    } else {
+                        // if a step has already been taken that gets us below `atol` or `rtol`,
+                        // we just use that step as is before proceeding
+                        0.1
+                    };
+
+                    // adapt dt based on `rtol` if it is Some; use `atol` otherwise
+                    let dt_coeff = match sc.state.norm_err_rel {
+                        Some(norm_err_rel) => {
+                            (sc.rtol / norm_err_rel).powf(
+                                if norm_err_rel < low_cutoff * sc.rtol {
+                                    // if `norm_err_rel` is smaller than `sc.rtol`, that means the time step is too small
+                                    // so we'll increase the time step
+                                    0.2
+                                } else {
+                                    // if `norm_err_rel` is larger than `sc.tol`, that means the time step is too large
+                                    // so we'll increase the time step
+                                    0.25
+                                }
+                            )
+                        },
+                        None => {
+                            match sc.state.norm_err {
+                                Some(norm_err) => {
+                                    (sc.atol / norm_err).powf(
+                                        if norm_err < low_cutoff * sc.atol {
+                                            // if `norm_err` is smaller than `sc.atol`, that means the time step is too small
+                                            // so we'll increase the time step
+                                            0.2
+                                        } else {
+                                            // if `norm_err` is larger than `sc.atol`, that means the time step is too large
+                                            // so we'll increase the time step
+                                            0.25
+                                        }
+                                    )
+                                },
+                                None => 1.0, // don't adapt if there is not enough information to do so
+                            }
+                        }
+                    };
+                    sc.state.dt *= dt_coeff;
+                    // to avoid borrow problems
+                    let dt = sc.state.dt.clone();
+
                     let (delta4, delta5) = self.rk45_cash_karp_step(dt);
                     let sc = match &mut self.solver_type {
                         SolverTypes::RK45CashKarp(sc) => sc,
                         _ => unreachable!(),
                     };
-                    sc.state.norm = delta4
+
+                    sc.state.n_iter += 1;
+                    sc.state.norm_err = Some(delta4
                         .iter()
                         .zip(&delta5)
-                        .map(|(d4, d5)| d4.powi(2) - d5.powi(2))
+                        .map(|(d4, d5)| (d4 - d5).powi(2))
+                        .collect::<Vec<f64>>()
+                        .iter()
+                        .sum::<f64>()
+                        .sqrt());
+                    let norm_d5 = delta5
+                        .iter()
+                        .map(|d5| d5.powi(2))
                         .collect::<Vec<f64>>()
                         .iter()
                         .sum::<f64>()
                         .sqrt();
-                    sc.state.n_iter += 1;
 
-                    /// TODO: think about the epsilon arg (3rd arg) here:
-                    let tol_met: bool = almost_eq(sc.state.norm, sc.tol, Some(1e-3));
+                    sc.state.norm_err_rel = if norm_d5 > sc.atol {
+                        // `unwrap` is ok here because `norm_err` will always be some by this point
+                        Some(sc.state.norm_err.unwrap() / norm_d5)
+                    } else {
+                        // avoid dividing by a really small denominator
+                        None
+                    };
 
-                    if tol_met || sc.state.n_iter >= sc.max_iter {
-                        sc.state.dt_prev = dt;
+                    // conditions for breaking loop
+                    let rtol_met = match sc.state.norm_err_rel {
+                        Some(norm_err_rel) => norm_err_rel <= sc.rtol,
+                        None => false,
+                    };
+                    let break_cond = sc.state.n_iter >= sc.max_iter || sc.state.norm_err.unwrap() < sc.atol || rtol_met;
+
+                    if break_cond {
                         sc.state.t_curr = self.state.time;
                         break delta5
                     };
-
-                    let dt_coeff = (sc.tol / sc.state.norm).abs().powf(
-                        if sc.state.norm < sc.tol {
-                            0.2
-                        } else {
-                            0.25
-                        }
-                    );
-                    dt *= dt_coeff;
                 };
 
                 // increment forward with 5th order solution
                 self.step(delta5);
+                let sc = match &self.solver_type {
+                    SolverTypes::RK45CashKarp(sc) => sc,
+                    _ => unreachable!(),
+                };
 
-                dt
+                sc.state.dt
             }
         }
     });

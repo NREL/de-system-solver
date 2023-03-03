@@ -30,7 +30,7 @@ mod tests;
 
     #[classmethod]
     fn new_rk45_cash_karp(
-        _cls: &PyType, 
+        _cls: &PyType,
         sol: AdaptiveSolverConfig,
         m1: ThermalMass,
         m2: ThermalMass,

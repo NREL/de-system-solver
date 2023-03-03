@@ -37,13 +37,13 @@ macro_rules! update_derivs {
     };
 }
 
+/// For debugging purposes only!
 /// Given pairs of arbitrary keys and values, prints "key: value" to python intepreter.  
 /// Given str, prints str.  
 /// Using this will break `cargo test` but work with `maturin develop`.  
 #[macro_export]
 macro_rules! print_to_py {
     ( $( $x:expr, $y:expr ),* ) => {
-        #[cfg(feature = "pyo3")]
         pyo3::Python::with_gil(|py| {
             let locals = pyo3::types::PyDict::new(py);
             $(
@@ -59,7 +59,6 @@ macro_rules! print_to_py {
     };
     ( $x:expr ) => {
         // use pyo3::py_run;
-        #[cfg(feature = "pyo3")]
         pyo3::Python::with_gil(|py| {
                 py.run(
                     &format!("print({})", $x),

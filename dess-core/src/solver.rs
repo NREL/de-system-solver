@@ -35,24 +35,18 @@ impl Default for SolverTypes {
         dt_init: f64,
         dt_max: Option<f64>,
         max_iter: Option<u8>,
-        tol: Option<f64>,
+        rtol: Option<f64>,
+        atol: Option<f64>,
         save: Option<bool>,
     ) -> Self {
-        let mut solver = Self::default();
-        solver.state.dt_prev = dt_init;
-        if let Some(dt_max) = dt_max {
-            solver.dt_max = dt_max;
-        }
-        if let Some(max_iter) = max_iter {
-            solver.max_iter = max_iter;
-        }
-        if let Some(tol) = tol {
-            solver.tol = tol;
-        }
-        if let Some(save) = save {
-            solver.save = save;
-        }
-        solver
+        Self::new(
+            dt_init,
+            dt_max,
+            max_iter,
+            rtol,
+            atol,
+            save,
+        )
     }
 )]
 #[common_derives]
@@ -61,8 +55,10 @@ pub struct AdaptiveSolverConfig {
     pub dt_max: f64,
     /// max number of iterations per time step
     pub max_iter: u8,
-    /// euclidean error tolerance
-    pub tol: f64,
+    /// absolute euclidean error tolerance
+    pub atol: f64,
+    /// relative euclidean error tolerance
+    pub rtol: f64,
     /// save iteration history
     pub save: bool,
     /// solver state
@@ -72,14 +68,22 @@ pub struct AdaptiveSolverConfig {
 }
 
 impl AdaptiveSolverConfig {
-    pub fn new(dt_init: f64, dt_max: f64, max_iter: u8, tol: f64, save: bool) -> Self {
+    pub fn new(
+        dt_init: f64,
+        dt_max: Option<f64>,
+        max_iter: Option<u8>,
+        rtol: Option<f64>,
+        atol: Option<f64>,
+        save: Option<bool>,
+    ) -> Self {
         let mut state = SolverState::default();
-        state.dt_prev = dt_init;
+        state.dt = dt_init;
         Self {
-            dt_max,
-            max_iter,
-            tol,
-            save,
+            dt_max: dt_max.unwrap_or(1.0),
+            max_iter: max_iter.unwrap_or(2),
+            rtol: rtol.unwrap_or(1e-3),
+            atol: atol.unwrap_or(1e-6),
+            save: save.unwrap_or_default(),
             state,
             ..Default::default()
         }
@@ -91,7 +95,8 @@ impl Default for AdaptiveSolverConfig {
         Self {
             dt_max: 1.0,
             max_iter: 2,
-            tol: 1e-6,
+            rtol: 1e-6,
+            atol: 1e-9,
             save: false,
             state: Default::default(),
             history: Default::default(),
@@ -108,13 +113,19 @@ impl AsMut<AdaptiveSolverConfig> for AdaptiveSolverConfig {
 #[common_derives]
 #[pyo3_api]
 #[derive(HistoryVec, Copy)]
+/// Solver is considered considered converged when any one of the following conditions are met:
+/// - `norm_err` is less than `atol`
+/// - `norm_err_rel` is less than `rtol`
+/// - `n_iter` >= `n_max_iter`
 pub struct SolverState {
-    /// time step size in previous interval
-    pub dt_prev: f64,
+    /// time step size used by solver
+    pub dt: f64,
     /// number of iterations to achieve tolerance
     pub n_iter: u8,
-    /// L2 (euclidean) norm
-    pub norm: f64,
+    /// Absolute error based on difference in L2 (euclidean) norm
+    pub norm_err: Option<f64>,
+    /// Relative error based on difference in L2 (euclidean) norm
+    pub norm_err_rel: Option<f64>,
     /// current system time used in solver
     pub t_curr: f64,
 }
@@ -122,9 +133,10 @@ pub struct SolverState {
 impl Default for SolverState {
     fn default() -> Self {
         Self {
-            dt_prev: 0.1,
+            dt: 0.1,
             n_iter: 0,
-            norm: 0.0,
+            norm_err: None,
+            norm_err_rel: None,
             t_curr: 0.0,
         }
     }
