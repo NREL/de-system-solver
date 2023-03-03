@@ -40,11 +40,11 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             /// value of states by deriv * dt
             fn step_by_dt(&mut self, dt: &f64) {
                 #(self.#fields_with_state.step_state_by_dt(dt);)*
-                self.step_dt(dt);
+                self.step_time(dt);
             }
 
             /// steps dt without affecting states
-            fn step_dt(&mut self, dt: &f64) {
+            fn step_time(&mut self, dt: &f64) {
                 self.state.time += dt;
             }
 
@@ -233,7 +233,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     _ => unreachable!(),
                 };
                 let dt_used = sc.state.dt;
-                self.step_dt(&dt_used);
+                self.step_time(&dt_used);
                 dt_used
             }
         }

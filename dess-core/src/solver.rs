@@ -148,7 +148,7 @@ pub trait SolverBase: BareClone + Sized {
     fn step_by_dt(&mut self, dt: &f64);
 
     /// steps dt without affecting states
-    fn step_dt(&mut self, dt: &f64);
+    fn step_time(&mut self, dt: &f64);
 
     /// assuming `set_derivs` has been called, steps
     /// value of states by deriv * dt
@@ -215,7 +215,7 @@ pub trait SolverVariantMethods: SolverBase {
         }
 
         self.step(delta);
-        self.step_dt(dt);
+        self.step_time(dt);
     }
 
     fn rk45_cash_karp_step(&mut self, dt: f64) -> (Vec<f64>, Vec<f64>) {
