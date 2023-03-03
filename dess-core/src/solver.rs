@@ -96,8 +96,8 @@ impl Default for AdaptiveSolverConfig {
         Self {
             dt_max: 1.0,
             max_iter: 2,
-            rtol: 1e-6,
-            atol: 1e-9,
+            rtol: 1e-3,
+            atol: 1e-6,
             save: false,
             state: Default::default(),
             history: Default::default(),

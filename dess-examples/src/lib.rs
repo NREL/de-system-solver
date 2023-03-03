@@ -174,3 +174,14 @@ pub fn mock_rk4fixed_sys() -> System {
 
     System::new(Default::default(), m1, m2, h12, m3, h13, t_report)
 }
+
+pub fn mock_rk45_sys() -> System {
+    let m1 = ThermalMass::new(1.0, 0.0);
+    let m2 = ThermalMass::new(2.0, 10.0);
+    let h12 = Conductance::new(5.0);
+    let m3 = ThermalMass::new(1.5, 12.0);
+    let h13 = Conductance::new(5.0);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 11);
+
+    System::new(SolverTypes::RK45CashKarp(AdaptiveSolverConfig::default()), m1, m2, h12, m3, h13, t_report)
+}
