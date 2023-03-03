@@ -74,6 +74,7 @@ impl AdaptiveSolverConfig {
         max_iter: Option<u8>,
         rtol: Option<f64>,
         atol: Option<f64>,
+        // tol_deadband: Option<f64,
         save: Option<bool>,
     ) -> Self {
         let mut state = SolverState::default();

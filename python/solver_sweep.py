@@ -98,7 +98,7 @@ t0 = time.perf_counter()
 sys_rk4_large_dt.walk()
 print(f"rk4 large dt elapsed: {time.perf_counter() - t0:.3g} s")
 
-solver = dess_pyo3.AdaptiveSolverConfig(dt_init=1e-1)
+solver = dess_pyo3.AdaptiveSolverConfig(dt_init=1e-3)
 
 sys_rk45 = dess_pyo3.System.new_rk45_cash_karp(
     solver,
@@ -187,3 +187,58 @@ ax[-1].set_xlabel('Time [s]')
 ax[0].legend()
 
 # %%
+
+solver = dess_pyo3.AdaptiveSolverConfig(
+    dt_init=1e-2,
+    # rtol=1e-8,
+    # max_iter=5,
+    save=True
+)
+
+sys_rk45 = dess_pyo3.System.new_rk45_cash_karp(
+    solver,
+    m1,
+    m2,
+    h12,
+    m3,
+    h13,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_rk45.walk()
+print(f"rk45 dt elapsed: {time.perf_counter() - t0:.3g} s")
+
+fig, ax = plt.subplots(3, 1, sharex=True)
+ax[0].plot(
+    np.array(sys_rk45.solver_conf.history.t_curr),
+    np.array(sys_rk45.solver_conf.history.n_iter),
+    linestyle='',
+    marker='x',
+)
+ax[0].set_ylabel('n_iter')
+
+ax[1].plot(
+    np.array(sys_rk45.solver_conf.history.t_curr),
+    np.array(sys_rk45.solver_conf.history.norm_err),
+    linestyle='',
+    marker='x',
+    label='norm_err',
+)
+ax[1].plot(
+    np.array(sys_rk45.solver_conf.history.t_curr),
+    np.array(sys_rk45.solver_conf.history.norm_err_rel),
+    linestyle='',
+    marker='o',
+    label='norm_err_rel',
+)
+ax[1].set_ylabel('error')
+ax[1].legend()
+
+ax[-1].plot(
+    np.array(sys_rk45.solver_conf.history.t_curr),
+    np.array(sys_rk45.solver_conf.history.dt),
+    linestyle='',
+    marker='x',
+)
+ax[-1].set_ylabel('dt')
+ax[-1].set_xlabel('Sim. Time [s]')

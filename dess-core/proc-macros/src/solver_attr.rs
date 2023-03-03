@@ -126,6 +126,12 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
             /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
             fn rk45_cash_karp(&mut self, dt_max: &f64) -> f64 {
+                // reset iteration counter
+                match &mut self.solver_type {
+                    SolverTypes::RK45CashKarp(sc) => sc.state.n_iter = 0,
+                    _ => unreachable!(),
+                }
+
                 let delta5 = loop {
                     let sc = match &mut self.solver_type {
                         SolverTypes::RK45CashKarp(sc) => sc,
@@ -221,6 +227,9 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         || dt_too_large;
 
                     if break_cond {
+                        if sc.save {
+                            sc.history.push(sc.state);
+                        }
                         sc.state.t_curr = self.state.time;
                         break delta5
                     };
