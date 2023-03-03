@@ -182,6 +182,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         }
                     };
                     sc.state.dt *= dt_coeff;
+                    sc.state.dt = sc.state.dt.min(dt_max.clone());
                     // to avoid borrow problems
                     let dt = sc.state.dt.clone();
 
@@ -244,6 +245,8 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                 };
                 let dt_used = sc.state.dt;
                 self.step_time(&dt_used);
+                // dbg!(self.state.time);
+                // dbg!(self.t_report[self.state.i]);
                 dt_used
             }
         }
