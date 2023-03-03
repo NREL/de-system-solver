@@ -232,8 +232,9 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     SolverTypes::RK45CashKarp(sc) => sc,
                     _ => unreachable!(),
                 };
-
-                sc.state.dt
+                let dt_used = sc.state.dt;
+                self.step_dt(&dt_used);
+                dt_used
             }
         }
     });
