@@ -144,20 +144,18 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         // if a step has already been taken that gets us below `atol` or `rtol`,
                         // we just use that step as is, without any further iteration on step size,
                         // unless it's an absurdly small step.
+                        // TODO: make this not hardcoded but putting it in sc
                         0.1
                     };
 
                     // adapt dt based on `rtol` if it is Some; use `atol` otherwise
+                    // this adaptation strategy came directly from Chapra and Canale's section on adapting the time step
                     let dt_coeff = match sc.state.norm_err_rel {
                         Some(norm_err_rel) => {
                             (sc.rtol / norm_err_rel).powf(
                                 if norm_err_rel < low_cutoff * sc.rtol {
-                                    // if `norm_err_rel` is smaller than `sc.rtol`, that means the time step is too small
-                                    // so we'll increase the time step
                                     0.2
                                 } else {
-                                    // if `norm_err_rel` is larger than `sc.tol`, that means the time step is too large
-                                    // so we'll increase the time step
                                     0.25
                                 }
                             )
@@ -167,12 +165,8 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                                 Some(norm_err) => {
                                     (sc.atol / norm_err).powf(
                                         if norm_err < low_cutoff * sc.atol {
-                                            // if `norm_err` is smaller than `sc.atol`, that means the time step is too small
-                                            // so we'll increase the time step
                                             0.2
                                         } else {
-                                            // if `norm_err` is larger than `sc.atol`, that means the time step is too large
-                                            // so we'll increase the time step
                                             0.25
                                         }
                                     )
@@ -182,6 +176,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         }
                     };
                     sc.state.dt *= dt_coeff;
+                    sc.state.dt_raw = sc.state.dt;
                     sc.state.dt = sc.state.dt.min(dt_max.clone());
                     // to avoid borrow problems
                     let dt = sc.state.dt.clone();
@@ -189,7 +184,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     let (delta4, delta5) = self.rk45_cash_karp_step(dt);
                     let sc = match &mut self.solver_type {
                         SolverTypes::RK45CashKarp(sc) => sc,
-                        _ => unreachable!(),
+                        _ => unreachable!(), // this won't ever happen in this function
                     };
 
                     sc.state.n_iter += 1;
