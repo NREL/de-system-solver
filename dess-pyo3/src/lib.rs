@@ -1,6 +1,6 @@
 use dess_core::prelude::*;
 use dess_examples::components::*;
-use dess_examples::three_thremal_mass_sys::*;
+use dess_examples::three_thermal_mass_sys::*;
 
 /// A Python module implemented in Rust.
 #[pymodule]

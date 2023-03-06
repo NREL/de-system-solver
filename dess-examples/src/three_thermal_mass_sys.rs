@@ -1,5 +1,6 @@
 use crate::components::*;
 use crate::imports::*;
+use plotters::prelude::*;
 
 /// System of connected components
 #[derive(HistoryMethods, BareClone)]
@@ -259,6 +260,96 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
     }
+
+    plot_stuff(sys_rk45);
+}
+
+pub fn plot_stuff(sys: System3TM) {
+    let out_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+        .parent()
+        .unwrap()
+        .to_path_buf()
+        .join("target/artifacts/");
+    DirBuilder::new()
+        .recursive(true)
+        .create(out_dir.clone())
+        .unwrap();
+    let out_file = out_dir.join("sys_3TM_rk45.png");
+    let out_file_str = out_file.as_os_str().to_str().unwrap();
+
+    let root_area = BitMapBackend::new(&out_file, (1024, 768)).into_drawing_area();
+
+    root_area.fill(&WHITE).unwrap();
+
+    // let root_height = root_area.dim_in_pixel().1;
+
+    // let (upper, lower) = root_area.split_vertically(root_height / 2);
+    let title_font_size = 40;
+    let mut cc = ChartBuilder::on(&root_area)
+        .x_label_area_size(70)
+        .y_label_area_size(70)
+        .margin_right(30)
+        .margin_left(30)
+        .margin_bottom(30)
+        .caption(format!("y = x^{}", 1 + 2), ("sans-serif", title_font_size))
+        .build_cartesian_2d(
+            0.0..sys.state.time as f32,
+            (sys.m1
+                .history
+                .temp
+                .iter()
+                .fold(f64::INFINITY, |prev, curr| prev.min(*curr))
+                * 0.95) as f32
+                ..(sys
+                    .m1
+                    .history
+                    .temp
+                    .iter()
+                    .fold(f64::NEG_INFINITY, |prev, curr| prev.max(*curr))
+                    * 1.1) as f32,
+        )
+        .unwrap();
+
+    let label_font_size = 30;
+    cc.configure_mesh()
+        .x_labels(5)
+        .y_labels(3)
+        .y_desc("Temperature")
+        .y_label_style(("sans-serif", label_font_size))
+        .x_label_style(("sans-serif", label_font_size))
+        .x_desc("Time [s]")
+        .max_light_lines(4)
+        .draw()
+        .unwrap();
+
+    cc.draw_series(LineSeries::new(
+        sys.history
+            .time
+            .iter()
+            .zip(sys.m1.history.temp.clone())
+            .map(|(x, y)| (*x as f32, y as f32)),
+        &RED,
+    ))
+    .unwrap();
+
+    cc.draw_series(PointSeries::of_element(
+        sys.history
+            .time
+            .iter()
+            .zip(sys.m1.history.temp)
+            .map(|(x, y)| (*x as f32, y as f32)),
+        5,
+        ShapeStyle::from(&RED).filled(),
+        &|coord, size, style| {
+            EmptyElement::at(coord)
+                + Circle::new((0, 0), size, style)
+                // + Text::new(format!("{:?}", coord), (0, 15), ("sans-serif", 15))
+        },
+    ))
+    .unwrap();
+    // To avoid the IO failure being ignored silently, we manually call the present function
+    root_area.present().unwrap();
+    println!("Result has been saved to {out_file_str}");
 }
 
 #[cfg(test)]

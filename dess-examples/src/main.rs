@@ -12,5 +12,5 @@ fn main() {
             overwrite_benchmarks = true;
         }
     }
-    three_thremal_mass_sys::run_three_tm_sys(overwrite_benchmarks);
+    three_thermal_mass_sys::run_three_tm_sys(overwrite_benchmarks);
 }
