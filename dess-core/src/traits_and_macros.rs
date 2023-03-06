@@ -4,6 +4,16 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
+#[macro_export]
+macro_rules! time_it {
+    ($thing: expr) => {{
+        let t0 = Instant::now();
+        $thing;
+        let t_elapsed = Instant::now() - t0;
+        t_elapsed
+    }};
+}
+
 /// zips multiple vectors into iterators
 /// https://stackoverflow.com/a/62016977/941031
 #[macro_export]

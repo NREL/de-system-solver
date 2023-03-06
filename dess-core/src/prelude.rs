@@ -8,3 +8,4 @@ pub use crate::traits_and_macros::*;
 pub use crate::update_derivs;
 pub use crate::utilities::*;
 pub use crate::zip;
+pub use crate::time_it;

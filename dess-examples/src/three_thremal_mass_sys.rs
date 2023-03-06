@@ -132,16 +132,6 @@ pub struct SystemState3TM {
     time: f64,
 }
 
-#[macro_export]
-macro_rules! time_it {
-    ($thing: expr) => {{
-        let t0 = Instant::now();
-        $thing;
-        let t_elapsed = Instant::now() - t0;
-        t_elapsed
-    }};
-}
-
 pub fn mock_euler_sys() -> System3TM {
     let m1 = ThermalMass::new(1.0, 0.0);
     let m2 = ThermalMass::new(2.0, 10.0);
