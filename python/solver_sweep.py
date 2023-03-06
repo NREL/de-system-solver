@@ -189,8 +189,8 @@ ax[0].legend()
 # %%
 
 solver = dess_pyo3.AdaptiveSolverConfig(
-    dt_init=1e-2,
-    # rtol=1e-8,
+    dt_init=1e-3,
+    # rtol=1e-6,
     # max_iter=5,
     save=True
 )
@@ -222,16 +222,16 @@ ax[1].plot(
     np.array(sys_rk45.solver_conf.history.norm_err),
     linestyle='',
     marker='x',
-    label='norm_err',
+    label='absolute',
 )
 ax[1].plot(
     np.array(sys_rk45.solver_conf.history.t_curr),
     np.array(sys_rk45.solver_conf.history.norm_err_rel),
     linestyle='',
     marker='o',
-    label='norm_err_rel',
+    label='relative',
 )
-ax[1].set_ylabel('error')
+ax[1].set_ylabel('Norm Error')
 ax[1].legend()
 
 ax[-1].plot(

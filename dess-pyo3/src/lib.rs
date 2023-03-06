@@ -1,5 +1,6 @@
 use dess_core::prelude::*;
-use dess_examples::*;
+use dess_examples::components::*;
+use dess_examples::three_thremal_mass_sys::*;
 
 /// A Python module implemented in Rust.
 #[pymodule]
@@ -7,9 +8,9 @@ fn dess_pyo3(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<AdaptiveSolverConfig>()?;
     m.add_class::<SolverState>()?;
     m.add_class::<SolverStateHistoryVec>()?;
-    m.add_class::<System>()?;
-    m.add_class::<SystemState>()?;
-    m.add_class::<SystemStateHistoryVec>()?;
+    m.add_class::<System3TM>()?;
+    m.add_class::<SystemState3TM>()?;
+    m.add_class::<SystemState3TMHistoryVec>()?;
     m.add_class::<ThermalMass>()?;
     m.add_class::<ThermalMassState>()?;
     m.add_class::<ThermalMassStateHistoryVec>()?;
