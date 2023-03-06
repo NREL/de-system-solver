@@ -15,7 +15,7 @@ m1 = dess_pyo3.ThermalMass(1.0, 2.0)
 m2 = dess_pyo3.ThermalMass(2.0, 10.0)
 h12 = dess_pyo3.Conductance(5.0)
 m3 = dess_pyo3.ThermalMass(1.5, 12.0)
-h13 = dess_pyo3.Conductance(5.0)
+h23 = dess_pyo3.Conductance(5.0)
 t_report_euler = np.linspace(0.0, 1.0, 201).tolist()
 t_report_rk4 = np.linspace(0.0, 1.0, 11).tolist()
 
@@ -26,7 +26,7 @@ sys_rk4 = dess_pyo3.System3TM(
     m2,
     h12,
     m3,
-    h13,
+    h23,
     t_report_rk4,)
 t0 = time.perf_counter()
 sys_rk4.walk()
@@ -39,7 +39,7 @@ sys_euler = dess_pyo3.System3TM(
     m2,
     h12,
     m3,
-    h13,
+    h23,
     t_report_euler,)
 
 t0 = time.perf_counter()

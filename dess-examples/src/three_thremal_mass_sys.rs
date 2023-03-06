@@ -11,7 +11,7 @@ use crate::imports::*;
         m2: ThermalMass,
         h12: Conductance,
         m3: ThermalMass,
-        h13: Conductance,
+        h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
         Self::new(
@@ -20,7 +20,7 @@ use crate::imports::*;
             m2,
             h12,
             m3,
-            h13,
+            h23,
             t_report,
         )
     }
@@ -33,7 +33,7 @@ use crate::imports::*;
         m2: ThermalMass,
         h12: Conductance,
         m3: ThermalMass,
-        h13: Conductance,
+        h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
         Self::new(
@@ -42,7 +42,7 @@ use crate::imports::*;
             m2,
             h12,
             m3,
-            h13,
+            h23,
             t_report
         )
     }
@@ -70,8 +70,8 @@ use crate::imports::*;
     /// This method must be user defined in `solver` macro args.
     fn update_derivs(&mut self) {
         self.reset_derivs();
-        connect_states!(self, (m1, m2, h12), (m1, m3, h13));
-        update_derivs!(self, (m1, m2, h12), (m1, m3, h13));
+        connect_states!(self, (m1, m2, h12), (m2, m3, h23));
+        update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
     }
 )]
 #[common_derives]
@@ -91,7 +91,7 @@ pub struct System3TM {
     #[use_state]
     pub m3: ThermalMass,
     #[save_state]
-    pub h13: Conductance,
+    pub h23: Conductance,
     // fields needed by `solver` procedural macro
     pub t_report: Vec<f64>,
     pub state: SystemState3TM,
@@ -105,7 +105,7 @@ impl System3TM {
         m2: ThermalMass,
         h12: Conductance,
         m3: ThermalMass,
-        h13: Conductance,
+        h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
         Self {
@@ -114,7 +114,7 @@ impl System3TM {
             m2,
             h12,
             m3,
-            h13,
+            h23,
             t_report,
             state: Default::default(),
             history: Default::default(),
@@ -137,7 +137,7 @@ pub fn mock_euler_sys() -> System3TM {
     let m2 = ThermalMass::new(2.0, 10.0);
     let h12 = Conductance::new(5.0);
     let m3 = ThermalMass::new(1.5, 12.0);
-    let h13 = Conductance::new(5.0);
+    let h23 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
 
     System3TM::new(
@@ -146,7 +146,7 @@ pub fn mock_euler_sys() -> System3TM {
         m2,
         h12,
         m3,
-        h13,
+        h23,
         t_report,
     )
 }
@@ -156,10 +156,10 @@ pub fn mock_rk4fixed_sys() -> System3TM {
     let m2 = ThermalMass::new(2.0, 10.0);
     let h12 = Conductance::new(5.0);
     let m3 = ThermalMass::new(1.5, 12.0);
-    let h13 = Conductance::new(5.0);
+    let h23 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
-    System3TM::new(Default::default(), m1, m2, h12, m3, h13, t_report)
+    System3TM::new(Default::default(), m1, m2, h12, m3, h23, t_report)
 }
 
 pub fn mock_rk45_sys() -> System3TM {
@@ -167,7 +167,7 @@ pub fn mock_rk45_sys() -> System3TM {
     let m2 = ThermalMass::new(2.0, 10.0);
     let h12 = Conductance::new(5.0);
     let m3 = ThermalMass::new(1.5, 12.0);
-    let h13 = Conductance::new(5.0);
+    let h23 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 11);
 
     System3TM::new(
@@ -176,7 +176,7 @@ pub fn mock_rk45_sys() -> System3TM {
         m2,
         h12,
         m3,
-        h13,
+        h23,
         t_report,
     )
 }
