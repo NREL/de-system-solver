@@ -191,7 +191,7 @@ pub fn mock_rk45_sys() -> System3TM {
     )
 }
 
-pub fn run_three_tm_sys() {
+pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
     // build and run prescribed-step Euler system
     let mut sys_euler = mock_euler_sys();
 
@@ -205,7 +205,7 @@ pub fn run_three_tm_sys() {
         t_euler.as_micros()
     );
 
-    let overwrite_euler_benchmark: bool = false;
+    let overwrite_euler_benchmark: bool = overwrite_benchmarks;
     if overwrite_euler_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
@@ -231,7 +231,7 @@ pub fn run_three_tm_sys() {
         t_rk4.as_micros()
     );
 
-    let overwrite_rk4_benchmark: bool = false;
+    let overwrite_rk4_benchmark: bool = overwrite_benchmarks;
     if overwrite_rk4_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
@@ -257,7 +257,7 @@ pub fn run_three_tm_sys() {
         t_rk45.as_micros()
     );
 
-    let overwrite_rk45_benchmark: bool = false;
+    let overwrite_rk45_benchmark: bool = overwrite_benchmarks;
     if overwrite_rk45_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()

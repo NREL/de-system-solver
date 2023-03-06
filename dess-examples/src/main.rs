@@ -1,5 +1,16 @@
 use dess_examples::*;
 
 fn main() {
-    three_thremal_mass_sys::run_three_tm_sys();
+    let args: Vec<String> = std::env::args().collect();
+
+    // Default value is false if no argument is provided
+    let mut overwrite_benchmarks = false;
+
+    if args.len() > 1 {
+        // Check if the second argument is "true"
+        if args[1] == "true" {
+            overwrite_benchmarks = true;
+        }
+    }
+    three_thremal_mass_sys::run_three_tm_sys(overwrite_benchmarks);
 }

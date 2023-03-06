@@ -1,5 +1,5 @@
 solver_type: !RK45CashKarp
-  dt_max: 1.0
+  dt_max: 10.0
   max_iter: 2
   atol: 1e-6
   rtol: 0.001

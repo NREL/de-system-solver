@@ -20,7 +20,7 @@ t_report_euler = np.linspace(0.0, 1.0, 201).tolist()
 t_report_rk4 = np.linspace(0.0, 1.0, 11).tolist()
 
 
-sys_rk4 = dess_pyo3.System(
+sys_rk4 = dess_pyo3.System3TM(
     '{"RK4Fixed":{"dt":1.0}}',
     m1,
     m2,
@@ -33,7 +33,7 @@ sys_rk4.walk()
 t1 = time.perf_counter()
 print(f"Elapsed time to run `sys_rk4.walk()`: {t1-t0:.3g}")
 
-sys_euler = dess_pyo3.System(
+sys_euler = dess_pyo3.System3TM(
     '{"EulerFixed": {"dt": 1.0}}',
     m1,
     m2,
@@ -208,4 +208,3 @@ ax.plot(
 ax.set_ylabel('Energy [J]')
 ax.set_xlabel('Time [s]')
 ax.legend()
-

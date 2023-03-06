@@ -22,7 +22,7 @@ dt_medium = (t_report_dt_sweep[1] - t_report_dt_sweep[0]) * 0.9
 dt_ultra_medium = (t_report_dt_sweep[1] - t_report_dt_sweep[0]) * 1.0
 dt_large = (t_report_dt_sweep[1] - t_report_dt_sweep[0]) * 10.0
 
-sys_small_dt = dess_pyo3.System(
+sys_small_dt = dess_pyo3.System3TM(
     f'{{"EulerFixed": {{"dt": {dt_small}}}}}',
     m1,
     m2,
@@ -33,7 +33,7 @@ sys_small_dt = dess_pyo3.System(
 )
 sys_small_dt.walk()
 
-sys_medium_dt = dess_pyo3.System(
+sys_medium_dt = dess_pyo3.System3TM(
     f'{{"EulerFixed": {{"dt": {dt_medium}}}}}',
     m1,
     m2,
@@ -44,7 +44,7 @@ sys_medium_dt = dess_pyo3.System(
 )
 sys_medium_dt.walk()
 
-sys_ultra_medium_dt = dess_pyo3.System(
+sys_ultra_medium_dt = dess_pyo3.System3TM(
     f'{{"EulerFixed": {{"dt": {dt_ultra_medium}}}}}',
     m1,
     m2,
@@ -55,7 +55,7 @@ sys_ultra_medium_dt = dess_pyo3.System(
 )
 sys_ultra_medium_dt.walk()
 
-sys_large_dt = dess_pyo3.System(
+sys_large_dt = dess_pyo3.System3TM(
     f'{{"EulerFixed": {{"dt": {dt_large}}}}}',
     m1,
     m2,

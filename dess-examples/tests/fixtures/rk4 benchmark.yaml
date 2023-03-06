@@ -604,9 +604,3 @@ history:
   - 0.96
   - 0.98
   - 1.0
-solver_state: null
-solver_history:
-  dt: []
-  n_iter: []
-  norm: []
-  t_curr: []

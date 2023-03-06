@@ -20,7 +20,7 @@ dt_small = (t_report[1] - t_report[0]) / 1e3
 dt_medium = (t_report[1] - t_report[0]) / 1e1
 dt_large = (t_report[1] - t_report[0]) * 1.0
 
-sys_small_dt = dess_pyo3.System(
+sys_small_dt = dess_pyo3.System3TM(
     f'{{"EulerFixed": {{"dt": {dt_small}}}}}',
     m1,
     m2,
@@ -33,7 +33,7 @@ t0 = time.perf_counter()
 sys_small_dt.walk()
 print(f"small dt elapsed: {time.perf_counter() - t0:.3g} s")
 
-sys_medium_dt = dess_pyo3.System(
+sys_medium_dt = dess_pyo3.System3TM(
     f'{{"EulerFixed": {{"dt": {dt_medium}}}}}',
     m1,
     m2,
@@ -46,7 +46,7 @@ t0 = time.perf_counter()
 sys_medium_dt.walk()
 print(f"medium dt elapsed: {time.perf_counter() - t0:.3g} s")
 
-sys_large_dt = dess_pyo3.System(
+sys_large_dt = dess_pyo3.System3TM(
     f'{{"EulerFixed": {{"dt": {dt_large}}}}}',
     m1,
     m2,
@@ -59,7 +59,7 @@ t0 = time.perf_counter()
 sys_large_dt.walk()
 print(f"large dt elapsed: {time.perf_counter() - t0:.3g} s")
 
-sys_rk4_small_dt = dess_pyo3.System(
+sys_rk4_small_dt = dess_pyo3.System3TM(
     f'{{"RK4Fixed": {{"dt": {dt_small}}}}}',
     m1,
     m2,
@@ -72,7 +72,7 @@ t0 = time.perf_counter()
 sys_rk4_small_dt.walk()
 print(f"rk4 small dt elapsed: {time.perf_counter() - t0:.3g} s")
 
-sys_rk4_medium_dt = dess_pyo3.System(
+sys_rk4_medium_dt = dess_pyo3.System3TM(
     f'{{"RK4Fixed": {{"dt": {dt_medium}}}}}',
     m1,
     m2,
@@ -85,7 +85,7 @@ t0 = time.perf_counter()
 sys_rk4_medium_dt.walk()
 print(f"rk4 medium dt elapsed: {time.perf_counter() - t0:.3g} s")
 
-sys_rk4_large_dt = dess_pyo3.System(
+sys_rk4_large_dt = dess_pyo3.System3TM(
     f'{{"RK4Fixed": {{"dt": {dt_large}}}}}',
     m1,
     m2,
@@ -100,7 +100,7 @@ print(f"rk4 large dt elapsed: {time.perf_counter() - t0:.3g} s")
 
 solver = dess_pyo3.AdaptiveSolverConfig(dt_init=1e-3)
 
-sys_rk45 = dess_pyo3.System.new_rk45_cash_karp(
+sys_rk45 = dess_pyo3.System3TM.new_rk45_cash_karp(
     solver,
     m1,
     m2,
@@ -195,7 +195,7 @@ solver = dess_pyo3.AdaptiveSolverConfig(
     save=True
 )
 
-sys_rk45 = dess_pyo3.System.new_rk45_cash_karp(
+sys_rk45 = dess_pyo3.System3TM.new_rk45_cash_karp(
     solver,
     m1,
     m2,

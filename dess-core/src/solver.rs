@@ -80,7 +80,7 @@ impl AdaptiveSolverConfig {
         let mut state = SolverState::default();
         state.dt = dt_init;
         Self {
-            dt_max: dt_max.unwrap_or(1.0),
+            dt_max: dt_max.unwrap_or(10.0),
             max_iter: max_iter.unwrap_or(2),
             rtol: rtol.unwrap_or(1e-3),
             atol: atol.unwrap_or(1e-6),
