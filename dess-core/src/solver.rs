@@ -113,8 +113,6 @@ impl AsMut<AdaptiveSolverConfig> for AdaptiveSolverConfig {
 pub struct SolverState {
     /// time step size used by solver
     pub dt: f64,
-    /// time step that would be used absent any constraints
-    pub dt_raw: f64,
     /// number of iterations to achieve tolerance
     pub n_iter: u8,
     /// Absolute error based on difference in L2 (euclidean) norm
@@ -129,7 +127,6 @@ impl Default for SolverState {
     fn default() -> Self {
         Self {
             dt: 0.1,
-            dt_raw: 0.1,
             n_iter: 0,
             norm_err: None,
             norm_err_rel: None,

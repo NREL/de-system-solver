@@ -176,7 +176,6 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         }
                     };
                     sc.state.dt *= dt_coeff;
-                    sc.state.dt_raw = sc.state.dt;
                     sc.state.dt = sc.state.dt.min(dt_max.clone());
                     // to avoid borrow problems
                     let dt = sc.state.dt.clone();
