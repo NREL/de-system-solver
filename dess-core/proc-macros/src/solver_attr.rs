@@ -138,22 +138,12 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         _ => unreachable!(),
                     };
 
-                    let low_cutoff = if sc.state.n_iter == 0 {
-                        1.0
-                    } else {
-                        // if a step has already been taken that gets us below `atol` or `rtol`,
-                        // we just use that step as is, without any further iteration on step size,
-                        // unless it's an absurdly small step.
-                        // TODO: make this not hardcoded but putting it in sc
-                        0.1
-                    };
-
                     // adapt dt based on `rtol` if it is Some; use `atol` otherwise
                     // this adaptation strategy came directly from Chapra and Canale's section on adapting the time step
                     let dt_coeff = match sc.state.norm_err_rel {
                         Some(norm_err_rel) => {
                             (sc.rtol / norm_err_rel).powf(
-                                if norm_err_rel < low_cutoff * sc.rtol {
+                                if norm_err_rel <= sc.rtol {
                                     0.2
                                 } else {
                                     0.25
@@ -164,7 +154,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                             match sc.state.norm_err {
                                 Some(norm_err) => {
                                     (sc.atol / norm_err).powf(
-                                        if norm_err < low_cutoff * sc.atol {
+                                        if norm_err <= sc.atol {
                                             0.2
                                         } else {
                                             0.25

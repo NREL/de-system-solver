@@ -219,7 +219,7 @@ ax[0].plot(
     np.array(sys_rk45.m2.history.temp),
     label=f'rk45',
     color=default_colors[0],
-    markersize=markersize,
+    markersize=markersize + 2,
     linestyle='',
     marker='x',
 )
