@@ -181,6 +181,16 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     let dt = sc.state.dt.clone();
 
                     let (delta4, delta5) = self.rk45_cash_karp_step(dt);
+                    let states = match &self.solver_type {
+                        SolverTypes::RK45CashKarp(sc) => {
+                            if sc.save {
+                                self.get_states().clone()
+                            } else {
+                                vec![]
+                            }
+                        },
+                        _ => unreachable!(), // this won't ever happen in this function
+                    };
                     let sc = match &mut self.solver_type {
                         SolverTypes::RK45CashKarp(sc) => sc,
                         _ => unreachable!(), // this won't ever happen in this function
@@ -225,7 +235,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     if break_cond {
                         sc.state.t_curr = self.state.time;
                         if sc.save {
-                            // sc.state.states = self.get_states().clone();
+                            sc.state.states = states;
                             sc.history.push(sc.state.clone());
                         }
                         break delta5

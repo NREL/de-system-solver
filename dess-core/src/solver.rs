@@ -120,8 +120,8 @@ pub struct SolverState {
     pub norm_err_rel: Option<f64>,
     /// current system time used in solver
     pub t_curr: f64,
-    // /// current values of states
-    // pub states: Vec<f64>,
+    /// current values of states
+    pub states: Vec<f64>,
 }
 
 impl Default for SolverState {
@@ -132,7 +132,7 @@ impl Default for SolverState {
             norm_err: None,
             norm_err_rel: None,
             t_curr: 0.0,
-            // states: Default::default(),
+            states: Default::default(),
         }
     }
 }
