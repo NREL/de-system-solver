@@ -13,4 +13,5 @@ fn main() {
         }
     }
     three_thermal_mass_sys::run_three_tm_sys(overwrite_benchmarks);
+    three_thrml_mass_w_bc_sys::run_three_tm_w_bc_sys();
 }

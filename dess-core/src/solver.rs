@@ -74,7 +74,6 @@ impl AdaptiveSolverConfig {
         max_iter: Option<u8>,
         rtol: Option<f64>,
         atol: Option<f64>,
-        // tol_deadband: Option<f64,
         save: bool,
     ) -> Self {
         let mut state = SolverState::default();
@@ -105,7 +104,7 @@ impl AsMut<AdaptiveSolverConfig> for AdaptiveSolverConfig {
 
 #[common_derives]
 #[pyo3_api]
-#[derive(HistoryVec, Copy)]
+#[derive(HistoryVec)]
 /// Solver is considered considered converged when any one of the following conditions are met:
 /// - `norm_err` is less than `atol`
 /// - `norm_err_rel` is less than `rtol`
@@ -121,6 +120,8 @@ pub struct SolverState {
     pub norm_err_rel: Option<f64>,
     /// current system time used in solver
     pub t_curr: f64,
+    // /// current values of states
+    // pub states: Vec<f64>,
 }
 
 impl Default for SolverState {
@@ -131,6 +132,7 @@ impl Default for SolverState {
             norm_err: None,
             norm_err_rel: None,
             t_curr: 0.0,
+            // states: Default::default(),
         }
     }
 }

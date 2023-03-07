@@ -41,8 +41,8 @@ macro_rules! connect_states {
 macro_rules! update_derivs {
     ($sys: ident, $(($s0: ident, $s1: ident, $c: ident)), +) => {
         $(
-            $sys.$s0.step_deriv(-$sys.$c.flow() / $sys.$s0.c);
-            $sys.$s1.step_deriv($sys.$c.flow() / $sys.$s1.c);
+            $sys.$s0.step_deriv(-$sys.$c.flow() / $sys.$s0.storage());
+            $sys.$s1.step_deriv($sys.$c.flow() / $sys.$s1.storage());
         )+
     };
 }

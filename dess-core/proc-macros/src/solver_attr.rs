@@ -223,10 +223,11 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         || dt_too_large;
 
                     if break_cond {
-                        if sc.save {
-                            sc.history.push(sc.state);
-                        }
                         sc.state.t_curr = self.state.time;
+                        if sc.save {
+                            // sc.state.states = self.get_states().clone();
+                            sc.history.push(sc.state.clone());
+                        }
                         break delta5
                     };
                 };

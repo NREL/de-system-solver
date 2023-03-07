@@ -81,7 +81,7 @@ pub struct System3TM {
     #[skip_get]
     solver_type: SolverTypes,
     // components
-    // the `use_state` attribute tells the SystemSolver
+    // the `use_state` attribute tells the SystemSolver TODO: finish this thought
     #[use_state]
     pub m1: ThermalMass,
     #[use_state]
@@ -153,33 +153,23 @@ pub fn mock_euler_sys() -> System3TM {
 }
 
 pub fn mock_rk4fixed_sys() -> System3TM {
-    let m1 = ThermalMass::new(1.0, 0.0);
-    let m2 = ThermalMass::new(2.0, 10.0);
-    let h12 = Conductance::new(5.0);
-    let m3 = ThermalMass::new(1.5, 12.0);
-    let h23 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
-    System3TM::new(Default::default(), m1, m2, h12, m3, h23, t_report)
+    System3TM {
+        solver_type: Default::default(),
+        t_report,
+        ..mock_euler_sys()
+    }
 }
 
 pub fn mock_rk45_sys() -> System3TM {
-    let m1 = ThermalMass::new(1.0, 0.0);
-    let m2 = ThermalMass::new(2.0, 10.0);
-    let h12 = Conductance::new(5.0);
-    let m3 = ThermalMass::new(1.5, 12.0);
-    let h23 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 11);
 
-    System3TM::new(
-        SolverTypes::RK45CashKarp(AdaptiveSolverConfig::default()),
-        m1,
-        m2,
-        h12,
-        m3,
-        h23,
+    System3TM {
+        solver_type: SolverTypes::RK45CashKarp(AdaptiveSolverConfig::default()),
         t_report,
-    )
+        ..mock_euler_sys()
+    }
 }
 
 pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
@@ -284,14 +274,12 @@ pub fn plot_stuff(sys: System3TM) {
     // let root_height = root_area.dim_in_pixel().1;
 
     // let (upper, lower) = root_area.split_vertically(root_height / 2);
-    let title_font_size = 40;
+    let _title_font_size = 40;
     let mut cc = ChartBuilder::on(&root_area)
         .x_label_area_size(70)
         .y_label_area_size(70)
-        .margin_right(30)
-        .margin_left(30)
-        .margin_bottom(30)
-        .caption(format!("y = x^{}", 1 + 2), ("sans-serif", title_font_size))
+        .margin(25)
+        // .caption(format!("y = x^{}", 1 + 2), ("sans-serif", title_font_size))
         .build_cartesian_2d(
             0.0..sys.state.time as f32,
             (sys.m1
@@ -341,9 +329,8 @@ pub fn plot_stuff(sys: System3TM) {
         5,
         ShapeStyle::from(&RED).filled(),
         &|coord, size, style| {
-            EmptyElement::at(coord)
-                + Circle::new((0, 0), size, style)
-                // + Text::new(format!("{:?}", coord), (0, 15), ("sans-serif", 15))
+            EmptyElement::at(coord) + Circle::new((0, 0), size, style)
+            // + Text::new(format!("{:?}", coord), (0, 15), ("sans-serif", 15))
         },
     ))
     .unwrap();

@@ -52,6 +52,55 @@ impl HasState for ThermalMass {
     }
 }
 
+/// ThermalReservoir component with capacitance, state, and history
+#[derive(HistoryMethods, BareClone, Default)]
+#[common_derives]
+#[pyo3_api(
+    #[new]
+    /// New thermal mass with capacitance `c` and initial temperature `t0`
+    pub fn __new__(temp0: f64) -> Self {
+        Self::new(temp0)
+    }
+)]
+pub struct ThermalReservoir {
+    pub state: ThermalMassState,
+    pub history: ThermalMassStateHistoryVec,
+}
+
+impl ThermalReservoir {
+    /// New thermal mass with capacitance `c` and initial temperature `t0`
+    pub fn new(temp: f64) -> Self {
+        Self {
+            state: ThermalMassState {
+                temp: temp,
+                dtemp: Default::default(),
+            },
+            history: Default::default(),
+        }
+    }
+}
+
+impl HasState for ThermalReservoir {
+    fn set_state(&mut self, val: f64) {
+        self.state.temp = val;
+    }
+    fn state(&self) -> f64 {
+        self.state.temp
+    }
+    fn deriv(&self) -> f64 {
+        self.state.dtemp
+    }
+    fn set_deriv(&mut self, _val: f64) {
+        self.state.dtemp = 0.0;
+    }
+    fn step_deriv(&mut self, val: f64) {
+        self.state.dtemp += val;
+    }
+    fn storage(&self) -> f64 {
+        f64::INFINITY
+    }
+}
+
 /// State for tracking temperature of [ThermalMass]
 #[derive(Copy, HistoryVec, Default)]
 #[common_derives]
