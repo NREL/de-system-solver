@@ -95,8 +95,8 @@ pub struct System3TM {
     pub h23: Conductance,
     // fields needed by `solver` procedural macro
     pub t_report: Vec<f64>,
-    pub state: SystemState3TM,
-    pub history: SystemState3TMHistoryVec,
+    pub state: SystemState,
+    pub history: SystemStateHistoryVec,
 }
 
 impl System3TM {
@@ -121,16 +121,6 @@ impl System3TM {
             history: Default::default(),
         }
     }
-}
-
-#[derive(Copy, HistoryVec, Default)]
-#[common_derives]
-#[pyo3_api]
-pub struct SystemState3TM {
-    // current index in `t_report`
-    i: usize,
-    // current time
-    time: f64,
 }
 
 pub fn mock_euler_sys() -> System3TM {

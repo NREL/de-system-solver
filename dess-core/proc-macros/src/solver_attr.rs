@@ -32,7 +32,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     item_and_impl_block.extend::<TokenStream2>(item.clone().into());
 
-    let attr: TokenStream2 = attr.into();
+    let fn_update_derivs: TokenStream2 = attr.into();
 
     item_and_impl_block.extend::<TokenStream2>(quote! {
         impl SolverBase for #ident {
@@ -86,7 +86,25 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                 #(self.#fields_with_state.set_state(iter.next().unwrap().clone());)*
             }
 
-            #attr
+            fn sc(&self) -> Option<&AdaptiveSolverConfig> {
+                match &self.solver_type {
+                    SolverTypes::RK45CashKarp(sc) => Some(sc),
+                    _ => None,
+                }
+            }
+
+            fn sc_mut(&mut self) -> Option<&mut AdaptiveSolverConfig> {
+                match &mut self.solver_type {
+                    SolverTypes::RK45CashKarp(sc) => Some(sc),
+                    _ => None,
+                }
+            }
+
+            fn state(&self) -> &dess_core::SystemState {
+                &self.state
+            }
+
+            #fn_update_derivs
         }
 
         impl SolverVariantMethods for #ident{}
@@ -121,128 +139,6 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         _ => todo!(),
                     }
                 }
-            }
-
-            /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
-            /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-            fn rk45_cash_karp(&mut self, dt_max: &f64) -> f64 {
-                // reset iteration counter
-                match &mut self.solver_type {
-                    SolverTypes::RK45CashKarp(sc) => sc.state.n_iter = 0,
-                    _ => unreachable!(),
-                }
-
-                let delta5 = loop {
-                    let sc = match &mut self.solver_type {
-                        SolverTypes::RK45CashKarp(sc) => sc,
-                        _ => unreachable!(),
-                    };
-
-                    // adapt dt based on `rtol` if it is Some; use `atol` otherwise
-                    // this adaptation strategy came directly from Chapra and Canale's section on adapting the time step
-                    let dt_coeff = match sc.state.norm_err_rel {
-                        Some(norm_err_rel) => {
-                            (sc.rtol / norm_err_rel).powf(
-                                if norm_err_rel <= sc.rtol {
-                                    0.2
-                                } else {
-                                    0.25
-                                }
-                            )
-                        },
-                        None => {
-                            match sc.state.norm_err {
-                                Some(norm_err) => {
-                                    (sc.atol / norm_err).powf(
-                                        if norm_err <= sc.atol {
-                                            0.2
-                                        } else {
-                                            0.25
-                                        }
-                                    )
-                                },
-                                None => 1.0, // don't adapt if there is not enough information to do so
-                            }
-                        }
-                    };
-                    sc.state.dt *= dt_coeff;
-                    sc.state.dt = sc.state.dt.min(dt_max.clone());
-                    // to avoid borrow problems
-                    let dt = sc.state.dt.clone();
-
-                    let (delta4, delta5) = self.rk45_cash_karp_step(dt);
-                    let states = match &self.solver_type {
-                        SolverTypes::RK45CashKarp(sc) => {
-                            if sc.save {
-                                self.get_states().clone()
-                            } else {
-                                vec![]
-                            }
-                        },
-                        _ => unreachable!(), // this won't ever happen in this function
-                    };
-                    let sc = match &mut self.solver_type {
-                        SolverTypes::RK45CashKarp(sc) => sc,
-                        _ => unreachable!(), // this won't ever happen in this function
-                    };
-
-                    sc.state.n_iter += 1;
-                    sc.state.norm_err = Some(delta4
-                        .iter()
-                        .zip(&delta5)
-                        .map(|(d4, d5)| (d4 - d5).powi(2))
-                        .collect::<Vec<f64>>()
-                        .iter()
-                        .sum::<f64>()
-                        .sqrt());
-                    let norm_d5 = delta5
-                        .iter()
-                        .map(|d5| d5.powi(2))
-                        .collect::<Vec<f64>>()
-                        .iter()
-                        .sum::<f64>()
-                        .sqrt();
-
-                    sc.state.norm_err_rel = if norm_d5 > sc.atol {
-                        // `unwrap` is ok here because `norm_err` will always be some by this point
-                        Some(sc.state.norm_err.unwrap() / norm_d5)
-                    } else {
-                        // avoid dividing by a really small denominator
-                        None
-                    };
-
-                    // conditions for breaking loop
-                    let rtol_met = match sc.state.norm_err_rel {
-                        Some(norm_err_rel) => norm_err_rel <= sc.rtol,
-                        None => false,
-                    };
-                    let dt_too_large = sc.state.dt > sc.dt_max;
-                    let break_cond = sc.state.n_iter >= sc.max_iter
-                        || sc.state.norm_err.unwrap() < sc.atol
-                        || rtol_met
-                        || dt_too_large;
-
-                    if break_cond {
-                        sc.state.t_curr = self.state.time;
-                        if sc.save {
-                            sc.state.states = states;
-                            sc.history.push(sc.state.clone());
-                        }
-                        break delta5
-                    };
-                };
-
-                // increment forward with 5th order solution
-                self.step(delta5);
-                let sc = match &self.solver_type {
-                    SolverTypes::RK45CashKarp(sc) => sc,
-                    _ => unreachable!(),
-                };
-                let dt_used = sc.state.dt;
-                self.step_time(&dt_used);
-                // dbg!(self.state.time);
-                // dbg!(self.t_report[self.state.i]);
-                dt_used
             }
         }
     });

@@ -274,8 +274,14 @@ ax[1].plot(
     marker='o',
     label='relative',
 )
+ax[1].plot(
+    [sys_rk45.history.time[0], sys_rk45.history.time[-1]],
+    [sys_rk45.solver_conf.rtol] * 2,
+    label='rtol',
+    color='k'
+)
 ax[1].set_ylabel('Norm Error')
-ax[1].legend()
+ax[1].legend(loc='right')
 
 ax[-1].plot(
     np.array(sys_rk45.solver_conf.history.t_curr),

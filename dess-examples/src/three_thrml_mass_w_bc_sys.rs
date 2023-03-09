@@ -98,8 +98,8 @@ pub struct System3TMWithBC {
     pub h23: Conductance,
     // fields needed by `solver` procedural macro
     pub t_report: Vec<f64>,
-    pub state: SystemState3TM,
-    pub history: SystemState3TMHistoryVec,
+    pub state: SystemState,
+    pub history: SystemStateHistoryVec,
 }
 
 impl System3TMWithBC {

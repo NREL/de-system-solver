@@ -81,8 +81,8 @@ impl AdaptiveSolverConfig {
         Self {
             dt_max: dt_max.unwrap_or(10.0),
             max_iter: max_iter.unwrap_or(2),
-            rtol: rtol.unwrap_or(1e-3),
-            atol: atol.unwrap_or(1e-6),
+            rtol: rtol.unwrap_or(1e-6),
+            atol: atol.unwrap_or(1e-12),
             save,
             state,
             history: Default::default(),
@@ -166,6 +166,15 @@ pub trait SolverBase: BareClone + Sized {
     /// Updates time derivatives of states.
     /// This method must be user defined.
     fn update_derivs(&mut self);
+
+    /// Returns `solver_conf`, if applicable
+    fn sc(&self) -> Option<&AdaptiveSolverConfig>;
+
+    /// Returns mut `solver_conf`, if applicable
+    fn sc_mut(&mut self) -> Option<&mut AdaptiveSolverConfig>;
+
+    /// Returns [Self::state]
+    fn state(&self) -> &crate::SystemState;
 }
 
 pub trait SolverVariantMethods: SolverBase {
@@ -211,6 +220,129 @@ pub trait SolverVariantMethods: SolverBase {
 
         self.step(delta);
         self.step_time(dt);
+    }
+
+    /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
+    /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
+    fn rk45_cash_karp(&mut self, dt_max: &f64) -> f64 {
+        let sc_mut = self.sc_mut().unwrap();
+        // reset iteration counter
+        sc_mut.state.n_iter = 0;
+        sc_mut.state.dt = sc_mut.state.dt.min(dt_max.clone());
+
+        // loop to find `dt` that results in meeting tolerance
+        // and does not exceed `dt_max`
+        let delta5 = loop {
+            let sc = self.sc().unwrap();
+            let dt = sc.state.dt;
+
+            // run a single step at `dt`
+            let (delta4, delta5) = self.rk45_cash_karp_step(dt);
+
+            // reborrow because of the borrow above in `self.rk45_cash_karp_step(dt);`
+            let sc = self.sc().unwrap();
+            // grab states for later use if solver steps are to be saved
+            let states = if sc.save {
+                self.get_states()
+                    .clone()
+                    .iter()
+                    .zip(delta5.clone())
+                    .map(|(s, d)| s + d)
+                    .collect::<Vec<f64>>()
+            } else {
+                vec![]
+            };
+
+            let t_curr = self.state().time.clone();
+
+            // mutably borrow sc to update it
+            let sc = self.sc_mut().unwrap();
+
+            // update `n_iter`, `norm_err`, `norm_err_rel`, `t_curr`, and `states`
+            // still need to update dt at some point
+            sc.state.n_iter += 1;
+            sc.state.norm_err = Some(
+                delta4
+                    .iter()
+                    .zip(&delta5)
+                    .map(|(d4, d5)| (d4 - d5).powi(2))
+                    .collect::<Vec<f64>>()
+                    .iter()
+                    .sum::<f64>()
+                    .sqrt(),
+            );
+            let norm_d5 = delta5
+                .iter()
+                .map(|d5| d5.powi(2))
+                .collect::<Vec<f64>>()
+                .iter()
+                .sum::<f64>()
+                .sqrt();
+
+            sc.state.norm_err_rel = if norm_d5 > sc.atol {
+                // `unwrap` is ok here because `norm_err` will always be some by this point
+                Some(sc.state.norm_err.unwrap() / norm_d5)
+            } else {
+                // avoid dividing by a really small denominator
+                None
+            };
+            // pretty sure `dt` needs to be added here, as is being done
+            sc.state.t_curr = t_curr + dt;
+
+            sc.state.states = states;
+
+            // conditions for breaking loop
+            // if there is a relative error, use that
+            // otherwise, use the absolute error
+            let tol_met = match sc.state.norm_err_rel {
+                Some(norm_err_rel) => norm_err_rel <= sc.rtol,
+                None => match sc.state.norm_err {
+                    Some(norm_err) => norm_err <= sc.atol,
+                    None => unreachable!(),
+                },
+            };
+
+            // Because we need to be able to possibly expand the next time step,
+            // regardless of whether break condition is met,
+            // adapt dt based on `rtol` if it is Some; use `atol` otherwise
+            // this adaptation strategy came directly from Chapra and Canale's section on adapting the time step
+            let dt_coeff = match sc.state.norm_err_rel {
+                Some(norm_err_rel) => {
+                    (sc.rtol / norm_err_rel).powf(if norm_err_rel <= sc.rtol { 0.2 } else { 0.25 })
+                }
+                None => {
+                    match sc.state.norm_err {
+                        Some(norm_err) => {
+                            (sc.atol / norm_err).powf(if norm_err <= sc.atol { 0.2 } else { 0.25 })
+                        }
+                        None => 1.0, // don't adapt if there is not enough information to do so
+                    }
+                }
+            };
+            sc.state.dt *= dt_coeff;
+
+            // if tolerance is achieved here, then we proceed to the next time step, and
+            // `dt` will be limited to `dt_max` at the start of the next time step.  If tolerance
+            // is not achieved, then time step will be decreased.
+            let break_cond =
+                sc.state.n_iter >= sc.max_iter || sc.state.norm_err.unwrap() < sc.atol || tol_met;
+
+            if break_cond {
+                if sc.save {
+                    sc.history.push(sc.state.clone());
+                }
+                break delta5;
+            };
+        };
+
+        // increment forward with 5th order solution
+        self.step(delta5);
+        let sc = self.sc().unwrap();
+        let dt_used = sc.state.dt;
+        self.step_time(&dt_used);
+        // dbg!(self.state.time);
+        // dbg!(self.t_report[self.state.i]);
+        dt_used
     }
 
     fn rk45_cash_karp_step(&mut self, dt: f64) -> (Vec<f64>, Vec<f64>) {

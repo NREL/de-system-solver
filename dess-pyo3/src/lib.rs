@@ -12,8 +12,8 @@ fn dess_pyo3(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<System3TMWithBC>()?;
     m.add_class::<ThermalReservoir>()?;
     m.add_class::<System3TM>()?;
-    m.add_class::<SystemState3TM>()?;
-    m.add_class::<SystemState3TMHistoryVec>()?;
+    m.add_class::<SystemState>()?;
+    m.add_class::<SystemStateHistoryVec>()?;
     m.add_class::<ThermalMass>()?;
     m.add_class::<ThermalMassState>()?;
     m.add_class::<ThermalMassStateHistoryVec>()?;
