@@ -81,29 +81,50 @@ macro_rules! print_to_py {
 }
 
 pub trait HasState {
-    /// sets value `val` of potential variable (e.g. temperature, pressure, voltage)
-    fn set_state(&mut self, val: f64);
     /// returns value of potential variable (e.g. temperature, pressure, voltage)
     fn state(&self) -> f64;
+    /// sets value `val` of potential variable (e.g. temperature, pressure, voltage)
+    fn set_state(&mut self, val: f64);
     /// increments value of potential variable by multiplying `dt * self.derive()`
     /// and adding to previous value
     fn step_state_by_dt(&mut self, dt: &f64) {
         self.set_state(self.state() + dt * self.deriv());
     }
-    /// increments value of potential by multiplying `dt * self.derive()`
+    /// increments value of states by `val` Vec
     fn step_state(&mut self, val: f64) {
         self.set_state(self.state() + val);
     }
-    /// sets value `val` of time derivative of potential variable
-    fn set_deriv(&mut self, val: f64);
     /// returns value of time derivative of potential variable
     fn deriv(&self) -> f64;
+    /// sets value `val` of time derivative of potential variable
+    fn set_deriv(&mut self, val: f64);
     /// incremenents value of time derivative of pontental variable
     fn step_deriv(&mut self, val: f64) {
         self.set_deriv(self.deriv() + val)
     }
     /// returns value of storage variable (e.g. thermal capacitance \[J/K\])
     fn storage(&self) -> f64;
+}
+
+pub trait HasStates: BareClone {
+    /// returns values of states
+    fn states(&self) -> Vec<f64>;
+    /// sets values of states
+    fn set_states(&mut self, val: Vec<f64>);
+    /// assuming `set_derivs` has been called, steps
+    /// value of states by deriv * dt
+    fn step_states_by_dt(&mut self, dt: &f64);
+    /// assuming `set_derivs` has been called, steps
+    /// value of states by deriv * dt
+    fn step_states(&mut self, val: Vec<f64>);
+    /// returns derivatives of states
+    fn derivs(&self) -> Vec<f64>;
+    /// sets values of derivatives of states
+    fn set_derivs(&mut self, val: &Vec<f64>);
+    /// incremenents value of time derivative of pontental variable
+    fn step_derivs(&mut self, val: Vec<f64>);
+    /// returns value of storage variable (e.g. thermal capacitance \[J/K\])
+    fn storages(&self) -> Vec<f64>;
 }
 
 pub trait Flow {

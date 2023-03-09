@@ -137,42 +137,18 @@ impl Default for SolverState {
     }
 }
 
-pub trait SolverBase: BareClone + Sized {
-    /// assuming `set_derivs` has been called, steps
-    /// value of states by deriv * dt
-    fn step_by_dt(&mut self, dt: &f64);
-
-    /// steps dt without affecting states
-    fn step_time(&mut self, dt: &f64);
-
-    /// assuming `set_derivs` has been called, steps
-    /// value of states by deriv * dt
-    fn step(&mut self, val: Vec<f64>);
-
+pub trait SolverBase: HasStates + Sized {
     /// reset all time derivatives to zero for start of `solve_step`
     fn reset_derivs(&mut self);
-
-    /// returns derivatives of states
-    fn get_derivs(&self) -> Vec<f64>;
-
-    /// sets values of derivatives of states
-    fn set_derivs(&mut self, val: &Vec<f64>);
-    /// returns values of states
-    fn get_states(&self) -> Vec<f64>;
-
-    /// sets values of states
-    fn set_states(&mut self, val: Vec<f64>);
-
     /// Updates time derivatives of states.
     /// This method must be user defined.
     fn update_derivs(&mut self);
-
+    /// steps dt without affecting states
+    fn step_time(&mut self, dt: &f64);
     /// Returns `solver_conf`, if applicable
     fn sc(&self) -> Option<&AdaptiveSolverConfig>;
-
     /// Returns mut `solver_conf`, if applicable
     fn sc_mut(&mut self) -> Option<&mut AdaptiveSolverConfig>;
-
     /// Returns [Self::state]
     fn state(&self) -> &crate::SystemState;
 }
@@ -181,7 +157,7 @@ pub trait SolverVariantMethods: SolverBase {
     /// Steps forward by `dt`
     fn euler(&mut self, dt: &f64) {
         self.update_derivs();
-        self.step_by_dt(dt);
+        self.step_states_by_dt(dt);
     }
 
     /// solves time step with 4th order Runge-Kutta method.
@@ -190,27 +166,27 @@ pub trait SolverVariantMethods: SolverBase {
         self.update_derivs();
 
         // k1 = f(x_i, y_i)
-        let k1s = self.get_derivs();
+        let k1s = self.derivs();
 
         // k2 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k1 * h)
         let mut sys1 = self.bare_clone();
-        sys1.step_by_dt(&(dt / 2.0));
+        sys1.step_states_by_dt(&(dt / 2.0));
         sys1.update_derivs();
-        let k2s = sys1.get_derivs();
+        let k2s = sys1.derivs();
 
         // k3 = f(x_i + 1 / 2 * h, y_i + 1 / 2 * k2 * h)
         let mut sys2 = self.bare_clone();
         sys2.set_derivs(&k2s);
-        sys2.step_by_dt(&(dt / 2.0));
+        sys2.step_states_by_dt(&(dt / 2.0));
         sys2.update_derivs();
-        let k3s = sys2.get_derivs();
+        let k3s = sys2.derivs();
 
         // k4 = f(x_i + h, y_i + k3 * h)
         let mut sys3 = self.bare_clone();
         sys3.set_derivs(&k3s);
-        sys3.step_by_dt(&dt);
+        sys3.step_states_by_dt(&dt);
         sys3.update_derivs();
-        let k4s = sys3.get_derivs();
+        let k4s = sys3.derivs();
 
         let mut delta: Vec<f64> = vec![];
         let zipped = zip!(k1s, k2s, k3s, k4s);
@@ -218,7 +194,7 @@ pub trait SolverVariantMethods: SolverBase {
             delta.push(1.0 / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4) * dt);
         }
 
-        self.step(delta);
+        self.step_states(delta);
         self.step_time(dt);
     }
 
@@ -243,7 +219,7 @@ pub trait SolverVariantMethods: SolverBase {
             let sc = self.sc().unwrap();
             // grab states for later use if solver steps are to be saved
             let states = if sc.save {
-                self.get_states()
+                self.states()
                     .clone()
                     .iter()
                     .zip(delta5.clone())
@@ -286,6 +262,7 @@ pub trait SolverVariantMethods: SolverBase {
                 // avoid dividing by a really small denominator
                 None
             };
+
             // pretty sure `dt` needs to be added here, as is being done
             sc.state.t_curr = t_curr + dt;
 
@@ -295,7 +272,14 @@ pub trait SolverVariantMethods: SolverBase {
             // if there is a relative error, use that
             // otherwise, use the absolute error
             let tol_met = match sc.state.norm_err_rel {
-                Some(norm_err_rel) => norm_err_rel <= sc.rtol,
+                Some(norm_err_rel) => {
+                    if sc.state.n_iter >= sc.max_iter - 2 {
+                        dbg!(sc.state.norm_err_rel);
+                        dbg!(norm_err_rel <= sc.rtol);
+                        dbg!(sc.rtol);
+                    }
+                    norm_err_rel <= sc.rtol
+                }
                 None => match sc.state.norm_err {
                     Some(norm_err) => norm_err <= sc.atol,
                     None => unreachable!(),
@@ -327,6 +311,10 @@ pub trait SolverVariantMethods: SolverBase {
             let break_cond =
                 sc.state.n_iter >= sc.max_iter || sc.state.norm_err.unwrap() < sc.atol || tol_met;
 
+            if sc.state.n_iter >= sc.max_iter - 2 {
+                dbg!(&sc);
+                dbg!(dt_coeff);
+            }
             if break_cond {
                 if sc.save {
                     sc.history.push(sc.state.clone());
@@ -336,7 +324,7 @@ pub trait SolverVariantMethods: SolverBase {
         };
 
         // increment forward with 5th order solution
-        self.step(delta5);
+        self.step_states(delta5);
         let sc = self.sc().unwrap();
         let dt_used = sc.state.dt;
         self.step_time(&dt_used);
@@ -349,41 +337,42 @@ pub trait SolverVariantMethods: SolverBase {
         self.update_derivs();
 
         // k1 = f(x_i, y_i)
-        let k1s = self.get_derivs();
+        let k1s = self.derivs();
 
         // k2 = f(x_i + 1 / 5 * h, y_i + 1 / 5 * k1 * h)
         let mut sys1 = self.bare_clone();
-        sys1.step_by_dt(&(dt / 5.0));
+        sys1.step_states_by_dt(&(dt / 5.0));
         sys1.update_derivs();
-        let k2s = sys1.get_derivs();
+        let k2s = sys1.derivs();
 
+        // TODO: make it so that the step is based on ` 3 / 40 * k1 * h + 9 / 40 * k2 * h`
         // k3 = f(x_i + 3 / 10 * h, y_i + 3 / 40 * k1 * h + 9 / 40 * k2 * h)
         let mut sys2 = self.bare_clone();
         sys2.set_derivs(&k2s);
-        sys2.step_by_dt(&(dt * 3.0 / 10.0));
+        sys2.step_states_by_dt(&(dt * 3.0 / 10.0));
         sys2.update_derivs();
-        let k3s = sys2.get_derivs();
+        let k3s = sys2.derivs();
 
         // k4 = f(x_i + 3 / 5 * h, y_i + 3 / 10 * k1 * h - 9 / 10 * k2 * h + 6 / 5 * k3 * h)
         let mut sys3 = self.bare_clone();
         sys3.set_derivs(&k3s);
-        sys3.step_by_dt(&(dt * 3.0 / 5.0));
+        sys3.step_states_by_dt(&(dt * 3.0 / 5.0));
         sys3.update_derivs();
-        let k4s = sys3.get_derivs();
+        let k4s = sys3.derivs();
 
         // k5 = f(x_i + h, y_i - 11 / 54 * k1 * h + 5 / 2 * k2 * h - 70 / 27 * k3 * h + 35 / 27 * k4 * h)
         let mut sys4 = self.bare_clone();
         sys4.set_derivs(&k4s);
-        sys4.step_by_dt(&dt);
+        sys4.step_states_by_dt(&dt);
         sys4.update_derivs();
-        let k5s = sys4.get_derivs();
+        let k5s = sys4.derivs();
 
         // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k4 * h)
         let mut sys5 = self.bare_clone();
         sys5.set_derivs(&k5s);
-        sys5.step_by_dt(&(dt * 7.0 / 8.0));
+        sys5.step_states_by_dt(&(dt * 7.0 / 8.0));
         sys5.update_derivs();
-        let k6s = sys5.get_derivs();
+        let k6s = sys5.derivs();
 
         // 4th order delta
         let mut delta4: Vec<f64> = vec![];

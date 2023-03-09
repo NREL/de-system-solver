@@ -35,75 +35,78 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
     let fn_update_derivs: TokenStream2 = attr.into();
 
     item_and_impl_block.extend::<TokenStream2>(quote! {
-        impl SolverBase for #ident {
-            /// assuming `set_derivs` has been called, steps
-            /// value of states by deriv * dt
-            fn step_by_dt(&mut self, dt: &f64) {
-                #(self.#fields_with_state.step_state_by_dt(dt);)*
-                self.step_time(dt);
-            }
-
-            /// steps dt without affecting states
-            fn step_time(&mut self, dt: &f64) {
-                self.state.time += dt;
-            }
-
-            /// assuming `set_derivs` has been called, steps
-            /// value of states by deriv * dt
-            fn step(&mut self, val: Vec<f64>) {
-                let mut iter = val.iter();
-                #(self.#fields_with_state.step_state(iter.next().unwrap().clone());)*
-            }
-
-            /// reset all time derivatives to zero for start of `solve_step`
-            fn reset_derivs(&mut self) {
-                #(self.#fields_with_state.set_deriv(0.0);)*
-            }
-
-            /// returns derivatives of states
-            fn get_derivs(&self) -> Vec<f64> {
-                let mut derivs: Vec<f64> = Vec::new();
-                #(derivs.push(self.#fields_with_state.deriv());)*
-                derivs
-            }
-
-            /// sets values of derivatives of states
-            fn set_derivs(&mut self, val: &Vec<f64>) {
-                let mut iter = val.iter();
-                #(self.#fields_with_state.set_deriv(iter.next().unwrap().clone());)*
-            }
-
+        impl HasStates for #ident {
             /// returns values of states
-            fn get_states(&self) -> Vec<f64> {
+            fn states(&self) -> Vec<f64> {
                 let mut states: Vec<f64> = Vec::new();
                 #(states.push(self.#fields_with_state.state());)*
                 states
             }
-
             /// sets values of states
             fn set_states(&mut self, val: Vec<f64>) {
                 let mut iter = val.iter();
                 #(self.#fields_with_state.set_state(iter.next().unwrap().clone());)*
             }
+            /// assuming `set_derivs` has been called, steps
+            /// value of states by deriv * dt
+            fn step_states_by_dt(&mut self, dt: &f64) {
+                #(self.#fields_with_state.step_state_by_dt(dt);)*
+                self.step_time(dt);
+            }
+            /// assuming `set_derivs` has been called, steps
+            /// value of states by deriv * dt
+            fn step_states(&mut self, val: Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.step_state(iter.next().unwrap().clone());)*
+            }
+            /// returns derivatives of states
+            fn derivs(&self) -> Vec<f64> {
+                let mut derivs: Vec<f64> = Vec::new();
+                #(derivs.push(self.#fields_with_state.deriv());)*
+                derivs
+            }
+            /// sets values of derivatives of states
+            fn set_derivs(&mut self, val: &Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.set_deriv(iter.next().unwrap().clone());)*
+            }
+            /// steps derivs by val
+            fn step_derivs(&mut self, val: Vec<f64>) {
+                let mut iter = val.iter();
+                #(self.#fields_with_state.step_deriv(iter.next().unwrap().clone());)*
+            }
+            /// returns value of storage variable (e.g. thermal capacitance \[J/K\])
+            fn storages(&self) -> Vec<f64> {
+                let mut storages: Vec<f64> = Vec::new();
+                #(storages.push(self.#fields_with_state.storage());)*
+                storages
+            }
+        }
 
+        impl SolverBase for #ident {
+            /// reset all time derivatives to zero for start of `solve_step`
+            fn reset_derivs(&mut self) {
+                #(self.#fields_with_state.set_deriv(0.0);)*
+            }
+            /// steps dt without affecting states
+            fn step_time(&mut self, dt: &f64) {
+                self.state.time += dt;
+            }
             fn sc(&self) -> Option<&AdaptiveSolverConfig> {
                 match &self.solver_type {
                     SolverTypes::RK45CashKarp(sc) => Some(sc),
                     _ => None,
                 }
             }
-
             fn sc_mut(&mut self) -> Option<&mut AdaptiveSolverConfig> {
                 match &mut self.solver_type {
                     SolverTypes::RK45CashKarp(sc) => Some(sc),
                     _ => None,
                 }
             }
-
             fn state(&self) -> &dess_core::SystemState {
                 &self.state
             }
-
             #fn_update_derivs
         }
 

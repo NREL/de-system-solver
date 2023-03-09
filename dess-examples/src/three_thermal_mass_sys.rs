@@ -217,6 +217,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
 
     // build and run adaptive RK45
     let mut sys_rk45 = mock_rk45_sys();
+    sys_rk45.sc_mut().unwrap().max_iter = 5;
 
     let t_rk45 = time_it!(sys_rk45.walk());
 
