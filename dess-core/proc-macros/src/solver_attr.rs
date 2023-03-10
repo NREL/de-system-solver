@@ -2,15 +2,22 @@ use crate::imports::*;
 
 /// Derives several methods for struct
 pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let ast_item = item.clone();
-    let ast = syn::parse_macro_input!(ast_item as syn::DeriveInput);
-    let ident = &ast.ident;
+    let item_struct = syn::parse_macro_input!(item as ItemStruct);
+    let ident = &item_struct.ident;
 
-    let fields: Vec<Field> = match ast.data {
-        syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
-        _ => abort!(&ident.span(), "only works on structs"),
+    let fn_update_derivs = match syn::parse::<ItemFn>(attr) {
+        Ok(fn_update_derivs) => fn_update_derivs,
+        Err(_err) => {
+            abort_call_site!("Must provide definition for `update_derivs`")
+        }
     };
 
+    match fn_update_derivs.sig.ident.to_string().as_str() {
+        "update_derivs" => {}
+        _ => abort_call_site!("`update_derivs` is the only function allowed"),
+    }
+
+    let fields = &item_struct.fields;
     let use_state_vec: Vec<bool> = fields
         .iter()
         .map(|field| {
@@ -30,10 +37,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let mut item_and_impl_block = TokenStream2::default();
 
-    item_and_impl_block.extend::<TokenStream2>(item.clone().into());
-
-    let fn_update_derivs: TokenStream2 = attr.into();
-
+    item_and_impl_block.extend::<TokenStream2>(item_struct.to_token_stream());
     item_and_impl_block.extend::<TokenStream2>(quote! {
         impl HasStates for #ident {
             /// returns values of states

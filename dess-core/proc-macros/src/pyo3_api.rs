@@ -2,16 +2,18 @@ use crate::imports::*;
 
 /// Derives several methods for struct
 pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
-    let ast_item = item.clone();
-    let mut ast = syn::parse_macro_input!(ast_item as syn::ItemStruct);
-    let ident = &ast.ident;
-    let has_walk = ast.attrs.iter().any(|attr| attr.path.is_ident("walk"));
+    let item_struct = syn::parse_macro_input!(item as syn::ItemStruct);
+    let ident = &item_struct.ident;
+    let has_walk = item_struct
+        .attrs
+        .iter()
+        .any(|attr| attr.path.is_ident("walk"));
 
     let mut item_block: TokenStream2 = quote! {
         #[derive(Pyo3ApiCleanup)]
         #[cfg_attr(feature = "pyo3", pyclass)]
     };
-    item_block.extend::<TokenStream2>(item.into());
+    item_block.extend::<TokenStream2>(item_struct.to_token_stream());
 
     let walk_block = if has_walk {
         quote! {
@@ -26,28 +28,25 @@ pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let mut pyo3_fns: Vec<TokenStream2> = Vec::new();
 
-    if let syn::Fields::Named(syn::FieldsNamed { named, .. }) = &mut ast.fields {
-        // struct with named fields
-        for field in named.iter_mut() {
-            let fname = field.ident.as_ref().unwrap();
+    let mut fields = item_struct.fields;
 
-            // Conditionally add setter function
-            if !field.attrs.iter().any(|a| a.path.is_ident("skip_get")) {
-                let fn_get_fname: TokenStream2 =
-                    format!("fn get_{}(&mut self)", &fname).parse().unwrap();
-                let field_type = &field.ty;
-                let fn_body: TokenStream2 = format!("self.{}.clone()", &fname).parse().unwrap();
-                let new_fn = quote! {
-                    #[getter]
-                    #fn_get_fname -> #field_type {
-                        #fn_body
-                    }
-                };
-                pyo3_fns.push(new_fn);
-            }
+    for field in fields.iter_mut() {
+        let fname = field.ident.as_ref().unwrap();
+
+        // Conditionally add setter function
+        if !field.attrs.iter().any(|a| a.path.is_ident("skip_get")) {
+            let fn_get_fname: TokenStream2 =
+                format!("fn get_{}(&mut self)", &fname).parse().unwrap();
+            let field_type = &field.ty;
+            let fn_body: TokenStream2 = format!("self.{}.clone()", &fname).parse().unwrap();
+            let new_fn = quote! {
+                #[getter]
+                #fn_get_fname -> #field_type {
+                    #fn_body
+                }
+            };
+            pyo3_fns.push(new_fn);
         }
-    } else {
-        abort!(&ident.span(), "Only works on structs with named fields.");
     }
 
     let attr_ts2: TokenStream2 = attr.into();

@@ -1,13 +1,9 @@
 use crate::imports::*;
 
 pub(crate) fn history_methods_derive(input: TokenStream) -> TokenStream {
-    let ast = syn::parse_macro_input!(input as syn::DeriveInput);
-    let ident = &ast.ident;
-
-    let fields: Vec<Field> = match ast.data {
-        syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
-        _ => abort!(&ident.span(), "only works on structs"),
-    };
+    let item_struct = syn::parse_macro_input!(input as ItemStruct);
+    let ident = &item_struct.ident;
+    let fields = item_struct.fields;
 
     let struct_has_state = fields
         .iter()

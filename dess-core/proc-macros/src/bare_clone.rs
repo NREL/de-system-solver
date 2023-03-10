@@ -1,13 +1,9 @@
 use crate::imports::*;
 
 pub(crate) fn bare_clone_derive(input: TokenStream) -> TokenStream {
-    let ast = syn::parse_macro_input!(input as syn::DeriveInput);
-    let ident = &ast.ident;
-
-    let fields: Vec<Field> = match ast.data {
-        syn::Data::Struct(s) => s.fields.iter().map(|x| x.clone()).collect(),
-        _ => abort!(&ident.span(), "only works on structs"),
-    };
+    let item_struct = syn::parse_macro_input!(input as syn::ItemStruct);
+    let ident = &item_struct.ident;
+    let fields = item_struct.fields;
 
     // all fields with `use_state` or `save_state` attribute
     let has_bare_clone: Vec<bool> = fields

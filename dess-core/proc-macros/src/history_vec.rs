@@ -2,22 +2,14 @@ use crate::imports::*;
 use crate::utilities::TokenStreamIterator;
 
 pub(crate) fn history_vec_derive(input: TokenStream) -> TokenStream {
-    let ast: DeriveInput = syn::parse(input).unwrap();
-    let original_name = &ast.ident;
+    let item_struct: ItemStruct = syn::parse_macro_input!(input as ItemStruct);
+    let original_name = &item_struct.ident;
     let original_name_str: String = original_name.to_string();
     let new_name = Ident::new(
         &format!("{}HistoryVec", original_name.to_token_stream()),
         original_name.span(),
     );
-    let mut fields = Vec::new();
-    match ast.data {
-        syn::Data::Struct(s) => {
-            for field in s.fields.iter() {
-                fields.push(field.clone());
-            }
-        }
-        _ => abort!(&ast.span(), "#[derive(HistoryVec)] only works on structs"),
-    }
+    let fields = item_struct.fields;
     let field_names = fields
         .iter()
         .map(|f| f.ident.as_ref().unwrap())
