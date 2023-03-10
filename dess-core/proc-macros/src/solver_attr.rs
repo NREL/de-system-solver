@@ -143,7 +143,6 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         SolverTypes::RK45CashKarp(_sc) => {
                             let dt = self.rk45_cash_karp(&dt);
                         },
-                        _ => todo!(),
                     }
                 }
             }

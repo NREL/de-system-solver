@@ -5,22 +5,18 @@ pub enum SolverTypes {
     /// Euler with fixed time step.
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
-    EulerFixed {
-        dt: f64,
-    },
+    EulerFixed { dt: f64 },
     /// Runge-Kutta 4th order with fixed time step.  
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
-    RK4Fixed {
-        dt: f64,
-    },
+    RK4Fixed { dt: f64 },
     // TODO: add this stuff back into fixed options
     // /// time step to use if `t_report` is larger than `dt`
     // dt: f64,
     /// Runge-Kutta 4/5 order adaptive, Cash-Karp method
     /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
     RK45CashKarp(AdaptiveSolverConfig),
-    ToDo,
+    // TODO: add more variants here
 }
 
 impl Default for SolverTypes {
@@ -208,7 +204,7 @@ pub trait SolverVariantMethods: SolverBase {
 
         // loop to find `dt` that results in meeting tolerance
         // and does not exceed `dt_max`
-        let delta5 = loop {
+        let (delta5, dt_used) = loop {
             let sc = self.sc().unwrap();
             let dt = sc.state.dt;
 
@@ -232,12 +228,12 @@ pub trait SolverVariantMethods: SolverBase {
             let t_curr = self.state().time.clone();
 
             // mutably borrow sc to update it
-            let sc = self.sc_mut().unwrap();
+            let sc_mut = self.sc_mut().unwrap();
 
             // update `n_iter`, `norm_err`, `norm_err_rel`, `t_curr`, and `states`
             // still need to update dt at some point
-            sc.state.n_iter += 1;
-            sc.state.norm_err = Some(
+            sc_mut.state.n_iter += 1;
+            sc_mut.state.norm_err = Some(
                 delta4
                     .iter()
                     .zip(&delta5)
@@ -255,26 +251,26 @@ pub trait SolverVariantMethods: SolverBase {
                 .sum::<f64>()
                 .sqrt();
 
-            sc.state.norm_err_rel = if norm_d5 > sc.atol {
+            sc_mut.state.norm_err_rel = if norm_d5 > sc_mut.atol {
                 // `unwrap` is ok here because `norm_err` will always be some by this point
-                Some(sc.state.norm_err.unwrap() / norm_d5)
+                Some(sc_mut.state.norm_err.unwrap() / norm_d5)
             } else {
                 // avoid dividing by a really small denominator
                 None
             };
 
             // pretty sure `dt` needs to be added here, as is being done
-            sc.state.t_curr = t_curr + dt;
+            sc_mut.state.t_curr = t_curr + dt;
 
-            sc.state.states = states;
+            sc_mut.state.states = states;
 
             // conditions for breaking loop
             // if there is a relative error, use that
             // otherwise, use the absolute error
-            let tol_met = match sc.state.norm_err_rel {
-                Some(norm_err_rel) => norm_err_rel <= sc.rtol,
-                None => match sc.state.norm_err {
-                    Some(norm_err) => norm_err <= sc.atol,
+            let tol_met = match sc_mut.state.norm_err_rel {
+                Some(norm_err_rel) => norm_err_rel <= sc_mut.rtol,
+                None => match sc_mut.state.norm_err {
+                    Some(norm_err) => norm_err <= sc_mut.atol,
                     None => unreachable!(),
                 },
             };
@@ -283,39 +279,47 @@ pub trait SolverVariantMethods: SolverBase {
             // regardless of whether break condition is met,
             // adapt dt based on `rtol` if it is Some; use `atol` otherwise
             // this adaptation strategy came directly from Chapra and Canale's section on adapting the time step
-            let dt_coeff = match sc.state.norm_err_rel {
+            let dt_coeff = match sc_mut.state.norm_err_rel {
                 Some(norm_err_rel) => {
-                    (sc.rtol / norm_err_rel).powf(if norm_err_rel <= sc.rtol { 0.2 } else { 0.25 })
+                    (sc_mut.rtol / norm_err_rel).powf(if norm_err_rel <= sc_mut.rtol {
+                        0.2
+                    } else {
+                        0.25
+                    })
                 }
                 None => {
-                    match sc.state.norm_err {
-                        Some(norm_err) => {
-                            (sc.atol / norm_err).powf(if norm_err <= sc.atol { 0.2 } else { 0.25 })
-                        }
+                    match sc_mut.state.norm_err {
+                        Some(norm_err) => (sc_mut.atol / norm_err)
+                            .powf(if norm_err <= sc_mut.atol { 0.2 } else { 0.25 }),
                         None => 1., // don't adapt if there is not enough information to do so
                     }
                 }
             };
-            sc.state.dt *= dt_coeff;
 
             // if tolerance is achieved here, then we proceed to the next time step, and
             // `dt` will be limited to `dt_max` at the start of the next time step.  If tolerance
             // is not achieved, then time step will be decreased.
-            let break_cond =
-                sc.state.n_iter >= sc.max_iter || sc.state.norm_err.unwrap() < sc.atol || tol_met;
+            let break_cond = sc_mut.state.n_iter >= sc_mut.max_iter
+                || sc_mut.state.norm_err.unwrap() < sc_mut.atol
+                || tol_met;
 
             if break_cond {
-                if sc.save {
-                    sc.history.push(sc.state.clone());
+                // save before modifying dt
+                if sc_mut.save {
+                    sc_mut.history.push(sc_mut.state.clone());
                 }
-                break delta5;
+                // store used dt before adapting
+                let dt_used = sc_mut.state.dt;
+                // adapt for next solver time step
+                sc_mut.state.dt *= dt_coeff;
+                break (delta5, dt_used);
             };
+            // adapt for next iteration in current time step
+            sc_mut.state.dt *= dt_coeff;
         };
 
         // increment forward with 5th order solution
         self.step_states(delta5);
-        let sc = self.sc().unwrap();
-        let dt_used = sc.state.dt;
         self.step_time(&dt_used);
         // dbg!(self.state.time);
         // dbg!(self.t_report[self.state.i]);
