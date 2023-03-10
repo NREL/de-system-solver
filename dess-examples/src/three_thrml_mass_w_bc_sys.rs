@@ -264,34 +264,6 @@ pub fn run_three_tm_w_bc_sys() {
         ..mock_rk45_sys()
     };
     sys_rk45_with_save.walk();
-    plot_stuff(sys_rk45_with_save);
-}
-
-pub fn plot_stuff(sys: System3TMWithBC) {
-    let out_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
-        .parent()
-        .unwrap()
-        .to_path_buf()
-        .join("target/artifacts/");
-    DirBuilder::new()
-        .recursive(true)
-        .create(out_dir.clone())
-        .unwrap();
-    let out_file = out_dir.join("sys_3TM_w_bc_rk45.png");
-    let out_file_str = out_file.as_os_str().to_str().unwrap();
-
-    let root_area = BitMapBackend::new(&out_file, (1024, 768)).into_drawing_area();
-
-    root_area.fill(&WHITE).unwrap();
-
-    let root_height = root_area.dim_in_pixel().1;
-
-    let (upper, lower) = root_area.split_vertically(root_height * 2 / 3);
-    let (upper, middle) = upper.split_vertically(root_height / 3);
-
-    // To avoid the IO failure being ignored silently, we manually call the present function
-    root_area.present().unwrap();
-    println!("Result has been saved to {out_file_str}");
 }
 
 // #[cfg(test)]
