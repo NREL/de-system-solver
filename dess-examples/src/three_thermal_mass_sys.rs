@@ -216,8 +216,6 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
 
     // build and run adaptive RK45
     let mut sys_rk45 = mock_rk45_sys();
-    sys_rk45.sc_mut().unwrap().max_iter = 5;
-
     let t_rk45 = time_it!(sys_rk45.walk());
 
     let dt = sys_rk45.t_report[1] - sys_rk45.t_report.first().unwrap();
@@ -235,7 +233,6 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .unwrap()
             .to_path_buf()
             .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
-
         sys_rk45
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();

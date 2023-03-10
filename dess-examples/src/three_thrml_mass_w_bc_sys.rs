@@ -253,17 +253,6 @@ pub fn run_three_tm_w_bc_sys() {
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
     }
-
-    let mut sys_rk45_with_save = System3TMWithBC {
-        solver_type: SolverTypes::RK45CashKarp(AdaptiveSolverConfig {
-            save: true,
-            max_iter: 5,
-            ..Default::default()
-        }),
-        t_report: vec![0.0, 0.33, 0.66, 1.0],
-        ..mock_rk45_sys()
-    };
-    sys_rk45_with_save.walk();
 }
 
 // #[cfg(test)]
