@@ -77,7 +77,7 @@ impl AdaptiveSolverConfig {
         Self {
             dt_max: dt_max.unwrap_or(10.),
             max_iter: max_iter.unwrap_or(2),
-            rtol: rtol.unwrap_or(1e-6),
+            rtol: rtol.unwrap_or(1e-3),
             atol: atol.unwrap_or(1e-9),
             save,
             state,
