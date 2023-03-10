@@ -31,7 +31,7 @@ sys_small_dt = dess_pyo3.System3TMWithBC(
 )
 t0 = time.perf_counter()
 sys_small_dt.walk()
-print(f"small dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"dt={dt_small:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_medium_dt = dess_pyo3.System3TMWithBC(
     f'{{"EulerFixed": {{"dt": {dt_medium}}}}}',
@@ -44,7 +44,7 @@ sys_medium_dt = dess_pyo3.System3TMWithBC(
 )
 t0 = time.perf_counter()
 sys_medium_dt.walk()
-print(f"medium dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"dt={dt_medium:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_large_dt = dess_pyo3.System3TMWithBC(
     f'{{"EulerFixed": {{"dt": {dt_large}}}}}',
@@ -57,7 +57,7 @@ sys_large_dt = dess_pyo3.System3TMWithBC(
 )
 t0 = time.perf_counter()
 sys_large_dt.walk()
-print(f"large dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_rk4_small_dt = dess_pyo3.System3TMWithBC(
     f'{{"RK4Fixed": {{"dt": {dt_small}}}}}',
@@ -70,7 +70,7 @@ sys_rk4_small_dt = dess_pyo3.System3TMWithBC(
 )
 t0 = time.perf_counter()
 sys_rk4_small_dt.walk()
-print(f"rk4 small dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk4 dt={dt_small:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_rk4_medium_dt = dess_pyo3.System3TMWithBC(
     f'{{"RK4Fixed": {{"dt": {dt_medium}}}}}',
@@ -83,7 +83,7 @@ sys_rk4_medium_dt = dess_pyo3.System3TMWithBC(
 )
 t0 = time.perf_counter()
 sys_rk4_medium_dt.walk()
-print(f"rk4 medium dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk4 dt={dt_medium:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 sys_rk4_large_dt = dess_pyo3.System3TMWithBC(
     f'{{"RK4Fixed": {{"dt": {dt_large}}}}}',
@@ -96,11 +96,11 @@ sys_rk4_large_dt = dess_pyo3.System3TMWithBC(
 )
 t0 = time.perf_counter()
 sys_rk4_large_dt.walk()
-print(f"rk4 large dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk4 dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 max_iter = 5
-rtol = 1e-5
-dt_init = 1e-2
+rtol = 1e-2
+dt_init = 1e-3
 solver = dess_pyo3.AdaptiveSolverConfig(
     dt_init=dt_init,
     max_iter=max_iter,
@@ -118,7 +118,10 @@ sys_rk45 = dess_pyo3.System3TMWithBC.new_rk45_cash_karp(
 )
 t0 = time.perf_counter()
 sys_rk45.walk()
-print(f"rk45 dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk45 elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk45 rtol={sys_rk45.solver_conf.rtol}")
+print(f"rk45 dt_init={dt_init}")
+
 
 solver_save = dess_pyo3.AdaptiveSolverConfig(
     dt_init=dt_init,
@@ -249,7 +252,9 @@ sys_rk45 = dess_pyo3.System3TMWithBC.new_rk45_cash_karp(
 )
 t0 = time.perf_counter()
 sys_rk45.walk()
-print(f"rk45 dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk45 elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk45 rtol={sys_rk45.solver_conf.rtol}")
+print(f"rk45 dt_init={dt_init}")
 
 fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
@@ -278,7 +283,7 @@ ax[1].plot(
     [sys_rk45.history.time[0], sys_rk45.history.time[-1]],
     [sys_rk45.solver_conf.rtol] * 2,
     label='rtol',
-    color='k'
+    color='k',
 )
 ax[1].set_ylabel('Norm Error')
 ax[1].legend(loc='right')
@@ -293,3 +298,11 @@ ax[-1].set_ylabel('dt')
 ax[-1].set_xlabel('Sim. Time [s]')
 
 # %%
+
+fig, ax = plt.subplots()
+ax.plot(
+    sys_rk45.solver_conf.history.t_curr,
+    np.array(sys_rk45.solver_conf.history.norm_err_rel) < sys_rk45.solver_conf.rtol
+)
+ax.set_xlabel("Time [s]")
+ax.set_ylabel('rtol met')
