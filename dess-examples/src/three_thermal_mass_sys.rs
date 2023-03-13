@@ -68,7 +68,7 @@ use crate::imports::*;
 #[solver(
     /// Updates time derivatives of states.
     /// This method must be user defined in `solver` macro args.
-    fn update_drivs(&mut self) {
+    fn update_derivs(&mut self) {
         self.reset_derivs();
         connect_states!(self, (m1, m2, h12), (m2, m3, h23));
         update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
