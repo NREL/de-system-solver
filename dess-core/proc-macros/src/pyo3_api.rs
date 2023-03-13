@@ -1,7 +1,12 @@
 use crate::imports::*;
+use crate::utilities::parse_ts_as_fn_defs;
 
 /// Derives several methods for struct
 pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let forbidden_fn_names = vec!["default".into(), "default_py".into()];
+    let attr_ts2: TokenStream2 =
+        parse_ts_as_fn_defs(attr.into(), vec![], false, forbidden_fn_names);
+
     let item_struct = syn::parse_macro_input!(item as syn::ItemStruct);
     let ident = &item_struct.ident;
     let has_walk = item_struct
@@ -48,8 +53,6 @@ pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
             pyo3_fns.push(new_fn);
         }
     }
-
-    let attr_ts2: TokenStream2 = attr.into();
 
     let py_impl_block = quote! {
         #[cfg(feature = "pyo3")]
