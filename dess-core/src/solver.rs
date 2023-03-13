@@ -279,6 +279,8 @@ pub trait SolverVariantMethods: SolverBase {
             // regardless of whether break condition is met,
             // adapt dt based on `rtol` if it is Some; use `atol` otherwise
             // this adaptation strategy came directly from Chapra and Canale's section on adapting the time step
+            // The approach is to adapt more aggressively to meet rtol when decreasing the time step size
+            // than when increasing time step size.
             let dt_coeff = match sc_mut.state.norm_err_rel {
                 Some(norm_err_rel) => {
                     (sc_mut.rtol / norm_err_rel).powf(if norm_err_rel <= sc_mut.rtol {
