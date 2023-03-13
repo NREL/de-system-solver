@@ -38,6 +38,10 @@ pub fn is_vec(field: &Field) -> bool {
     false
 }
 
+/// accepts `attr` TokenStream from attribute-like proc macro and returns
+/// TokenStream2 of fn defs that are in `expected_fn_names` and/or not in `forbidden_fn_names`.  
+/// If `expected_exlusive` is true, only values in `expected_fn_names` are allowed.  
+/// Raises locationally useful errors if mistakes are made in formatting or whatnot.  
 pub fn parse_ts_as_fn_defs(
     attr: TokenStream,
     mut expected_fn_names: Vec<String>,
