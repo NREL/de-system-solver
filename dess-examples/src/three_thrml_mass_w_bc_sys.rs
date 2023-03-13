@@ -77,16 +77,6 @@ use crate::imports::*;
             self.m1.state.temp = 10.0;
         }
     }
-
-    fn update_derivs3(&mut self) {
-        self.reset_derivs();
-        connect_states!(self, (m1, m2, h12), (m2, m3, h23));
-        update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
-        if self.state.time > 0.5 {
-            // change in temperature to test what the solver does
-            self.m1.state.temp = 10.0;
-        }
-    }
 )]
 #[common_derives]
 #[derive(Default)]
