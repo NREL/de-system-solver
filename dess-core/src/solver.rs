@@ -34,6 +34,7 @@ impl Default for SolverTypes {
         rtol: Option<f64>,
         atol: Option<f64>,
         save: Option<bool>,
+        save_states: Option<bool>,
     ) -> Self {
         Self::new(
             dt_init,
@@ -42,6 +43,7 @@ impl Default for SolverTypes {
             rtol,
             atol,
             save.unwrap_or_default(),
+            save_states.unwrap_or_default(),
         )
     }
 )]
@@ -57,6 +59,9 @@ pub struct AdaptiveSolverConfig {
     pub rtol: f64,
     /// save iteration history
     pub save: bool,
+    /// save states in iteration history
+    /// this is computationally expensive and should be generally `false`
+    pub save_states: bool,
     /// solver state
     pub state: SolverState,
     /// history of solver state
@@ -71,6 +76,7 @@ impl AdaptiveSolverConfig {
         rtol: Option<f64>,
         atol: Option<f64>,
         save: bool,
+        save_states: bool,
     ) -> Self {
         let mut state = SolverState::default();
         state.dt = dt_init;
@@ -80,6 +86,7 @@ impl AdaptiveSolverConfig {
             rtol: rtol.unwrap_or(1e-3),
             atol: atol.unwrap_or(1e-9),
             save,
+            save_states,
             state,
             history: Default::default(),
         }
@@ -88,7 +95,7 @@ impl AdaptiveSolverConfig {
 
 impl Default for AdaptiveSolverConfig {
     fn default() -> Self {
-        Self::new(0.1, None, None, None, None, false)
+        Self::new(0.1, None, None, None, None, false, false)
     }
 }
 
@@ -262,7 +269,9 @@ pub trait SolverVariantMethods: SolverBase {
             // pretty sure `dt` needs to be added here, as is being done
             sc_mut.state.t_curr = t_curr + dt;
 
-            sc_mut.state.states = states;
+            if sc_mut.save_states {
+                sc_mut.state.states = states;
+            }
 
             // conditions for breaking loop
             // if there is a relative error, use that

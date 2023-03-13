@@ -4,6 +4,7 @@ solver_type: !RK45CashKarp
   atol: 1e-9
   rtol: 0.001
   save: false
+  save_states: false
   state:
     dt: 0.005297171185539446
     n_iter: 1
