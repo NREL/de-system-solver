@@ -5,17 +5,52 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
     let item_struct = syn::parse_macro_input!(item as ItemStruct);
     let ident = &item_struct.ident;
 
-    let fn_update_derivs = match syn::parse::<ItemFn>(attr) {
-        Ok(fn_update_derivs) => fn_update_derivs,
-        Err(_err) => {
-            abort_call_site!("Must provide definition for `update_derivs`")
+    let attr0 = TokenStream2::from(attr.clone());
+    let impl_block = quote! {
+        impl Dummy { // this name doesn't really matter as it won't get used
+            #attr0
         }
-    };
-
-    match fn_update_derivs.sig.ident.to_string().as_str() {
-        "update_derivs" => {}
-        _ => abort_call_site!("`update_derivs` is the only function allowed"),
     }
+    .into();
+    // let item_impl = syn::parse_macro_input!(impl_block as syn::ItemImpl);
+    let item_impl = syn::parse::<syn::ItemImpl>(impl_block)
+        .map_err(|_| abort_call_site!("Only function definitions allowed here."))
+        .unwrap();
+
+    let mut fn_update_derivs = TokenStream2::new();
+
+    for impl_item in item_impl.items {
+        match impl_item {
+            syn::ImplItem::Method(item_meth) => {
+                fn_update_derivs = item_meth.clone().to_token_stream();
+                match item_meth {
+                    syn::ImplItemMethod { .. } => {
+                        // check signature here
+                        dbg!();
+                    },
+                    _ => abort_call_site!("That dog don't hunt."),
+                }
+            }
+            _ => abort_call_site!("Expected only method definitions in `solver` argument"),
+        }
+    }
+
+    // let fn_update_derivs = match syn::parse::<ItemFn>(attr) {
+    //     Ok(fn_update_derivs) => fn_update_derivs,
+    //     Err(_err) => {
+    //         abort_call_site!("Must provide definition for `update_derivs`")
+    //     }
+    // };
+
+    // match syn::ItemFn::from(fn_update_derivs)
+    //     .sig
+    //     .ident
+    //     .to_string()
+    //     .as_str()
+    // {
+    //     "update_derivs" => {}
+    //     _ => abort_call_site!("`update_derivs` is the only function allowed"),
+    // }
 
     let fields = &item_struct.fields;
     let use_state_vec: Vec<bool> = fields
