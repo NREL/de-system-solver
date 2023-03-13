@@ -5,10 +5,10 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
     let item_struct = syn::parse_macro_input!(item as ItemStruct);
     let ident = &item_struct.ident;
 
-    let attr0 = TokenStream2::from(attr.clone());
+    let attr = TokenStream2::from(attr);
     let impl_block = quote! {
         impl Dummy { // this name doesn't really matter as it won't get used
-            #attr0
+            #attr
         }
     }
     .into();
@@ -17,40 +17,41 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
         .map_err(|_| abort_call_site!("Only function definitions allowed here."))
         .unwrap();
 
-    let mut fn_update_derivs = TokenStream2::new();
+    let expected_exclusive = true;
+    let mut fn_from_attr = TokenStream2::new();
+    let mut expected_fn_names = Vec::<String>::from(["update_derivs".into()]);
+    let forbidden_fn_names = Vec::<String>::new();
 
     for impl_item in item_impl.items {
-        match impl_item {
+        match &impl_item {
             syn::ImplItem::Method(item_meth) => {
-                fn_update_derivs = item_meth.clone().to_token_stream();
-                match item_meth {
-                    syn::ImplItemMethod { .. } => {
-                        // check signature here
-                        dbg!();
-                    },
-                    _ => abort_call_site!("That dog don't hunt."),
+                let sig = &item_meth.sig;
+                fn_from_attr.extend(item_meth.clone().to_token_stream());
+                // check signature
+                if forbidden_fn_names.contains(&sig.ident.to_token_stream().to_string()) {
+                    abort!(&impl_item.span(), "")
                 }
+
+                let index = expected_fn_names
+                    .iter()
+                    .position(|x| *x == sig.ident.to_token_stream().to_string());
+
+                match index {
+                    Some(i) => {
+                        expected_fn_names.remove(i);
+                    }
+                    _ => {}
+                }
+                // remove the matching name from the vec to avoid checking again
+                // at the end of iteration, this vec should be empty
             }
             _ => abort_call_site!("Expected only method definitions in `solver` argument"),
         }
     }
 
-    // let fn_update_derivs = match syn::parse::<ItemFn>(attr) {
-    //     Ok(fn_update_derivs) => fn_update_derivs,
-    //     Err(_err) => {
-    //         abort_call_site!("Must provide definition for `update_derivs`")
-    //     }
-    // };
-
-    // match syn::ItemFn::from(fn_update_derivs)
-    //     .sig
-    //     .ident
-    //     .to_string()
-    //     .as_str()
-    // {
-    //     "update_derivs" => {}
-    //     _ => abort_call_site!("`update_derivs` is the only function allowed"),
-    // }
+    if !expected_fn_names.is_empty() {
+        abort_call_site!(format!("Expected fn def for {:?}", expected_fn_names));
+    }
 
     let fields = &item_struct.fields;
     let use_state_vec: Vec<bool> = fields
@@ -146,7 +147,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             fn state(&self) -> &dess_core::SystemState {
                 &self.state
             }
-            #fn_update_derivs
+            #fn_from_attr
         }
 
         impl SolverVariantMethods for #ident{}
