@@ -128,6 +128,7 @@ solver_save = dess_pyo3.AdaptiveSolverConfig(
     max_iter=max_iter,
     rtol=rtol,
     save=True,
+    save_states=True,
 )
 sys_rk45_save = dess_pyo3.System3TMWithBC.new_rk45_cash_karp(
     solver_save,
@@ -239,6 +240,7 @@ solver = dess_pyo3.AdaptiveSolverConfig(
     max_iter=max_iter,
     rtol=rtol,
     save=True,
+    save_states=True,
 )
 
 sys_rk45 = dess_pyo3.System3TMWithBC.new_rk45_cash_karp(
