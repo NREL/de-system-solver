@@ -1,5 +1,5 @@
 [package]
-name = "dess-pyo3"
+name = "dess-examples-pyo3"
 version = "0.1.0"
 edition = "2021"
 authors = ["Chad Baker <chad.baker@nrel.gov>"]

@@ -3,7 +3,7 @@ requires = ["maturin>=0.14,<0.15"]
 build-backend = "maturin"
 
 [project]
-name = "dess-pyo3"
+name = "dess-examples-pyo3"
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Rust",
