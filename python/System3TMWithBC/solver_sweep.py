@@ -12,7 +12,7 @@ sns.set()
 m1 = dess_pyo3.ThermalReservoir(8.5)
 m2 = dess_pyo3.ThermalMass(2.0, 10.0)
 h12 = dess_pyo3.Conductance(5.0)
-m3 = dess_pyo3.ThermalMass(1.5, 12.0)
+m3 = dess_pyo3.ThermalMass(1.5, 10.0)
 h23 = dess_pyo3.Conductance(5.0)
 
 t_report = np.linspace(0.0, 1.0, 11).tolist()
@@ -98,7 +98,7 @@ t0 = time.perf_counter()
 sys_rk4_large_dt.walk()
 print(f"rk4 dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
-max_iter = 5
+max_iter = 10
 rtol = 1e-3
 dt_init = 1e-3
 solver = dess_pyo3.AdaptiveSolverConfig(
@@ -148,7 +148,7 @@ default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
     sys_small_dt.history.time,
-    np.array(sys_small_dt.m2.history.temp),
+    np.array(sys_small_dt.m3.history.temp),
     label=f'euler',
     color=default_colors[0],
     markersize=markersize,
@@ -167,16 +167,16 @@ ax[0].plot(
 ax[0].plot(
     sys_rk45_save.solver_conf.history.t_curr,
     np.array([
-        states[1]
+        states[2]
         for states in sys_rk45_save.solver_conf.history.states]),
-    label=f'm2 rk45',
+    label=f'm3 rk45',
     color=default_colors[2],
     markersize=markersize,
 )
 ax[0].set_title(f'dt = {dt_small:.3g}')
 ax[1].plot(
     sys_small_dt.history.time,
-    np.array(sys_medium_dt.m2.history.temp),
+    np.array(sys_medium_dt.m3.history.temp),
     color=default_colors[0],
     markersize=markersize,
     marker='s',
@@ -185,7 +185,7 @@ ax[1].plot(
 ax[1].set_title(f'dt = {dt_medium:.3g}')
 ax[2].plot(
     sys_small_dt.history.time,
-    np.array(sys_large_dt.m2.history.temp),
+    np.array(sys_large_dt.m3.history.temp),
     color=default_colors[0],
     markersize=markersize,
     marker='s',
@@ -194,7 +194,7 @@ ax[2].plot(
 ax[2].set_title(f'dt = {dt_large:.3g}')
 ax[0].plot(
     sys_small_dt.history.time,
-    np.array(sys_rk4_small_dt.m2.history.temp),
+    np.array(sys_rk4_small_dt.m3.history.temp),
     label=f'rk4',
     color=default_colors[1],
     markersize=markersize,
@@ -203,7 +203,7 @@ ax[0].plot(
 )
 ax[1].plot(
     sys_small_dt.history.time,
-    np.array(sys_rk4_medium_dt.m2.history.temp),
+    np.array(sys_rk4_medium_dt.m3.history.temp),
     color=default_colors[1],
     markersize=markersize,
     marker='o',
@@ -211,7 +211,7 @@ ax[1].plot(
 )
 ax[2].plot(
     sys_small_dt.history.time,
-    np.array(sys_rk4_large_dt.m2.history.temp),
+    np.array(sys_rk4_large_dt.m3.history.temp),
     color=default_colors[1],
     markersize=markersize,
     marker='o',
@@ -220,7 +220,7 @@ ax[2].plot(
 
 ax[0].plot(
     sys_rk45.history.time,
-    np.array(sys_rk45.m2.history.temp),
+    np.array(sys_rk45.m3.history.temp),
     label=f'rk45',
     color=default_colors[0],
     markersize=markersize + 2,
