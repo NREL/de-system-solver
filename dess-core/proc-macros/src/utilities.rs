@@ -38,6 +38,8 @@ pub fn is_vec(field: &Field) -> bool {
     false
 }
 
+const ONLY_FN_MSG: &str = "Only function definitions allowed here.";
+
 /// accepts `attr` TokenStream from attribute-like proc macro and returns
 /// TokenStream2 of fn defs that are in `expected_fn_names` and/or not in `forbidden_fn_names`.  
 /// If `expected_exlusive` is true, only values in `expected_fn_names` are allowed.  
@@ -57,7 +59,7 @@ pub fn parse_ts_as_fn_defs(
     .into();
     // let item_impl = syn::parse_macro_input!(impl_block as syn::ItemImpl);
     let item_impl = syn::parse::<syn::ItemImpl>(impl_block)
-        .map_err(|_| abort_call_site!("Only function definitions allowed here."))
+        .map_err(|_| abort_call_site!(ONLY_FN_MSG))
         .unwrap();
 
     let mut fn_from_attr = TokenStream2::new();
@@ -89,7 +91,7 @@ pub fn parse_ts_as_fn_defs(
                 // remove the matching name from the vec to avoid checking again
                 // at the end of iteration, this vec should be empty
             }
-            _ => unreachable!(),
+            _ => abort_call_site!(ONLY_FN_MSG),
         }
     }
 
