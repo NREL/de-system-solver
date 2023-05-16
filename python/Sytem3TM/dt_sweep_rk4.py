@@ -1,9 +1,8 @@
 # %%
 import dess_pyo3
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import time
+import matplotlib.pyplot as plt # type: ignore
+import seaborn as sns # type: ignore
 sns.set()
 
 # %%
@@ -23,7 +22,7 @@ dt_ultra_medium = (t_report_dt_sweep[1] - t_report_dt_sweep[0]) * 1.0
 dt_large = (t_report_dt_sweep[1] - t_report_dt_sweep[0]) * 2.0
 
 
-def trim_t_report(dt) -> np.array:
+def trim_t_report(dt) -> np.ndarray:
     """
     Returns `t_report` with spacing appropriate for dt
     """

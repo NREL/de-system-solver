@@ -1,8 +1,8 @@
 # %%
 import dess_pyo3
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import matplotlib.pyplot as plt # type: ignore
+import seaborn as sns # type: ignore
 import time
 sns.set()
 
@@ -129,7 +129,7 @@ fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_small_dt.m1.history.temp),
-    label=f'euler',
+    label='euler',
     color=default_colors[0],
     markersize=markersize,
     linestyle='',
@@ -157,7 +157,7 @@ ax[2].set_title(f'dt = {dt_large:.3g}')
 ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_rk4_small_dt.m1.history.temp),
-    label=f'rk4',
+    label='rk4',
     color=default_colors[1],
     markersize=markersize,
     linestyle='',
@@ -183,7 +183,7 @@ ax[2].plot(
 ax[0].plot(
     sys_rk45.history.time,
     np.array(sys_rk45.m1.history.temp),
-    label=f'rk45',
+    label='rk45',
     color=default_colors[0],
     markersize=markersize,
     linestyle='',

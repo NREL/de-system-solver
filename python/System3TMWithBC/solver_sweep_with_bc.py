@@ -1,8 +1,8 @@
 # %%
 import dess_pyo3
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import matplotlib.pyplot as plt # type: ignore
+import seaborn as sns # type: ignore
 import time
 sns.set()
 
@@ -149,7 +149,7 @@ fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_small_dt.m3.history.temp),
-    label=f'euler',
+    label='euler',
     color=default_colors[0],
     markersize=markersize,
     linestyle='',
@@ -160,7 +160,7 @@ ax[0].plot(
     np.array([
         states[0]
         for states in sys_rk45_save.solver_conf.history.states]),
-    label=f'm1',
+    label='m1',
     color=default_colors[0],
     markersize=markersize,
 )
@@ -169,7 +169,7 @@ ax[0].plot(
     np.array([
         states[2]
         for states in sys_rk45_save.solver_conf.history.states]),
-    label=f'm3 rk45',
+    label='m3 rk45',
     color=default_colors[2],
     markersize=markersize,
 )
@@ -195,7 +195,7 @@ ax[2].set_title(f'dt = {dt_large:.3g}')
 ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_rk4_small_dt.m3.history.temp),
-    label=f'rk4',
+    label='rk4',
     color=default_colors[1],
     markersize=markersize,
     linestyle='',
@@ -221,7 +221,7 @@ ax[2].plot(
 ax[0].plot(
     sys_rk45.history.time,
     np.array(sys_rk45.m3.history.temp),
-    label=f'rk45',
+    label='rk45',
     color=default_colors[0],
     markersize=markersize + 2,
     linestyle='',

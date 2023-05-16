@@ -1,9 +1,8 @@
 # %%
 import dess_pyo3
 import numpy as np
-import json
-import matplotlib.pyplot as plt
-import seaborn as sns
+import matplotlib.pyplot as plt # type: ignore
+import seaborn as sns # type: ignore
 import time
 sns.set()
 
