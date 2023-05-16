@@ -2,3 +2,6 @@
 .DS_Store
 temp.rs
 dss-venv
+.vscode
+Cargo.lock
+dess-venv
