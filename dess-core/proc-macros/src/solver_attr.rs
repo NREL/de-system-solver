@@ -70,7 +70,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                 derivs
             }
             /// sets values of derivatives of states
-            fn set_derivs(&mut self, val: &Vec<f64>) {
+            fn set_derivs(&mut self, val: &[f64]) {
                 let mut iter = val.iter();
                 #(self.#fields_with_state.set_deriv(iter.next().unwrap().clone());)*
             }

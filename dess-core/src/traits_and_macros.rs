@@ -120,7 +120,7 @@ pub trait HasStates: BareClone {
     /// returns derivatives of states
     fn derivs(&self) -> Vec<f64>;
     /// sets values of derivatives of states
-    fn set_derivs(&mut self, val: &Vec<f64>);
+    fn set_derivs(&mut self, val: &[f64]);
     /// incremenents value of time derivative of pontental variable
     fn step_derivs(&mut self, val: Vec<f64>);
     /// returns value of storage variable (e.g. thermal capacitance \[J/K\])

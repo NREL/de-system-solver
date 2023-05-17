@@ -32,7 +32,7 @@ pub(crate) fn bare_clone_derive(input: TokenStream) -> TokenStream {
     // vec of fields to be cloned with `clone()`
     let mut fields_to_clone = fields
         .iter()
-        .zip(is_not_history.clone())
+        .zip(is_not_history)
         .filter(|(_f, ih)| *ih)
         .map(|(f, _ih)| f.ident.as_ref().unwrap())
         .collect::<Vec<_>>();

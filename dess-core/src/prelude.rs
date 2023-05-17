@@ -1,6 +1,6 @@
 pub use crate::connect_states;
 pub use crate::print_to_py;
-pub use crate::proc_macros::*;
+pub use proc_macros::*;
 #[cfg(feature = "pyo3")]
 pub use crate::pyo3_imports::*;
 pub use crate::solver::*;

@@ -26,6 +26,7 @@ use crate::imports::*;
     }
 
     #[classmethod]
+    #[allow(clippy::too_many_arguments)]
     fn new_rk45_cash_karp(
         _cls: &PyType,
         sol: AdaptiveSolverConfig,
