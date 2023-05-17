@@ -168,7 +168,7 @@ pub trait SerdeAPI: Serialize + for<'a> Deserialize<'a> {
             .extension()
             .and_then(OsStr::to_str)
             .unwrap_or("");
-        let res = match extension {
+        match extension {
             "json" => {
                 serde_json::to_writer(&File::create(file)?, self)?;
                 Ok(())
@@ -178,8 +178,7 @@ pub trait SerdeAPI: Serialize + for<'a> Deserialize<'a> {
                 Ok(())
             }
             _ => Err(anyhow!("Unsupported file extension {}", extension)),
-        };
-        res
+        }
     }
 
     /// Read from file and return instantiated struct. Method adaptively calls deserialization

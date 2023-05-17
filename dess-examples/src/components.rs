@@ -72,7 +72,7 @@ impl ThermalReservoir {
     pub fn new(temp: f64) -> Self {
         Self {
             state: ThermalMassState {
-                temp: temp,
+                temp,
                 dtemp: Default::default(),
             },
             history: Default::default(),

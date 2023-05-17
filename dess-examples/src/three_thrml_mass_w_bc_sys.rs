@@ -37,7 +37,7 @@ use crate::imports::*;
         t_report: Vec<f64>,
     ) -> Self {
         Self::new(
-            SolverTypes::RK45CashKarp(sol),
+            SolverTypes::RK45CashKarp(Box::new(sol)),
             m1,
             m2,
             h12,
@@ -50,7 +50,7 @@ use crate::imports::*;
     #[getter]
     fn get_solver_conf(&self) -> Option<AdaptiveSolverConfig> {
         match &self.solver_type {
-            SolverTypes::RK45CashKarp(sc) => Some(sc.clone()),
+            SolverTypes::RK45CashKarp(sc) => Some(*sc.clone()),
             _ => None,
         }
     }
@@ -172,7 +172,7 @@ pub fn mock_rk45_sys() -> System3TMWithBC {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 11);
 
     System3TMWithBC {
-        solver_type: SolverTypes::RK45CashKarp(AdaptiveSolverConfig::default()),
+        solver_type: SolverTypes::RK45CashKarp(Box::default()),
         t_report,
         ..mock_euler_sys()
     }

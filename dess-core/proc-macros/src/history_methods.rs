@@ -7,7 +7,7 @@ pub(crate) fn history_methods_derive(input: TokenStream) -> TokenStream {
 
     let struct_has_state = fields
         .iter()
-        .any(|x| x.ident.as_ref().unwrap().to_string() == "state");
+        .any(|x| *x.ident.as_ref().unwrap() == "state");
 
     let use_state_vec: Vec<bool> = fields
         .iter()
@@ -21,7 +21,7 @@ pub(crate) fn history_methods_derive(input: TokenStream) -> TokenStream {
 
     let fields_with_state = fields
         .iter()
-        .zip(use_state_vec.clone())
+        .zip(use_state_vec)
         .filter(|(_f, hsv)| *hsv)
         .map(|(f, _hsv)| f.ident.as_ref().unwrap())
         .collect::<Vec<_>>();
@@ -34,7 +34,7 @@ pub(crate) fn history_methods_derive(input: TokenStream) -> TokenStream {
             "/// Saves `self.state` to `self.history` and propagtes to `save_state` in {}",
             fields_with_state
                 .iter()
-                .map(|x| format!("[Self::{}]", x.to_string()))
+                .map(|x| format!("[Self::{}]", x))
                 .collect::<Vec<String>>()
                 .join(", ")
         )

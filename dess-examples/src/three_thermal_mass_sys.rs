@@ -26,6 +26,7 @@ use crate::imports::*;
     }
 
     #[classmethod]
+    #[allow(clippy::too_many_arguments)]
     fn new_rk45_cash_karp(
         _cls: &PyType,
         sol: AdaptiveSolverConfig,
@@ -37,7 +38,7 @@ use crate::imports::*;
         t_report: Vec<f64>,
     ) -> Self {
         Self::new(
-            SolverTypes::RK45CashKarp(sol),
+            SolverTypes::RK45CashKarp(Box::new(sol)),
             m1,
             m2,
             h12,
@@ -50,7 +51,7 @@ use crate::imports::*;
     #[getter]
     fn get_solver_conf(&self) -> Option<AdaptiveSolverConfig> {
         match &self.solver_type {
-            SolverTypes::RK45CashKarp(sc) => Some(sc.clone()),
+            SolverTypes::RK45CashKarp(sc) => Some(*sc.clone()),
             _ => None,
         }
     }
@@ -155,7 +156,7 @@ pub fn mock_rk45_sys() -> System3TM {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 11);
 
     System3TM {
-        solver_type: SolverTypes::RK45CashKarp(AdaptiveSolverConfig::default()),
+        solver_type: SolverTypes::RK45CashKarp(Box::default()),
         t_report,
         ..mock_euler_sys()
     }
@@ -305,7 +306,7 @@ mod tests {
         // system for checking if dt slightly less than t_report works ok
         let mut sys_dt_slightly_less_than_t_report = System3TM {
             solver_type: SolverTypes::RK4Fixed {
-                dt: (base_sys.t_report[1].clone() - base_sys.t_report[0].clone()) * 0.9,
+                dt: (base_sys.t_report[1] - base_sys.t_report[0]) * 0.9,
             },
             ..base_sys.clone()
         };
@@ -319,7 +320,7 @@ mod tests {
         // system for checking that t_report overrides dt when dt is slightly larger than t_report
         let mut sys_dt_slightly_larger_than_t_report = System3TM {
             solver_type: SolverTypes::RK4Fixed {
-                dt: (base_sys.t_report[1].clone() - base_sys.t_report[0].clone()) * 1.1,
+                dt: (base_sys.t_report[1] - base_sys.t_report[0]) * 1.1,
             },
             ..base_sys.clone()
         };
@@ -329,7 +330,7 @@ mod tests {
         // system for checking that t_report overrides dt when dt is large
         let mut sys_dt_larger_than_t_report = System3TM {
             solver_type: SolverTypes::RK4Fixed {
-                dt: (base_sys.t_report[1].clone() - base_sys.t_report[0].clone()) * 10.0,
+                dt: (base_sys.t_report[1] - base_sys.t_report[0]) * 10.0,
             },
             ..base_sys.clone()
         };

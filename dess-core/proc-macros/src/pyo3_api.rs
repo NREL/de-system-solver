@@ -5,7 +5,7 @@ use crate::utilities::parse_ts_as_fn_defs;
 pub(crate) fn pyo3_api(attr: TokenStream, item: TokenStream) -> TokenStream {
     let forbidden_fn_names = vec!["default".into(), "default_py".into()];
     let attr_ts2: TokenStream2 =
-        parse_ts_as_fn_defs(attr.into(), vec![], false, forbidden_fn_names);
+        parse_ts_as_fn_defs(attr, vec![], false, forbidden_fn_names);
 
     let item_struct = syn::parse_macro_input!(item as syn::ItemStruct);
     let ident = &item_struct.ident;

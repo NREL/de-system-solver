@@ -4,7 +4,7 @@ use crate::imports::*;
 pub enum SolverTypes {
     /// Euler with fixed time step.
     /// parameter `dt` provides time step size for whenever solver is between
-    /// `t_report` times.  
+    /// `t_report` times.  ≥
     EulerFixed { dt: f64 },
     /// Runge-Kutta 4th order with fixed time step.  
     /// parameter `dt` provides time step size for whenever solver is between
@@ -15,7 +15,7 @@ pub enum SolverTypes {
     // dt: f64,
     /// Runge-Kutta 4/5 order adaptive, Cash-Karp method
     /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
-    RK45CashKarp(AdaptiveSolverConfig),
+    RK45CashKarp(Box<AdaptiveSolverConfig>),
     // TODO: add more variants here
 }
 
@@ -78,8 +78,10 @@ impl AdaptiveSolverConfig {
         save: bool,
         save_states: bool,
     ) -> Self {
-        let mut state = SolverState::default();
-        state.dt = dt_init;
+        let state = SolverState {
+            dt: dt_init,
+            ..Default::default()
+        };
         Self {
             dt_max: dt_max.unwrap_or(10.),
             max_iter: max_iter.unwrap_or(2),
@@ -187,7 +189,7 @@ pub trait SolverVariantMethods: SolverBase {
         // k4 = f(x_i + h, y_i + k3 * h)
         let mut sys3 = self.bare_clone();
         sys3.set_derivs(&k3s);
-        sys3.step_states_by_dt(&dt);
+        sys3.step_states_by_dt(dt);
         sys3.update_derivs();
         let k4s = sys3.derivs();
 
@@ -207,7 +209,7 @@ pub trait SolverVariantMethods: SolverBase {
         let sc_mut = self.sc_mut().unwrap();
         // reset iteration counter
         sc_mut.state.n_iter = 0;
-        sc_mut.state.dt = sc_mut.state.dt.min(dt_max.clone());
+        sc_mut.state.dt = sc_mut.state.dt.min(*dt_max);
 
         // loop to find `dt` that results in meeting tolerance
         // and does not exceed `dt_max`
@@ -232,7 +234,7 @@ pub trait SolverVariantMethods: SolverBase {
                 vec![]
             };
 
-            let t_curr = self.state().time.clone();
+            let t_curr = self.state().time;
 
             // mutably borrow sc to update it
             let sc_mut = self.sc_mut().unwrap();
@@ -354,8 +356,7 @@ pub trait SolverVariantMethods: SolverBase {
         let mut sys2 = self.bare_clone();
         sys2.step_time(&(dt * 3. / 10.));
         sys2.step_states(
-            k1s.clone()
-                .iter()
+            k1s.iter()
                 .zip(k2s.clone())
                 .map(|(k1, k2)| (3. / 40. * k1 + 9. / 40. * k2) * dt)
                 .collect(),

@@ -30,7 +30,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let fields_with_state = fields
         .iter()
-        .zip(use_state_vec.clone())
+        .zip(use_state_vec)
         .filter(|(_f, hsv)| *hsv)
         .map(|(f, _hsv)| f.ident.as_ref().unwrap())
         .collect::<Vec<_>>();

@@ -19,14 +19,14 @@ pub(crate) fn bare_clone_derive(input: TokenStream) -> TokenStream {
     // vec of fields that should be cloned with `bare_clone()`
     let fields_to_bare_clone = fields
         .iter()
-        .zip(has_bare_clone.clone())
+        .zip(has_bare_clone)
         .filter(|(_f, hbc)| *hbc)
         .map(|(f, _hsv)| f.ident.as_ref().unwrap())
         .collect::<Vec<_>>();
 
     let is_not_history: Vec<bool> = fields
         .iter()
-        .map(|field| field.ident.as_ref().unwrap().to_string() != "history")
+        .map(|field| *field.ident.as_ref().unwrap() != "history")
         .collect();
 
     // vec of fields to be cloned with `clone()`
