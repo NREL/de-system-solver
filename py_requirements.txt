@@ -6,7 +6,6 @@ contourpy==1.0.7
 cycler==0.11.0
 debugpy==1.6.7
 decorator==5.1.1
-dess-examples-pyo3 @ file:///var/folders/wy/65dzvywd1vv7xny4wflyh1cslrrnqz/T/.tmpoSJhmy/dess_examples_pyo3-0.1.0-cp310-cp310-macosx_11_0_arm64.whl#sha256=95ffca0d2f96f2e0f7765688e1a9e75f7bffc8575d58b66f560f0c3b6e0cac11
 executing==1.2.0
 fonttools==4.39.3
 ipykernel==6.22.0
