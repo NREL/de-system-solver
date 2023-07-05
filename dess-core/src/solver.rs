@@ -6,7 +6,9 @@ pub enum SolverTypes {
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  ≥
     EulerFixed { dt: f64 },
-    /// Runge-Kutta 4th order with fixed time step.  
+    /// Runge-Kutta 2nd order with fixed time step
+    HeunsMethod { dt: f64 },
+    /// Heun's Method.  
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
     RK4Fixed { dt: f64 },
@@ -164,7 +166,23 @@ pub trait SolverVariantMethods: SolverBase {
         self.update_derivs();
         self.step_states_by_dt(dt);
     }
-
+    /// Heun's Method (starts out with Euler's method but adds an extra step)
+    fn heun(&mut self, dt: &f64) {
+        //is this necessary for when the code is looped?
+        self.update_derivs();
+        //recording initial output value for later use
+        val_0 = state(&self);
+        //recording initial derivative value for later use
+        deriv_0 = derivs(&self);
+        //this will give euler's formula result
+        val_1 = self.euler(dt);
+        //I need to figure out now how to get the derivative at val_1 and t_0+dt -- is t_0 = 0? do I just need
+        //update_derivs or something simple like that?
+        deriv_1 = self.update_derivs();
+        //val_final = val_0 + ((f(t_0, val_0)+f(t_0+dt, val_1))/2)dt
+        val_final = val_0 + ((deriv_0+deriv_1)/2) * dt;
+        //need to be able to return val_final -- how are the other solver functions in this section returning values?
+    }
     /// solves time step with 4th order Runge-Kutta method.
     /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
     fn rk4fixed(&mut self, dt: &f64) {

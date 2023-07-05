@@ -136,6 +136,10 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                             let dt = dt.min(dt_fixed.clone());
                             self.euler(&dt);
                         },
+                        SolverTypes::HeunsMethod{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
+                            self.heun(&dt);
+                        },
                         SolverTypes::RK4Fixed{dt: dt_fixed} => {
                             let dt = dt.min(dt_fixed.clone());
                             self.rk4fixed(&dt);
