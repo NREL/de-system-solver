@@ -59,6 +59,45 @@ t0 = time.perf_counter()
 sys_large_dt.walk()
 print(f"dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
+sys_small_dt = dess_pyo3.System3TM(
+    f'{{"HeunsMethod": {{"dt": {dt_small}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_small_dt.walk()
+print(f"dt={dt_small:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
+sys_medium_dt = dess_pyo3.System3TM(
+    f'{{"HeunsMethod": {{"dt": {dt_medium}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_medium_dt.walk()
+print(f"dt={dt_medium:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
+sys_large_dt = dess_pyo3.System3TM(
+    f'{{"HeunsMethod": {{"dt": {dt_large}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_large_dt.walk()
+print(f"dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
 sys_rk4_small_dt = dess_pyo3.System3TM(
     f'{{"RK4Fixed": {{"dt": {dt_small}}}}}',
     m1,
