@@ -163,7 +163,7 @@ pub fn mock_heuns_sys() -> System3TMWithBC {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
     System3TMWithBC {
-        solver_type: SolverTypes::HeunsMethod { dt: 5e-3},
+        solver_type: SolverTypes::HeunsMethod { dt: 5e-3 },
         t_report,
         ..mock_euler_sys()
     }

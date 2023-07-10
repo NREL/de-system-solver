@@ -180,7 +180,6 @@ sys_rk45_save = dess_pyo3.System3TMWithBC.new_rk45_cash_karp(
 )
 sys_rk45_save.walk()
 
-
 markersize = 3
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
@@ -257,6 +256,31 @@ ax[2].plot(
     linestyle='',
 )
 
+ax[0].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_small_dt.m3.history.temp),
+    label='heuns',
+    color=default_colors[1],
+    markersize=markersize,
+    linestyle='',
+    marker='v',
+)
+ax[1].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_medium_dt.m3.history.temp),
+    color=default_colors[1],
+    markersize=markersize,
+    marker='v',
+    linestyle='',
+)
+ax[2].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_large_dt.m3.history.temp),
+    color=default_colors[1],
+    markersize=markersize,
+    marker='v',
+    linestyle='',
+)
 ax[0].plot(
     sys_rk45.history.time,
     np.array(sys_rk45.m3.history.temp),
