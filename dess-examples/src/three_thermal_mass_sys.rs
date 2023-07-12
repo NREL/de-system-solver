@@ -313,6 +313,22 @@ mod tests {
     }
 
     #[test]
+    fn test_heuns_against_benchmark() {
+        let mut sys = mock_heuns_sys();
+        sys.walk();
+
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+
+        let benchmark_sys =
+            System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
+        assert_eq!(sys, benchmark_sys);
+    }
+
+    #[test]
     fn test_rk4_against_benchmark() {
         let mut sys = mock_rk4fixed_sys();
         sys.walk();

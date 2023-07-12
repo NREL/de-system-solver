@@ -6,9 +6,9 @@ pub enum SolverTypes {
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  ≥
     EulerFixed { dt: f64 },
+    /// Heun's Method. 
+    HeunsMethod { dt: f64 }, 
     /// Runge-Kutta 2nd order with fixed time step
-    HeunsMethod { dt: f64 },
-    /// Heun's Method.  
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
     RK4Fixed { dt: f64 },
