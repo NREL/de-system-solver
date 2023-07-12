@@ -1,5 +1,6 @@
 use crate::imports::*;
 
+///
 pub(crate) fn bare_clone_derive(input: TokenStream) -> TokenStream {
     let item_struct = syn::parse_macro_input!(input as syn::ItemStruct);
     let ident = &item_struct.ident;
