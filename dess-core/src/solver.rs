@@ -6,8 +6,8 @@ pub enum SolverTypes {
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  ≥
     EulerFixed { dt: f64 },
-    /// Heun's Method. 
-    HeunsMethod { dt: f64 }, 
+    /// Heun's Method.
+    HeunsMethod { dt: f64 },
     /// Runge-Kutta 2nd order with fixed time step
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
@@ -169,43 +169,29 @@ pub trait SolverVariantMethods: SolverBase {
     /// Heun's Method (starts out with Euler's method but adds an extra step)
     fn heun(&mut self, dt: &f64) {
         self.update_derivs();
-        //recording initial output value for later use
-        //let val_0: Vec<f64> = self.state().clone();
+        //making copy without history, to avoid stepping dt twice
+        let mut updated_self = self.bare_clone();
         //recording initial derivative value for later use
         let deriv_0: Vec<f64> = self.derivs().clone();
         //this will give euler's formula result
         self.step_states_by_dt(dt);
-        //let val_1: Vec<f64> = self.state();
-        //I need to figure out now how to get the derivative at val_1 and t_0+dt -- is t_0 = 0? do I just need
-        //update_derivs or something simple like that?
         self.update_derivs();
-        let deriv_1: Vec<f64> = self.derivs();
+        //recording derivative at endpoint of euler's method line
+        let deriv_1: Vec<f64> = self.derivs().clone();
         //creating new vector that is average of deriv_1 and deriv_2
-        //is this the proper way to do this?
         let deriv_mean: Vec<f64> = deriv_0
             .iter()
             .zip(&deriv_1)
             .map(|(d_1, d_2)| d_1 * 0.5 + d_2 * 0.5)
             .collect::<Vec<f64>>();
-        //should I use the actual self or a copy, and then somehow change the actual self afterwards?
-        self.set_derivs(&deriv_mean);
-        self.step_states_by_dt(dt);
-        //creating copy of self without history
-        //let mut updated_self = self.bare_clone();
-        //updating derivative to be the averages we just calculated
-        //updated_self.set_derivs(&deriv_mean);
-        //performing Heun's method
-        //do I need to then take the changes back to the original self?
-        //updated_self.step_states_by_dt(dt);
-        //val_final = val_0 + ((f(t_0, val_0)+f(t_0+dt, val_1))/2)dt -- need to actually get this to update self
-        //maybe I need another function, which can have the basics go in a trait, but then specifics go for each
-        //type of problem
-        //I've fixed most of the errors, just need to figure out how to make val_final a regular number
-        //ideally should make this last step into a function...perhaps one that takes two derivatives as inputs
-        //and outputs the val_final (to make it a bit more broadly applicable)
-        //Under trait HasState
-        //self.step_states_by_average(deriv_0, deriv_1, dt); -- need to get rid of this in the program since I don't need it!
-        //don't need to return any values, since the modifications to self will hold
+        //updates derivative in updated_self to be the average of deriv_1 and deriv_2
+        updated_self.set_derivs(&deriv_mean);
+        //steps states using the average derivative
+        updated_self.step_states_by_dt(dt);
+        //saving updated state
+        let new_state = updated_self.states();
+        //setting state to be the updated state
+        self.set_states(new_state);
     }
     /// solves time step with 4th order Runge-Kutta method.
     /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples

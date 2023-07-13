@@ -260,7 +260,7 @@ ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_heuns_small_dt.m3.history.temp),
     label='heuns',
-    color=default_colors[1],
+    color=default_colors[3],
     markersize=markersize,
     linestyle='',
     marker='v',
@@ -268,7 +268,7 @@ ax[0].plot(
 ax[1].plot(
     sys_small_dt.history.time,
     np.array(sys_heuns_medium_dt.m3.history.temp),
-    color=default_colors[1],
+    color=default_colors[3],
     markersize=markersize,
     marker='v',
     linestyle='',
@@ -276,7 +276,7 @@ ax[1].plot(
 ax[2].plot(
     sys_small_dt.history.time,
     np.array(sys_heuns_large_dt.m3.history.temp),
-    color=default_colors[1],
+    color=default_colors[3],
     markersize=markersize,
     marker='v',
     linestyle='',
