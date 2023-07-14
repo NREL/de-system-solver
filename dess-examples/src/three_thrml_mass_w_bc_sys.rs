@@ -158,7 +158,7 @@ pub fn mock_euler_sys() -> System3TMWithBC {
         t_report,
     )
 }
-//not sure if I need to change n_elements or dt for Heun's Method
+
 pub fn mock_heuns_sys() -> System3TMWithBC {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
@@ -169,7 +169,6 @@ pub fn mock_heuns_sys() -> System3TMWithBC {
     }
 }
 
-//not sure if I need to change n_elements or dt for Midpoint Method
 pub fn mock_midpoint_sys() -> System3TMWithBC {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 

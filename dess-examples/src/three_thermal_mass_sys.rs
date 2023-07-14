@@ -141,7 +141,7 @@ pub fn mock_euler_sys() -> System3TM {
         t_report,
     )
 }
-//not sure if I have the right n_elements and dt values
+
 pub fn mock_heuns_sys() -> System3TM {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
@@ -151,7 +151,7 @@ pub fn mock_heuns_sys() -> System3TM {
         ..mock_euler_sys()
     }
 }
-//not sure if I have the right n_elements and dt values
+
 pub fn mock_midpoint_sys() -> System3TM {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
