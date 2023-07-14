@@ -196,6 +196,7 @@ pub trait SolverVariantMethods: SolverBase {
         self.set_states(new_state);
     }
     /// Midpoint Method
+    /// See: https://en.wikipedia.org/wiki/Midpoint_method
     fn midpoint(&mut self, dt: &f64) {
         self.update_derivs();
         //making copy without history, to avoid stepping dt twice
@@ -204,7 +205,7 @@ pub trait SolverVariantMethods: SolverBase {
         updated_self.step_states_by_dt(&(0.5 * dt));
         updated_self.update_derivs();
         //recording derivative at midpoint
-        let deriv_1: Vec<f64> = updated_self.derivs().clone();
+        let deriv_1: Vec<f64> = updated_self.derivs();
         //updates derivative in self to be deriv_1
         self.set_derivs(&deriv_1);
         //steps states using the midpoint derivative
