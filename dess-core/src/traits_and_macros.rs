@@ -114,6 +114,8 @@ pub trait HasStates: BareClone {
     /// assuming `set_derivs` has been called, steps
     /// value of states by deriv * dt
     fn step_states_by_dt(&mut self, dt: &f64);
+    /// assuming `set_derivs` has been called, steps
+    /// value of states by deriv * dt
     fn step_states(&mut self, val: Vec<f64>);
     /// returns derivatives of states
     fn derivs(&self) -> Vec<f64>;

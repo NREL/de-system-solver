@@ -169,17 +169,19 @@ pub trait SolverVariantMethods: SolverBase {
         self.step_states_by_dt(dt);
     }
     /// Heun's Method (starts out with Euler's method but adds an extra step)
+    /// See Heun's Method (the first listed Heun's method, not the one also known as Ralston's Method):
+    /// https://en.wikipedia.org/wiki/Heun%27s_method
     fn heun(&mut self, dt: &f64) {
         self.update_derivs();
         //making copy without history, to avoid stepping dt twice
         let mut updated_self = self.bare_clone();
         //recording initial derivative value for later use
-        let deriv_0: Vec<f64> = self.derivs().clone();
+        let deriv_0: Vec<f64> = self.derivs();
         //this will give euler's formula result
         self.step_states_by_dt(dt);
         self.update_derivs();
         //recording derivative at endpoint of euler's method line
-        let deriv_1: Vec<f64> = self.derivs().clone();
+        let deriv_1: Vec<f64> = self.derivs();
         //creating new vector that is average of deriv_1 and deriv_2
         let deriv_mean: Vec<f64> = deriv_0
             .iter()
