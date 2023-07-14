@@ -98,6 +98,45 @@ t0 = time.perf_counter()
 sys_heuns_large_dt.walk()
 print(f"heuns dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
+sys_midpoint_small_dt = dess_pyo3.System3TMWithBC(
+    f'{{"MidpointMethod": {{"dt": {dt_small}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_midpoint_small_dt.walk()
+print(f"midpoint dt={dt_small:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
+sys_midpoint_medium_dt = dess_pyo3.System3TMWithBC(
+    f'{{"MidpointMethod": {{"dt": {dt_medium}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_midpoint_medium_dt.walk()
+print(f"midpoint dt={dt_medium:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
+sys_midpoint_large_dt = dess_pyo3.System3TMWithBC(
+    f'{{"MidpointMethod": {{"dt": {dt_large}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_midpoint_large_dt.walk()
+print(f"midpoint dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
 sys_rk4_small_dt = dess_pyo3.System3TMWithBC(
     f'{{"RK4Fixed": {{"dt": {dt_small}}}}}',
     m1,
@@ -279,6 +318,32 @@ ax[2].plot(
     color=default_colors[3],
     markersize=markersize,
     marker='v',
+    linestyle='',
+)
+
+ax[0].plot(
+    sys_small_dt.history.time,
+    np.array(sys_midpoint_small_dt.m3.history.temp),
+    label='midpoint',
+    color=default_colors[4],
+    markersize=markersize,
+    linestyle='',
+    marker='^',
+)
+ax[1].plot(
+    sys_small_dt.history.time,
+    np.array(sys_midpoint_medium_dt.m3.history.temp),
+    color=default_colors[4],
+    markersize=markersize,
+    marker='^',
+    linestyle='',
+)
+ax[2].plot(
+    sys_small_dt.history.time,
+    np.array(sys_midpoint_large_dt.m3.history.temp),
+    color=default_colors[4],
+    markersize=markersize,
+    marker='^',
     linestyle='',
 )
 ax[0].plot(

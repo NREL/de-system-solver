@@ -6,9 +6,11 @@ pub enum SolverTypes {
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  ≥
     EulerFixed { dt: f64 },
-    /// Heun's Method.
+    /// Heun's Method. (basic Runge-Kutta 2nd order with fixed time step)
     HeunsMethod { dt: f64 },
-    /// Runge-Kutta 2nd order with fixed time step
+    /// Midpoint Method. ( alternate Runge-Kutta 2nd order with fixed time step)
+    MidpointMethod { dt: f64 },
+    /// Runge-Kutta 4th order with fixed time step
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
     RK4Fixed { dt: f64 },
@@ -192,6 +194,21 @@ pub trait SolverVariantMethods: SolverBase {
         let new_state = updated_self.states();
         //setting state to be the updated state
         self.set_states(new_state);
+    }
+    /// Midpoint Method
+    fn midpoint(&mut self, dt: &f64) {
+        self.update_derivs();
+        //making copy without history, to avoid stepping dt twice
+        let mut updated_self = self.bare_clone();
+        //updating time and state to midpoint of line
+        updated_self.step_states_by_dt(&(0.5 * dt));
+        updated_self.update_derivs();
+        //recording derivative at midpoint
+        let deriv_1: Vec<f64> = updated_self.derivs().clone();
+        //updates derivative in self to be deriv_1
+        self.set_derivs(&deriv_1);
+        //steps states using the midpoint derivative
+        self.step_states_by_dt(dt);
     }
     /// solves time step with 4th order Runge-Kutta method.
     /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples

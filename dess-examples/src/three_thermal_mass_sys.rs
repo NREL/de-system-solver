@@ -151,6 +151,16 @@ pub fn mock_heuns_sys() -> System3TM {
         ..mock_euler_sys()
     }
 }
+//not sure if I have the right n_elements and dt values
+pub fn mock_midpoint_sys() -> System3TM {
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
+
+    System3TM {
+        solver_type: SolverTypes::MidpointMethod { dt: 5e-3 },
+        t_report,
+        ..mock_euler_sys()
+    }
+}
 
 pub fn mock_rk4fixed_sys() -> System3TM {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
@@ -221,6 +231,31 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
 
         sys_heuns
+            .to_file(benchmark_file.as_os_str().to_str().unwrap())
+            .unwrap();
+    }
+    // build and run prescribed-step midpoint system
+    let mut sys_midpoint = mock_midpoint_sys();
+
+    let t_midpoint = time_it!(sys_midpoint.walk());
+
+    let dt = sys_midpoint.t_report[1] - sys_midpoint.t_report.first().unwrap();
+
+    println!(
+        "Midpoint {} s time step elapsed time: {} μs",
+        dt,
+        t_midpoint.as_micros()
+    );
+
+    let overwrite_midpoint_benchmark: bool = overwrite_benchmarks;
+    if overwrite_midpoint_benchmark {
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
+
+        sys_midpoint
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
     }
@@ -322,6 +357,22 @@ mod tests {
             .unwrap()
             .to_path_buf()
             .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+
+        let benchmark_sys =
+            System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
+        assert_eq!(sys, benchmark_sys);
+    }
+
+    #[test]
+    fn test_midpoint_against_benchmark() {
+        let mut sys = mock_midpoint_sys();
+        sys.walk();
+
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
