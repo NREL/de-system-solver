@@ -10,6 +10,8 @@ pub enum SolverTypes {
     HeunsMethod { dt: f64 },
     /// Midpoint Method. ( alternate Runge-Kutta 2nd order with fixed time step)
     MidpointMethod { dt: f64 },
+    /// Ralston's Method. ( alternate Runge-Kutta 2nd order with fixed time step)
+    RalstonsMethod { dt: f64 },
     /// Runge-Kutta 4th order with fixed time step
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
@@ -188,7 +190,7 @@ pub trait SolverVariantMethods: SolverBase {
             .zip(&deriv_1)
             .map(|(d_1, d_2)| d_1 * 0.5 + d_2 * 0.5)
             .collect::<Vec<f64>>();
-        //updates derivative in updated_self to be the average of deriv_1 and deriv_2
+        //updates derivative in updated_self to be the average of deriv_0 and deriv_1
         updated_self.set_derivs(&deriv_mean);
         //steps states using the average derivative
         updated_self.step_states_by_dt(dt);
@@ -211,6 +213,31 @@ pub trait SolverVariantMethods: SolverBase {
         //updates derivative in self to be deriv_1
         self.set_derivs(&deriv_1);
         //steps states using the midpoint derivative
+        self.step_states_by_dt(dt);
+    }
+    /// Ralston's Method
+    /// See Chapra, S. C., &amp; Canale, R. P. (2015). Runge-Kutta Methods.
+    /// In Numerical Methods for Engineers (7th ed., p. 732). McGraw-Hill Education.
+    fn ralston(&mut self, dt: &f64) {
+        self.update_derivs();
+        //making copy without history, to avoid stepping dt twice
+        let mut updated_self = self.bare_clone();
+        //recording initial derivative for later
+        let deriv_0: Vec<f64> = updated_self.derivs();
+        //updating time and state to 3/4 way through line
+        updated_self.step_states_by_dt(&(0.75 * dt));
+        updated_self.update_derivs();
+        //recording derivative at 3/4 way through line
+        let deriv_1: Vec<f64> = updated_self.derivs();
+        //creating new vector that is weighted average of deriv_0 and deriv_1
+        let deriv_mean: Vec<f64> = deriv_0
+            .iter()
+            .zip(&deriv_1)
+            .map(|(d_1, d_2)| d_1 / 3.0 + 2.0 * d_2 / 3.0)
+            .collect::<Vec<f64>>();
+        //updates derivative in self to be deriv_mean
+        self.set_derivs(&deriv_mean);
+        //steps states using deriv_mean
         self.step_states_by_dt(dt);
     }
     /// solves time step with 4th order Runge-Kutta method.
