@@ -57,16 +57,6 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                 #(self.#fields_with_state.step_state_by_dt(dt);)*
                 self.step_time(dt);
             }
-            ///Given two derivatives, and a dt, adds to the value dt times the average of the derivatives
-            //I probably need to put the # * thing around main part, but right now when I do so
-            //it just says I have no iterator, so probably I first need to make an iterator.
-            //fn step_states_by_average(&mut self, derivative_1: Vec<f64>, derivative_2: Vec<f64>, dt: &f64) {
-            //    for d in derivative_1.iter().zip(derivative_2){
-            //        let (derivative_1i,derivative_2i)=d;
-            //        self.step_state_by_average(d.0, d.1, dt);
-            //    }
-            //    self.step_time(dt);
-            //}
             /// assuming `set_derivs` has been called, steps
             /// value of states by deriv * dt
             fn step_states(&mut self, val: Vec<f64>) {

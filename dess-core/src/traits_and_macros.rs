@@ -90,10 +90,6 @@ pub trait HasState {
     fn step_state_by_dt(&mut self, dt: &f64) {
         self.set_state(self.state() + dt * self.deriv());
     }
-    ///Given two derivatives, and a dt, adds to the value dt times the average of the derivatives
-    //fn step_state_by_average(&mut self, derivative_1: f64, derivative_2: f64, dt: &f64) {
-    //    self.set_state(self.state()+ dt * derivative_1 * 0.5 + dt * derivative_2 * 0.5);
-    //}
     /// increments value of states by `val` Vec
     fn step_state(&mut self, val: f64) {
         self.set_state(self.state() + val);
@@ -118,8 +114,6 @@ pub trait HasStates: BareClone {
     /// assuming `set_derivs` has been called, steps
     /// value of states by deriv * dt
     fn step_states_by_dt(&mut self, dt: &f64);
-    //Given two derivatives, and a dt, adds to the value dt times the average of the derivatives
-    //fn step_states_by_average(&mut self, derivative_1: Vec<f64>, derivative_2: Vec<f64>, dt: &f64);
     fn step_states(&mut self, val: Vec<f64>);
     /// returns derivatives of states
     fn derivs(&self) -> Vec<f64>;

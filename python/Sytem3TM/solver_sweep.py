@@ -163,7 +163,7 @@ print(f"rk45 dt_init={dt_init}")
 
 markersize = 3
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-
+#plot with three subplots, one for each dt
 fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
     sys_small_dt.history.time,
