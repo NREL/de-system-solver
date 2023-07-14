@@ -59,6 +59,45 @@ t0 = time.perf_counter()
 sys_large_dt.walk()
 print(f"dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
+sys_heuns_small_dt = dess_pyo3.System3TM(
+    f'{{"HeunsMethod": {{"dt": {dt_small}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_heuns_small_dt.walk()
+print(f"dt={dt_small:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
+sys_heuns_medium_dt = dess_pyo3.System3TM(
+    f'{{"HeunsMethod": {{"dt": {dt_medium}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_heuns_medium_dt.walk()
+print(f"dt={dt_medium:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
+sys_heuns_large_dt = dess_pyo3.System3TM(
+    f'{{"HeunsMethod": {{"dt": {dt_large}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_heuns_large_dt.walk()
+print(f"dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
 sys_rk4_small_dt = dess_pyo3.System3TM(
     f'{{"RK4Fixed": {{"dt": {dt_small}}}}}',
     m1,
@@ -124,7 +163,7 @@ print(f"rk45 dt_init={dt_init}")
 
 markersize = 3
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-
+#plot with three subplots, one for each dt
 fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
     sys_small_dt.history.time,
@@ -177,6 +216,32 @@ ax[2].plot(
     color=default_colors[1],
     markersize=markersize,
     marker='o',
+    linestyle='',
+)
+
+ax[0].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_small_dt.m1.history.temp),
+    label='heuns',
+    color=default_colors[3],
+    markersize=markersize,
+    linestyle='',
+    marker='v',
+)
+ax[1].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_medium_dt.m1.history.temp),
+    color=default_colors[3],
+    markersize=markersize,
+    marker='v',
+    linestyle='',
+)
+ax[2].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_large_dt.m1.history.temp),
+    color=default_colors[3],
+    markersize=markersize,
+    marker='v',
     linestyle='',
 )
 

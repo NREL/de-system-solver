@@ -59,6 +59,45 @@ t0 = time.perf_counter()
 sys_large_dt.walk()
 print(f"dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
+sys_heuns_small_dt = dess_pyo3.System3TMWithBC(
+    f'{{"HeunsMethod": {{"dt": {dt_small}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_heuns_small_dt.walk()
+print(f"heuns dt={dt_small:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
+sys_heuns_medium_dt = dess_pyo3.System3TMWithBC(
+    f'{{"HeunsMethod": {{"dt": {dt_medium}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_heuns_medium_dt.walk()
+print(f"heuns dt={dt_medium:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
+sys_heuns_large_dt = dess_pyo3.System3TMWithBC(
+    f'{{"HeunsMethod": {{"dt": {dt_large}}}}}',
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_heuns_large_dt.walk()
+print(f"heuns dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
+
 sys_rk4_small_dt = dess_pyo3.System3TMWithBC(
     f'{{"RK4Fixed": {{"dt": {dt_small}}}}}',
     m1,
@@ -141,10 +180,9 @@ sys_rk45_save = dess_pyo3.System3TMWithBC.new_rk45_cash_karp(
 )
 sys_rk45_save.walk()
 
-
 markersize = 3
 default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-
+#Plot with three subplots -- one for each dt
 fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
     sys_small_dt.history.time,
@@ -218,6 +256,31 @@ ax[2].plot(
     linestyle='',
 )
 
+ax[0].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_small_dt.m3.history.temp),
+    label='heuns',
+    color=default_colors[3],
+    markersize=markersize,
+    linestyle='',
+    marker='v',
+)
+ax[1].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_medium_dt.m3.history.temp),
+    color=default_colors[3],
+    markersize=markersize,
+    marker='v',
+    linestyle='',
+)
+ax[2].plot(
+    sys_small_dt.history.time,
+    np.array(sys_heuns_large_dt.m3.history.temp),
+    color=default_colors[3],
+    markersize=markersize,
+    marker='v',
+    linestyle='',
+)
 ax[0].plot(
     sys_rk45.history.time,
     np.array(sys_rk45.m3.history.temp),

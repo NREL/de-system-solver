@@ -141,6 +141,16 @@ pub fn mock_euler_sys() -> System3TM {
         t_report,
     )
 }
+//not sure if I have the right n_elements and dt values
+pub fn mock_heuns_sys() -> System3TM {
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
+
+    System3TM {
+        solver_type: SolverTypes::HeunsMethod { dt: 5e-3 },
+        t_report,
+        ..mock_euler_sys()
+    }
+}
 
 pub fn mock_rk4fixed_sys() -> System3TM {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
@@ -189,6 +199,31 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .unwrap();
     }
 
+    // build and run prescribed-step Heuns system
+    let mut sys_heuns = mock_heuns_sys();
+
+    let t_heuns = time_it!(sys_heuns.walk());
+
+    let dt = sys_heuns.t_report[1] - sys_heuns.t_report.first().unwrap();
+
+    println!(
+        "Heuns {} s time step elapsed time: {} μs",
+        dt,
+        t_heuns.as_micros()
+    );
+
+    let overwrite_heuns_benchmark: bool = overwrite_benchmarks;
+    if overwrite_heuns_benchmark {
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+
+        sys_heuns
+            .to_file(benchmark_file.as_os_str().to_str().unwrap())
+            .unwrap();
+    }
     // build and run prescribed-step 4th-order Runge-Kutta system
     let mut sys_rk4 = mock_rk4fixed_sys();
 
@@ -271,6 +306,22 @@ mod tests {
             .unwrap()
             .to_path_buf()
             .join("dess-examples/tests/fixtures/euler benchmark.yaml");
+
+        let benchmark_sys =
+            System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
+        assert_eq!(sys, benchmark_sys);
+    }
+
+    #[test]
+    fn test_heuns_against_benchmark() {
+        let mut sys = mock_heuns_sys();
+        sys.walk();
+
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();

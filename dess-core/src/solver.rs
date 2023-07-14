@@ -6,7 +6,9 @@ pub enum SolverTypes {
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  ≥
     EulerFixed { dt: f64 },
-    /// Runge-Kutta 4th order with fixed time step.  
+    /// Heun's Method.
+    HeunsMethod { dt: f64 },
+    /// Runge-Kutta 2nd order with fixed time step
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
     RK4Fixed { dt: f64 },
@@ -164,7 +166,35 @@ pub trait SolverVariantMethods: SolverBase {
         self.update_derivs();
         self.step_states_by_dt(dt);
     }
-
+    /// Heun's Method (starts out with Euler's method but adds an extra step)
+    /// See Heun's Method (the first listed Heun's method, not the one also known as Ralston's Method):
+    /// https://en.wikipedia.org/wiki/Heun%27s_method
+    fn heun(&mut self, dt: &f64) {
+        self.update_derivs();
+        //making copy without history, to avoid stepping dt twice
+        let mut updated_self = self.bare_clone();
+        //recording initial derivative value for later use
+        let deriv_0: Vec<f64> = self.derivs();
+        //this will give euler's formula result
+        self.step_states_by_dt(dt);
+        self.update_derivs();
+        //recording derivative at endpoint of euler's method line
+        let deriv_1: Vec<f64> = self.derivs();
+        //creating new vector that is average of deriv_1 and deriv_2
+        let deriv_mean: Vec<f64> = deriv_0
+            .iter()
+            .zip(&deriv_1)
+            .map(|(d_1, d_2)| d_1 * 0.5 + d_2 * 0.5)
+            .collect::<Vec<f64>>();
+        //updates derivative in updated_self to be the average of deriv_1 and deriv_2
+        updated_self.set_derivs(&deriv_mean);
+        //steps states using the average derivative
+        updated_self.step_states_by_dt(dt);
+        //saving updated state
+        let new_state = updated_self.states();
+        //setting state to be the updated state
+        self.set_states(new_state);
+    }
     /// solves time step with 4th order Runge-Kutta method.
     /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
     fn rk4fixed(&mut self, dt: &f64) {
