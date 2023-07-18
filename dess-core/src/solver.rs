@@ -12,6 +12,8 @@ pub enum SolverTypes {
     MidpointMethod { dt: f64 },
     /// Ralston's Method. ( alternate Runge-Kutta 2nd order with fixed time step)
     RalstonsMethod { dt: f64 },
+    /// Bogacki-Shampine Method. Runge-Kutte 2/3 order adaptive solver
+    RK23BogackiShampine(Box<AdaptiveSolverConfig>),
     /// Runge-Kutta 4th order with fixed time step
     /// parameter `dt` provides time step size for whenever solver is between
     /// `t_report` times.  
@@ -240,6 +242,183 @@ pub trait SolverVariantMethods: SolverBase {
         //steps states using deriv_mean
         self.step_states_by_dt(dt);
     }
+    ///solves time step with adaptive Bogacki Shampine Method (variant of RK23) and returns 'dt' used
+    ///see: https://en.wikipedia.org/wiki/Bogacki%E2%80%93Shampine_method
+    fn rk23_bogacki_shampine(&mut self, dt_max: &f64) -> f64 {
+        let sc_mut = self.sc_mut().unwrap();
+        // reset iteration counter
+        sc_mut.state.n_iter = 0;
+        sc_mut.state.dt = sc_mut.state.dt.min(*dt_max);
+
+        // loop to find `dt` that results in meeting tolerance
+        // and does not exceed `dt_max`
+        let (delta3, dt_used) = loop {
+            let sc = self.sc().unwrap();
+            let dt = sc.state.dt;
+
+            // run a single step at `dt`
+            let (delta2, delta3) = self.rk23_bogacki_shampine_step(dt);
+
+            // reborrow because of the borrow above in `self.rk23_bogacki_shampine_step(dt);`
+            let sc = self.sc().unwrap();
+            // grab states for later use if solver steps are to be saved
+            let states = if sc.save {
+                self.states()
+                    .clone()
+                    .iter()
+                    .zip(delta3.clone())
+                    .map(|(s, d)| s + d)
+                    .collect::<Vec<f64>>()
+            } else {
+                vec![]
+            };
+
+            let t_curr = self.state().time;
+
+            // mutably borrow sc to update it
+            let sc_mut = self.sc_mut().unwrap();
+
+            // update `n_iter`, `norm_err`, `norm_err_rel`, `t_curr`, and `states`
+            // still need to update dt at some point
+            sc_mut.state.n_iter += 1;
+            sc_mut.state.norm_err = Some(
+                delta2
+                    .iter()
+                    .zip(&delta3)
+                    .map(|(d2, d3)| (d2 - d3).powi(2))
+                    .collect::<Vec<f64>>()
+                    .iter()
+                    .sum::<f64>()
+                    .sqrt(),
+            );
+            let norm_d3 = delta3
+                .iter()
+                .map(|d3| d3.powi(2))
+                .collect::<Vec<f64>>()
+                .iter()
+                .sum::<f64>()
+                .sqrt();
+
+            sc_mut.state.norm_err_rel = if norm_d3 > sc_mut.atol {
+                // `unwrap` is ok here because `norm_err` will always be some by this point
+                Some(sc_mut.state.norm_err.unwrap() / norm_d3)
+            } else {
+                // avoid dividing by a really small denominator
+                None
+            };
+
+            // pretty sure `dt` needs to be added here, as is being done
+            sc_mut.state.t_curr = t_curr + dt;
+
+            if sc_mut.save_states {
+                sc_mut.state.states = states;
+            }
+
+            // conditions for breaking loop
+            // if there is a relative error, use that
+            // otherwise, use the absolute error
+            let tol_met = match sc_mut.state.norm_err_rel {
+                Some(norm_err_rel) => norm_err_rel <= sc_mut.rtol,
+                None => match sc_mut.state.norm_err {
+                    Some(norm_err) => norm_err <= sc_mut.atol,
+                    None => unreachable!(),
+                },
+            };
+
+            // Because we need to be able to possibly expand the next time step,
+            // regardless of whether break condition is met,
+            // adapt dt based on `rtol` if it is Some; use `atol` otherwise
+            // this adaptation strategy came directly from Chapra and Canale's section on adapting the time step
+            // The approach is to adapt more aggressively to meet rtol when decreasing the time step size
+            // than when increasing time step size.
+            let dt_coeff = match sc_mut.state.norm_err_rel {
+                Some(norm_err_rel) => {
+                    (sc_mut.rtol / norm_err_rel).powf(if norm_err_rel <= sc_mut.rtol {
+                        0.2
+                    } else {
+                        0.25
+                    })
+                }
+                None => {
+                    match sc_mut.state.norm_err {
+                        Some(norm_err) => (sc_mut.atol / norm_err)
+                            .powf(if norm_err <= sc_mut.atol { 0.2 } else { 0.25 }),
+                        None => 1., // don't adapt if there is not enough information to do so
+                    }
+                }
+            };
+
+            // if tolerance is achieved here, then we proceed to the next time step, and
+            // `dt` will be limited to `dt_max` at the start of the next time step.  If tolerance
+            // is not achieved, then time step will be decreased.
+            let break_cond = sc_mut.state.n_iter >= sc_mut.max_iter
+                || sc_mut.state.norm_err.unwrap() < sc_mut.atol
+                || tol_met;
+
+            if break_cond {
+                // save before modifying dt
+                if sc_mut.save {
+                    sc_mut.history.push(sc_mut.state.clone());
+                }
+                // store used dt before adapting
+                let dt_used = sc_mut.state.dt;
+                // adapt for next solver time step
+                sc_mut.state.dt *= dt_coeff;
+                break (delta3, dt_used);
+            };
+            // adapt for next iteration in current time step
+            sc_mut.state.dt *= dt_coeff;
+        };
+
+        // increment forward with 3th order solution
+        self.step_states(delta3);
+        self.step_time(&dt_used);
+        // dbg!(self.state.time);
+        // dbg!(self.t_report[self.state.i]);
+        dt_used
+    }
+    fn rk23_bogacki_shampine_step(&mut self, dt: f64) -> (Vec<f64>, Vec<f64>) {
+        self.update_derivs();
+
+        // k1 = f(t_i, x_i)
+        let k1s = self.derivs();
+
+        // k2 = f(t_i + 1 / 2 * h, x_i + 1 / 2 * k1 * h)
+        let mut sys1 = self.bare_clone();
+        sys1.step_states_by_dt(&(dt / 2.));
+        sys1.update_derivs();
+        let k2s = sys1.derivs();
+        // k3 = f(t_i + 3 / 4 * h, x_i + 3 / 4 * k2 * h)
+        let mut sys2 = self.bare_clone();
+        sys2.set_derivs(&k2s);
+        sys2.step_states_by_dt(&(dt * 3. / 4.));
+        sys2.update_derivs();
+        let k3s = sys2.derivs();
+        // k4 = f(x_i + h, y_i + 2 / 9 * k1 * h + 1 / 3 * k2 * h + 4 / 9 * k3 * h)
+        let mut sys3 = self.bare_clone();
+        sys3.step_time(&(dt));
+        sys3.step_states({
+            let (k1s, k2s, k3s) = (k1s.clone(), k2s.clone(), k3s.clone());
+            let zipped = zip!(k1s, k2s, k3s);
+            let mut steps = vec![];
+            for (k1, (k2, k3)) in zipped {
+                steps.push((2. / 9. * k1 + 1. / 3. * k2 + 4. / 9. * k3) * dt);
+            }
+            steps
+        });
+        sys3.update_derivs();
+        let k4s = sys3.derivs();
+        // 2nd order delta
+        let mut delta2: Vec<f64> = vec![];
+        // 3rd order delta
+        let mut delta3: Vec<f64> = vec![];
+        let zipped = zip!(k1s, k2s, k3s, k4s);
+        for (k1, (k2, (k3, k4))) in zipped {
+            delta2.push((2. / 9. * k1 + 1. / 3. * k2 + 4. / 9. * k3) * dt);
+            delta3.push((7. / 24. * k1 + 1. / 4. * k2 + 1. / 3. * k3 + 1. / 8. * k4) * dt);
+        }
+        (delta2, delta3)
+    }
     /// solves time step with 4th order Runge-Kutta method.
     /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
     fn rk4fixed(&mut self, dt: &f64) {
@@ -277,7 +456,6 @@ pub trait SolverVariantMethods: SolverBase {
         self.step_states(delta);
         self.step_time(dt);
     }
-
     /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
     /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
     fn rk45_cash_karp(&mut self, dt_max: &f64) -> f64 {
@@ -426,7 +604,7 @@ pub trait SolverVariantMethods: SolverBase {
         sys1.update_derivs();
         let k2s = sys1.derivs();
 
-        // TODO: make it so that the step is based on ` 3 / 40 * k1 * h + 9 / 40 * k2 * h`
+        // TODO: make it so that the step is based on ` 3 / 40 * k1 * h + 9 / 40 * k2 * h` -- looks like this has been done, can I delete?
         // k3 = f(x_i + 3 / 10 * h, y_i + 3 / 40 * k1 * h + 9 / 40 * k2 * h)
         let mut sys2 = self.bare_clone();
         sys2.step_time(&(dt * 3. / 10.));

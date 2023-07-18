@@ -99,12 +99,14 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             fn sc(&self) -> Option<&AdaptiveSolverConfig> {
                 match &self.solver_type {
                     SolverTypes::RK45CashKarp(sc) => Some(sc),
+                    SolverTypes::RK23BogackiShampine(sc) => Some(sc),
                     _ => None,
                 }
             }
             fn sc_mut(&mut self) -> Option<&mut AdaptiveSolverConfig> {
                 match &mut self.solver_type {
                     SolverTypes::RK45CashKarp(sc) => Some(sc),
+                    SolverTypes::RK23BogackiShampine(sc) => Some(sc),
                     _ => None,
                 }
             }
@@ -147,6 +149,9 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                         SolverTypes::RalstonsMethod{dt: dt_fixed} => {
                             let dt = dt.min(dt_fixed.clone());
                             self.ralston(&dt);
+                        },
+                        SolverTypes::RK23BogackiShampine(_sc) => {
+                            let dt = self.rk23_bogacki_shampine(&dt);
                         },
                         SolverTypes::RK4Fixed{dt: dt_fixed} => {
                             let dt = dt.min(dt_fixed.clone());
