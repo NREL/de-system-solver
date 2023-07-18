@@ -158,12 +158,22 @@ pub fn mock_euler_sys() -> System3TMWithBC {
         t_report,
     )
 }
-//not sure if I need to change n_elements or dt for Heun's Method
+
 pub fn mock_heuns_sys() -> System3TMWithBC {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
     System3TMWithBC {
         solver_type: SolverTypes::HeunsMethod { dt: 5e-3 },
+        t_report,
+        ..mock_euler_sys()
+    }
+}
+
+pub fn mock_midpoint_sys() -> System3TMWithBC {
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
+
+    System3TMWithBC {
+        solver_type: SolverTypes::MidpointMethod { dt: 5e-3 },
         t_report,
         ..mock_euler_sys()
     }
@@ -239,6 +249,32 @@ pub fn run_three_tm_w_bc_sys() {
             .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
 
         sys_heuns
+            .to_file(benchmark_file.as_os_str().to_str().unwrap())
+            .unwrap();
+    }
+
+    // build and run prescribed-step Midpoint system
+    let mut sys_midpoint = mock_midpoint_sys();
+
+    let t_midpoint = time_it!(sys_midpoint.walk());
+
+    let dt = sys_midpoint.t_report[1] - sys_midpoint.t_report.first().unwrap();
+
+    println!(
+        "Midpoint {} s time step elapsed time: {} μs",
+        dt,
+        t_midpoint.as_micros()
+    );
+
+    let overwrite_midpoint_benchmark: bool = overwrite_benchmarks;
+    if overwrite_midpoint_benchmark {
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
+
+        sys_midpoint
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
     }
