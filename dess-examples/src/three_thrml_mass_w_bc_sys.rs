@@ -179,6 +179,16 @@ pub fn mock_midpoint_sys() -> System3TMWithBC {
     }
 }
 
+pub fn mock_ralstons_sys() -> System3TMWithBC {
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
+
+    System3TMWithBC {
+        solver_type: SolverTypes::RalstonsMethod { dt: 5e-3 },
+        t_report,
+        ..mock_euler_sys()
+    }
+}
+
 pub fn mock_rk4fixed_sys() -> System3TMWithBC {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
@@ -275,6 +285,32 @@ pub fn run_three_tm_w_bc_sys() {
             .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
 
         sys_midpoint
+            .to_file(benchmark_file.as_os_str().to_str().unwrap())
+            .unwrap();
+    }
+
+    // build and run prescribed-step Ralston's system
+    let mut sys_ralstons = mock_ralstons_sys();
+
+    let t_ralstons = time_it!(sys_ralstons.walk());
+
+    let dt = sys_ralstons.t_report[1] - sys_ralstons.t_report.first().unwrap();
+
+    println!(
+        "Ralstons {} s time step elapsed time: {} μs",
+        dt,
+        t_ralstons.as_micros()
+    );
+
+    let overwrite_ralstons_benchmark: bool = overwrite_benchmarks;
+    if overwrite_ralstons_benchmark {
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/tests/fixtures/ralstons benchmark.yaml");
+
+        sys_ralstons
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
     }
