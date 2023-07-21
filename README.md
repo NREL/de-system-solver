@@ -3,7 +3,7 @@ This is a proof-of-concept Rust crate that will attempt to demonstrate that the 
 
 # Installation and Running
 1. [Install rust](https://www.ecosia.org/search?q=rustup%20instal&addon=firefox&addonversion=4.1.0&method=topbar)
-1. Create an activate a Python environment, e.g. with
+1. Create and activate a Python environment, e.g. with
     ```
     python3.10 -m venv dess-venv
     source dess-venv/bin/activate

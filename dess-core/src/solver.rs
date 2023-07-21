@@ -604,7 +604,6 @@ pub trait SolverVariantMethods: SolverBase {
         sys1.update_derivs();
         let k2s = sys1.derivs();
 
-        // TODO: make it so that the step is based on ` 3 / 40 * k1 * h + 9 / 40 * k2 * h` -- looks like this has been done, can I delete?
         // k3 = f(x_i + 3 / 10 * h, y_i + 3 / 40 * k1 * h + 9 / 40 * k2 * h)
         let mut sys2 = self.bare_clone();
         sys2.step_time(&(dt * 3. / 10.));
