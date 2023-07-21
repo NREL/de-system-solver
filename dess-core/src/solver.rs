@@ -370,7 +370,7 @@ pub trait SolverVariantMethods: SolverBase {
             sc_mut.state.dt *= dt_coeff;
         };
 
-        // increment forward with 3th order solution
+        // increment forward with 3rd order solution
         self.step_states(delta3);
         self.step_time(&dt_used);
         // dbg!(self.state.time);
