@@ -230,7 +230,7 @@ pub fn run_three_tm_w_bc_sys() {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler benchmark.yaml");
+            .join("dess-examples/tests/fixtures/euler_benchmark_w_bc.yaml");
 
         sys_euler
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -256,7 +256,7 @@ pub fn run_three_tm_w_bc_sys() {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+            .join("dess-examples/tests/fixtures/heuns_benchmark_w_bc.yaml");
 
         sys_heuns
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -282,7 +282,7 @@ pub fn run_three_tm_w_bc_sys() {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
+            .join("dess-examples/tests/fixtures/midpoint_benchmark_w_bc.yaml");
 
         sys_midpoint
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -308,7 +308,7 @@ pub fn run_three_tm_w_bc_sys() {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/ralstons benchmark.yaml");
+            .join("dess-examples/tests/fixtures/ralstons_benchmark_w_bc.yaml");
 
         sys_ralstons
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -334,7 +334,7 @@ pub fn run_three_tm_w_bc_sys() {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk4 benchmark.yaml");
+            .join("dess-examples/tests/fixtures/rk4_benchmark_w_bc.yaml");
 
         sys_rk4
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -360,7 +360,7 @@ pub fn run_three_tm_w_bc_sys() {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
+            .join("dess-examples/tests/fixtures/rk45_benchmark_w_bc.yaml");
 
         sys_rk45
             .to_file(benchmark_file.as_os_str().to_str().unwrap())

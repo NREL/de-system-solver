@@ -4,6 +4,7 @@ members = [
     "dess-core", # pure rust core 
     "dess-examples", # examples of how to run the code,
     "dess-examples-pyo3", # pyo3 api for dess-core
+    "tests", #testing the accuracy of each method
 ]
 
 [profile.dev]
