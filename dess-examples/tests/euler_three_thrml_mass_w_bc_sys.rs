@@ -1,7 +1,7 @@
-use crate::tests_core::*;
 use dess_core::prelude::*;
 use dess_examples::components::*;
 use dess_examples::imports::*;
+use dess_examples::tests::tests_core::*;
 use dess_examples::three_thrml_mass_w_bc_sys::System3TMWithBC;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TMWithBC {
@@ -39,7 +39,7 @@ pub fn baseline_three_tm_w_bc_sys(overwrite_baseline: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("tests/fixtures/euler_w_bc_baseline.yaml");
+            .join("dess-examples/tests/fixtures/euler_w_bc_baseline.yaml");
 
         sys_euler
             .to_file(baseline_file.as_os_str().to_str().unwrap())
@@ -66,7 +66,7 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
         .parent()
         .unwrap()
         .to_path_buf()
-        .join("tests/fixtures/euler_w_bc_baseline.yaml");
+        .join("dess-examples/tests/fixtures/euler_w_bc_baseline.yaml");
     let baseline_sys =
         System3TMWithBC::from_file(baseline_file.as_os_str().to_str().unwrap()).unwrap();
     //temperatures for m1, m2, m3 with small step euler
@@ -87,49 +87,19 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
     let m1_new_1 = m1.clone();
     let m2_new_1 = m2.clone();
     let m3_new_1 = m3.clone();
-    let m1_within_epsilon = within_epsilon(m1, epsilon);
+    let m1_within_epsilon = dess_examples::tests::tests_core::within_epsilon(m1, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m1 solution: {}",
         epsilon, m1_within_epsilon
     );
-    let m2_within_epsilon = within_epsilon(m2, epsilon);
+    let m2_within_epsilon = dess_examples::tests::tests_core::within_epsilon(m2, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m2 solution: {}",
         epsilon, m2_within_epsilon
     );
-    let m3_within_epsilon = within_epsilon(m3, epsilon);
+    let m3_within_epsilon = dess_examples::tests::tests_core::within_epsilon(m3, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m3 solution: {}",
         epsilon, m3_within_epsilon
-    );
-    let m1_within_epsilon_absolute_error_only = within_epsilon_absolute_error_only(m1_new, epsilon);
-    println!(
-        "Stays within {} of three thermal mass w bc m1 solution: {}",
-        epsilon, m1_within_epsilon_absolute_error_only
-    );
-    let m2_within_epsilon_absolute_error_only = within_epsilon_absolute_error_only(m2_new, epsilon);
-    println!(
-        "Stays within {} of three thermal mass w bc m2 solution: {}",
-        epsilon, m2_within_epsilon_absolute_error_only
-    );
-    let m3_within_epsilon_absolute_error_only = within_epsilon_absolute_error_only(m3_new, epsilon);
-    println!(
-        "Stays within {} of three thermal mass w bc m3 solution: {}",
-        epsilon, m3_within_epsilon_absolute_error_only
-    );
-    let average_distance_m1 = average_distance(m1_new_1);
-    println!(
-        "The average distance between method and baseline for three thermal mass w bc m1 solution is {}.",
-        average_distance_m1
-    );
-    let average_distance_m2 = average_distance(m2_new_1);
-    println!(
-        "The average distance between method and baseline for three thermal mass w bc m2 solution is {}.",
-        average_distance_m2
-    );
-    let average_distance_m3 = average_distance(m3_new_1);
-    println!(
-        "The average distance between method and baseline for three thermal mass w bc m3 solution is {}.",
-        average_distance_m3
     );
 }

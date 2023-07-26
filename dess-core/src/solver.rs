@@ -73,7 +73,7 @@ pub struct AdaptiveSolverConfig {
     /// history of solver state
     pub history: SolverStateHistoryVec,
 }
-
+//might not need new_method if you update default? might not be useful to use these types of functions in general, just create the struct directly
 impl AdaptiveSolverConfig {
     pub fn new(
         dt_init: f64,
@@ -86,8 +86,10 @@ impl AdaptiveSolverConfig {
     ) -> Self {
         let state = SolverState {
             dt: dt_init,
+            //can use this elsewhere when creating structs directly
             ..Default::default()
         };
+        //maybe have this in default instead? find everywhere unwrap or is happening, and change to default
         Self {
             dt_max: dt_max.unwrap_or(10.),
             max_iter: max_iter.unwrap_or(2),
@@ -100,7 +102,7 @@ impl AdaptiveSolverConfig {
         }
     }
 }
-
+//delete this (replace with different default that doesn't use self)
 impl Default for AdaptiveSolverConfig {
     fn default() -> Self {
         Self::new(0.1, None, None, None, None, false, false)
