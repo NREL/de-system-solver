@@ -13,7 +13,7 @@ pub fn baseline_euler_sys() -> System3TMWithBC {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 21);
 
     System3TMWithBC::new(
-        SolverTypes::EulerFixed { dt: 5e-5 },
+        SolverTypes::EulerFixed { dt: 5e-10 },
         m1,
         m2,
         h12,
@@ -77,24 +77,59 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
     let method_m1 = sys.m1.history.temp;
     let method_m2 = sys.m2.history.temp;
     let method_m3 = sys.m3.history.temp;
-    //need to create different comparisons -- almost eq, small dt to be within epsilon (might need own function),
-    //average difference (abs, rel), greatest distance(abs, rel)
-    let m1 = baseline_m1.iter().zip(&method_m1).collect();
+    //crreating vectors made up of pairs, with first one in pair being baseline_m_ and second one being method_m_
+    let m1: Vec<(&f64, &f64)> = baseline_m1.iter().zip(&method_m1).collect();
     let m2: Vec<(&f64, &f64)> = baseline_m2.iter().zip(&method_m2).collect();
     let m3: Vec<(&f64, &f64)> = baseline_m3.iter().zip(&method_m3).collect();
+    let m1_new: Vec<(&f64, &f64)> = m1.clone();
+    let m2_new = m2.clone();
+    let m3_new = m3.clone();
+    let m1_new_1 = m1.clone();
+    let m2_new_1 = m2.clone();
+    let m3_new_1 = m3.clone();
     let m1_within_epsilon = within_epsilon(m1, epsilon);
     println!(
-        "Stays within {} of three thermal mass w bc solution: {}",
+        "Stays within {} of three thermal mass w bc m1 solution: {}",
         epsilon, m1_within_epsilon
     );
     let m2_within_epsilon = within_epsilon(m2, epsilon);
     println!(
-        "Stays within {} of three thermal mass w bc solution: {}",
+        "Stays within {} of three thermal mass w bc m2 solution: {}",
         epsilon, m2_within_epsilon
     );
     let m3_within_epsilon = within_epsilon(m3, epsilon);
     println!(
-        "Stays within {} of three thermal mass w bc solution: {}",
+        "Stays within {} of three thermal mass w bc m3 solution: {}",
         epsilon, m3_within_epsilon
-    )
+    );
+    let m1_within_epsilon_absolute_error_only = within_epsilon_absolute_error_only(m1_new, epsilon);
+    println!(
+        "Stays within {} of three thermal mass w bc m1 solution: {}",
+        epsilon, m1_within_epsilon_absolute_error_only
+    );
+    let m2_within_epsilon_absolute_error_only = within_epsilon_absolute_error_only(m2_new, epsilon);
+    println!(
+        "Stays within {} of three thermal mass w bc m2 solution: {}",
+        epsilon, m2_within_epsilon_absolute_error_only
+    );
+    let m3_within_epsilon_absolute_error_only = within_epsilon_absolute_error_only(m3_new, epsilon);
+    println!(
+        "Stays within {} of three thermal mass w bc m3 solution: {}",
+        epsilon, m3_within_epsilon_absolute_error_only
+    );
+    let average_distance_m1 = average_distance(m1_new_1);
+    println!(
+        "The average distance between method and baseline for three thermal mass w bc m1 solution is {}.",
+        average_distance_m1
+    );
+    let average_distance_m2 = average_distance(m2_new_1);
+    println!(
+        "The average distance between method and baseline for three thermal mass w bc m2 solution is {}.",
+        average_distance_m2
+    );
+    let average_distance_m3 = average_distance(m3_new_1);
+    println!(
+        "The average distance between method and baseline for three thermal mass w bc m3 solution is {}.",
+        average_distance_m3
+    );
 }

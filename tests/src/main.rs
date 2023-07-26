@@ -15,8 +15,8 @@ fn main() {
     euler_three_thermal_mass_sys::baseline_three_tm_sys(overwrite_baseline);
     euler_three_thrml_mass_w_bc_sys::baseline_three_tm_w_bc_sys(overwrite_baseline);
     euler_three_thermal_mass_sys::test_method_against_euler_baseline(
-        dess_core::solver::SolverTypes::EulerFixed { dt: 5e-5 },
-        5e-10,
+        dess_core::solver::SolverTypes::EulerFixed { dt: 1e-2 },
+        1e-1,
     );
     euler_three_thermal_mass_sys::test_method_against_euler_baseline(
         dess_core::solver::SolverTypes::HeunsMethod { dt: 1e-2 },
@@ -39,8 +39,8 @@ fn main() {
         0.025,
     );
     euler_three_thrml_mass_w_bc_sys::test_method_against_euler_baseline(
-        dess_core::solver::SolverTypes::EulerFixed { dt: 5e-5 },
-        5e-10,
+        dess_core::solver::SolverTypes::EulerFixed { dt: 1e-2 },
+        1e-1,
     );
     euler_three_thrml_mass_w_bc_sys::test_method_against_euler_baseline(
         dess_core::solver::SolverTypes::HeunsMethod { dt: 1e-2 },
