@@ -1,8 +1,6 @@
 use crate::components::*;
 use crate::imports::*;
-use crate::tests::tests_core::*;
 use crate::three_thrml_mass_w_bc_sys::System3TMWithBC;
-use dess_core::prelude::*;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TMWithBC {
     let m1 = ThermalReservoir::new(-1.0);
@@ -39,7 +37,7 @@ pub fn baseline_three_tm_w_bc_sys(overwrite_baseline: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler_w_bc_baseline.yaml");
+            .join("dess-examples/src/tests/fixtures/euler_w_bc_baseline.yaml");
 
         sys_euler
             .to_file(baseline_file.as_os_str().to_str().unwrap())
@@ -66,7 +64,7 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
         .parent()
         .unwrap()
         .to_path_buf()
-        .join("dess-examples/tests/fixtures/euler_w_bc_baseline.yaml");
+        .join("dess-examples/src/tests/fixtures/euler_w_bc_baseline.yaml");
     let baseline_sys =
         System3TMWithBC::from_file(baseline_file.as_os_str().to_str().unwrap()).unwrap();
     //temperatures for m1, m2, m3 with small step euler
@@ -81,12 +79,6 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
     let m1: Vec<(&f64, &f64)> = baseline_m1.iter().zip(&method_m1).collect();
     let m2: Vec<(&f64, &f64)> = baseline_m2.iter().zip(&method_m2).collect();
     let m3: Vec<(&f64, &f64)> = baseline_m3.iter().zip(&method_m3).collect();
-    let m1_new: Vec<(&f64, &f64)> = m1.clone();
-    let m2_new = m2.clone();
-    let m3_new = m3.clone();
-    let m1_new_1 = m1.clone();
-    let m2_new_1 = m2.clone();
-    let m3_new_1 = m3.clone();
     let m1_within_epsilon = crate::tests::tests_core::within_epsilon(m1, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m1 solution: {}",
