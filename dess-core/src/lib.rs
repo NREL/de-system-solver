@@ -2,7 +2,7 @@ mod imports;
 pub mod prelude;
 #[cfg(feature = "pyo3")]
 pub(crate) mod pyo3_imports;
-pub mod solver;
+mod solver;
 pub mod traits_and_macros;
 pub mod utilities;
 

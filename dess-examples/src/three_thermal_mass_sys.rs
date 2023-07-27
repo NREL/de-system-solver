@@ -212,7 +212,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/euler benchmark.yaml");
 
         sys_euler
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -238,7 +238,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/heuns benchmark.yaml");
 
         sys_heuns
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -263,7 +263,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/midpoint benchmark.yaml");
 
         sys_midpoint
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -288,7 +288,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/ralstons benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/ralstons benchmark.yaml");
 
         sys_ralstons
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -313,7 +313,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk4 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk4 benchmark.yaml");
 
         sys_rk4
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -338,7 +338,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk45 benchmark.yaml");
         sys_rk45
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
@@ -375,7 +375,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/euler benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -391,7 +391,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/heuns benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -407,7 +407,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/midpoint benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -423,7 +423,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/ralstons benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/ralstons benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -438,7 +438,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk4 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk4 benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -506,7 +506,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk45 benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();

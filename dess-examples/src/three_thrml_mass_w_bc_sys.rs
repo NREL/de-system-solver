@@ -210,7 +210,7 @@ pub fn mock_rk45_sys() -> System3TMWithBC {
 }
 
 pub fn run_three_tm_w_bc_sys() {
-    let overwrite_benchmarks = false;
+    //let overwrite_benchmarks = false;
     // build and run prescribed-step Euler system
     let mut sys_euler = mock_euler_sys();
 
@@ -224,18 +224,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_euler.as_micros()
     );
 
-    let overwrite_euler_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_euler_benchmark: bool = overwrite_benchmarks;
     if overwrite_euler_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler_benchmark_w_bc.yaml");
+            .join("dess-examples/src/tests/fixtures/euler_benchmark_w_bc.yaml");
 
         sys_euler
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run prescribed-step Heuns system
     let mut sys_heuns = mock_heuns_sys();
@@ -250,18 +250,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_heuns.as_micros()
     );
 
-    let overwrite_heuns_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_heuns_benchmark: bool = overwrite_benchmarks;
     if overwrite_heuns_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/heuns_benchmark_w_bc.yaml");
+            .join("dess-examples/src/tests/fixtures/heuns_benchmark_w_bc.yaml");
 
         sys_heuns
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run prescribed-step Midpoint system
     let mut sys_midpoint = mock_midpoint_sys();
@@ -276,18 +276,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_midpoint.as_micros()
     );
 
-    let overwrite_midpoint_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_midpoint_benchmark: bool = overwrite_benchmarks;
     if overwrite_midpoint_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/midpoint_benchmark_w_bc.yaml");
+            .join("dess-examples/src/tests/fixtures/midpoint_benchmark_w_bc.yaml");
 
         sys_midpoint
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run prescribed-step Ralston's system
     let mut sys_ralstons = mock_ralstons_sys();
@@ -302,18 +302,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_ralstons.as_micros()
     );
 
-    let overwrite_ralstons_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_ralstons_benchmark: bool = overwrite_benchmarks;
     if overwrite_ralstons_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/ralstons_benchmark_w_bc.yaml");
+            .join("dess-examples/src/tests/fixtures/ralstons_benchmark_w_bc.yaml");
 
         sys_ralstons
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run prescribed-step 4th-order Runge-Kutta system
     let mut sys_rk4 = mock_rk4fixed_sys();
@@ -328,18 +328,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_rk4.as_micros()
     );
 
-    let overwrite_rk4_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_rk4_benchmark: bool = overwrite_benchmarks;
     if overwrite_rk4_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk4_benchmark_w_bc.yaml");
+            .join("dess-examples/src/tests/fixtures/rk4_benchmark_w_bc.yaml");
 
         sys_rk4
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run adaptive RK45
     let mut sys_rk45 = mock_rk45_sys();
@@ -354,18 +354,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_rk45.as_micros()
     );
 
-    let overwrite_rk45_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_rk45_benchmark: bool = overwrite_benchmarks;
     if overwrite_rk45_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk45_benchmark_w_bc.yaml");
+            .join("dess-examples/src/tests/fixtures/rk45_benchmark_w_bc.yaml");
 
         sys_rk45
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 }
 
 // #[cfg(test)]

@@ -1,4 +1,5 @@
-use dess_examples::tests::{euler_three_thermal_mass_sys::*, euler_three_thrml_mass_w_bc_sys::*};
+use dess_examples::tests::euler_three_thermal_mass_sys::*;
+use dess_examples::tests::euler_three_thrml_mass_w_bc_sys::*;
 use dess_examples::*;
 
 fn main() {
@@ -25,8 +26,6 @@ fn main() {
             overwrite_baseline = true;
         }
     }
-    dess_examples::tests::euler_three_thermal_mass_sys::baseline_three_tm_sys(overwrite_baseline);
-    dess_examples::tests::euler_three_thrml_mass_w_bc_sys::baseline_three_tm_w_bc_sys(
-        overwrite_baseline,
-    );
+    baseline_three_tm_sys(overwrite_baseline);
+    baseline_three_tm_w_bc_sys(overwrite_baseline);
 }

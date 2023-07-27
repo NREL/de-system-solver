@@ -1,8 +1,8 @@
-use dess_examples::tests::tests_core::*;
 use dess_core::prelude::*;
 use dess_core::solver::SolverTypes;
 use dess_examples::components::*;
 use dess_examples::imports::*;
+use dess_examples::tests::tests_core::*;
 use dess_examples::three_thermal_mass_sys::System3TM;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TM {
@@ -41,7 +41,7 @@ pub fn baseline_three_tm_sys(overwrite_baseline: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler_baseline.yaml");
+            .join("dess-examples/src/tests/fixtures/euler_baseline.yaml");
 
         sys_euler
             .to_file(baseline_file.as_os_str().to_str().unwrap())
@@ -68,7 +68,7 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
         .parent()
         .unwrap()
         .to_path_buf()
-        .join("dess-examples/tests/fixtures/euler_baseline.yaml");
+        .join("dess-examples/src/tests/fixtures/euler_baseline.yaml");
     let baseline_sys = System3TM::from_file(baseline_file.as_os_str().to_str().unwrap()).unwrap();
     //temperatures for m1, m2, m3 with small step euler
     let baseline_m1 = baseline_sys.m1.history.temp;
@@ -83,12 +83,6 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
     let m1: Vec<(&f64, &f64)> = baseline_m1.iter().zip(&method_m1).collect();
     let m2: Vec<(&f64, &f64)> = baseline_m2.iter().zip(&method_m2).collect();
     let m3: Vec<(&f64, &f64)> = baseline_m3.iter().zip(&method_m3).collect();
-    let m1_new = m1.clone();
-    let m2_new = m2.clone();
-    let m3_new = m3.clone();
-    let m1_new_1 = m1.clone();
-    let m2_new_1 = m2.clone();
-    let m3_new_1 = m3.clone();
     let m1_within_epsilon = dess_examples::tests::tests_core::within_epsilon(m1, epsilon);
     println!(
         "Stays within {} of m1 solution: {}",
