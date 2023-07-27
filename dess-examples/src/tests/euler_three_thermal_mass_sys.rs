@@ -1,9 +1,9 @@
-use dess_examples::tests::tests_core::*;
+use crate::tests::tests_core::*;
 use dess_core::prelude::*;
 use dess_core::solver::SolverTypes;
-use dess_examples::components::*;
-use dess_examples::imports::*;
-use dess_examples::three_thermal_mass_sys::System3TM;
+use crate::components::*;
+use crate::imports::*;
+use crate::three_thermal_mass_sys::System3TM;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TM {
     let m1 = ThermalMass::new(1.0, 0.0);
@@ -89,17 +89,17 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
     let m1_new_1 = m1.clone();
     let m2_new_1 = m2.clone();
     let m3_new_1 = m3.clone();
-    let m1_within_epsilon = dess_examples::tests::tests_core::within_epsilon(m1, epsilon);
+    let m1_within_epsilon = crate::tests::tests_core::within_epsilon(m1, epsilon);
     println!(
         "Stays within {} of m1 solution: {}",
         epsilon, m1_within_epsilon
     );
-    let m2_within_epsilon = dess_examples::tests::tests_core::within_epsilon(m2, epsilon);
+    let m2_within_epsilon = crate::tests::tests_core::within_epsilon(m2, epsilon);
     println!(
         "Stays within {} of m2 solution: {}",
         epsilon, m2_within_epsilon
     );
-    let m3_within_epsilon = dess_examples::tests::tests_core::within_epsilon(m3, epsilon);
+    let m3_within_epsilon = crate::tests::tests_core::within_epsilon(m3, epsilon);
     println!(
         "Stays within {} of m3 solution: {}",
         epsilon, m3_within_epsilon
