@@ -30,7 +30,7 @@ impl Default for SolverTypes {
         SolverTypes::RK4Fixed { dt: 0.1 }
     }
 }
-//need to replace
+//need to make sure something similar is still attached to python
 /* #[pyo3_api(
     #[new]
     fn new_py(
