@@ -20,7 +20,9 @@ use crate::imports::*;
             h12, 
             m3, 
             h23, 
-            t_report
+            t_report,
+            state: Default::default(),
+            history: Default::default(),
         }
     }
 
@@ -37,13 +39,15 @@ use crate::imports::*;
         t_report: Vec<f64>,
     ) -> Self {
         Self{
-            SolverTypes::RK45CashKarp(Box::new(sol)),
+            solver_type: SolverTypes::RK45CashKarp(Box::new(sol)),
             m1, 
             m2, 
             h12, 
             m3, 
             h23, 
-            t_report
+            t_report,
+            state: Default::default(),
+            history: Default::default(),
         }
     }
     #[getter]
@@ -74,7 +78,6 @@ use crate::imports::*;
     }
 )]
 #[common_derives]
-#[derive(Default)]
 pub struct System3TM {
     #[skip_get]
     solver_type: SolverTypes,
