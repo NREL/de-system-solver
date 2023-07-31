@@ -30,8 +30,8 @@ impl Default for SolverTypes {
         SolverTypes::RK4Fixed { dt: 0.1 }
     }
 }
-
-#[pyo3_api(
+//need to replace
+/* #[pyo3_api(
     #[new]
     fn new_py(
         dt_init: f64,
@@ -52,7 +52,7 @@ impl Default for SolverTypes {
             save_states.unwrap_or_default(),
         )
     }
-)]
+)] */
 #[common_derives]
 pub struct AdaptiveSolverConfig {
     /// max allowable dt
@@ -73,8 +73,8 @@ pub struct AdaptiveSolverConfig {
     /// history of solver state
     pub history: SolverStateHistoryVec,
 }
-//might not need new_method if you update default? might not be useful to use these types of functions in general, just create the struct directly
-impl AdaptiveSolverConfig {
+
+/* impl AdaptiveSolverConfig {
     pub fn new(
         dt_init: f64,
         dt_max: Option<f64>,
@@ -101,11 +101,23 @@ impl AdaptiveSolverConfig {
             history: Default::default(),
         }
     }
-}
+} */
 //delete this (replace with different default that doesn't use self)
 impl Default for AdaptiveSolverConfig {
     fn default() -> Self {
-        Self::new(0.1, None, None, None, None, false, false)
+        Self {
+            dt_max: 10.,
+            max_iter: 2,
+            rtol: 1e-5,
+            atol: 1e-9,
+            save: false,
+            save_states: false,
+            state: SolverState {
+                dt: 0.1,
+                ..Default::default()
+            },
+            history: Default::default(),
+        }
     }
 }
 
@@ -136,7 +148,8 @@ pub struct SolverState {
     /// current values of states
     pub states: Vec<f64>,
 }
-
+//what should the defaults be for norm_err and norm_err_rel? can't find what they should be...maybe those fields aren't required
+//and that's why they use option?
 impl Default for SolverState {
     fn default() -> Self {
         Self {

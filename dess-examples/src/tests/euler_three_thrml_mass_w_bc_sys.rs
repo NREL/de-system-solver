@@ -1,24 +1,14 @@
-use crate::components::*;
 use crate::imports::*;
 use crate::three_thrml_mass_w_bc_sys::System3TMWithBC;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TMWithBC {
-    let m1 = ThermalReservoir::new(-1.0);
-    let m2 = ThermalMass::new(2.0, 10.0);
-    let h12 = Conductance::new(5.0);
-    let m3 = ThermalMass::new(1.5, 12.0);
-    let h23 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 21);
 
-    System3TMWithBC::new(
-        SolverTypes::EulerFixed { dt: 5e-10 },
-        m1,
-        m2,
-        h12,
-        m3,
-        h23,
+    System3TMWithBC {
+        solver_type: SolverTypes::EulerFixed { dt: 5e-10 },
         t_report,
-    )
+        ..Default::default()
+    }
 }
 pub fn baseline_three_tm_w_bc_sys(overwrite_baseline: bool) {
     if overwrite_baseline {
@@ -46,17 +36,16 @@ pub fn baseline_three_tm_w_bc_sys(overwrite_baseline: bool) {
 }
 ///three thermal mass w bc with chosen method, to compare to small step euler
 pub fn mock_method_w_bc_sys(method: SolverTypes) -> System3TMWithBC {
-    let m1 = ThermalReservoir::new(-1.0);
-    let m2 = ThermalMass::new(2.0, 10.0);
-    let h12 = Conductance::new(5.0);
-    let m3 = ThermalMass::new(1.5, 12.0);
-    let h23 = Conductance::new(5.0);
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 21);
 
-    System3TMWithBC::new(method, m1, m2, h12, m3, h23, t_report)
+    System3TMWithBC {
+        solver_type: method,
+        t_report,
+        ..Default::default()
+    }
 }
 ///tests chosen solver (including dt) against small step euler
-pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
+pub fn test_method_against_euler_baseline_bc(method: SolverTypes, epsilon: f64) {
     let mut sys = mock_method_w_bc_sys(method);
     sys.walk();
     //taking baseline

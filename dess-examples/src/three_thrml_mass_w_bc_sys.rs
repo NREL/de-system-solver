@@ -14,15 +14,15 @@ use crate::imports::*;
         h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
-        Self::new(
-            SolverTypes::from_json(&solver_type).unwrap(),
+        Self{
+            solver_type: SolverTypes::from_json(&solver_type).unwrap(),
             m1,
             m2,
             h12,
             m3,
             h23,
             t_report,
-        )
+        }
     }
 
     #[classmethod]
@@ -37,7 +37,7 @@ use crate::imports::*;
         h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
-        Self::new(
+        Self{
             SolverTypes::RK45CashKarp(Box::new(sol)),
             m1,
             m2,
@@ -45,7 +45,7 @@ use crate::imports::*;
             m3,
             h23,
             t_report
-        )
+        }
     }
 
     #[getter]
@@ -106,29 +106,80 @@ pub struct System3TMWithBC {
     pub history: SystemStateHistoryVec,
 }
 
-impl System3TMWithBC {
-    pub fn new(
-        solver_type: SolverTypes,
-        m1: ThermalReservoir,
-        m2: ThermalMass,
-        h12: Conductance,
-        m3: ThermalMass,
-        h23: Conductance,
-        t_report: Vec<f64>,
-    ) -> Self {
+impl Default for System3TMWithBC {
+    fn default() -> Self {
         Self {
-            solver_type,
-            m1,
-            m2,
-            h12,
-            m3,
-            h23,
-            t_report,
+            solver_type: SolverTypes::EulerFixed { dt: 5e-3 },
+            m1: ThermalReservoir{
+                state: ThermalMassState {
+                    temp: -1.0, 
+                    dtemp: Default::default(),
+                }, 
+                history: Default::default(),
+            },
+            m2: ThermalMass {
+                c: 2.0,
+                state: ThermalMassState {
+                    temp: 10.,
+                    dtemp: Default::default(),
+                },
+                history: Default::default(),
+            },
+            h12: Conductance {
+                h: 5.0,
+                state: ConductanceState {
+                    q: Default::default(),
+                },
+                history: ConductanceStateHistoryVec {
+                    q: Default::default(),
+                },
+            },
+            m3: ThermalMass {
+                c: 1.5,
+                state: ThermalMassState {
+                    temp: 12.,
+                    dtemp: Default::default(),
+                },
+                history: Default::default(),
+            },
+            h23: Conductance {
+                h: 5.0,
+                state: ConductanceState {
+                    q: Default::default(),
+                },
+                history: ConductanceStateHistoryVec {
+                    q: Default::default(),
+                },
+            },
+            t_report: Vec::linspace(0.0, 1.0, 201),
             state: Default::default(),
             history: Default::default(),
         }
     }
 }
+// impl System3TMWithBC {
+//     pub fn new(
+//         solver_type: SolverTypes,
+//         m1: ThermalReservoir,
+//         m2: ThermalMass,
+//         h12: Conductance,
+//         m3: ThermalMass,
+//         h23: Conductance,
+//         t_report: Vec<f64>,
+//     ) -> Self {
+//         Self {
+//             solver_type,
+//             m1,
+//             m2,
+//             h12,
+//             m3,
+//             h23,
+//             t_report,
+//             state: Default::default(),
+//             history: Default::default(),
+//         }
+//     }
+// }
 
 #[derive(Copy, HistoryVec, Default)]
 #[common_derives]
@@ -139,24 +190,8 @@ pub struct SystemState3TM {
     // current time
     time: f64,
 }
-
 pub fn mock_euler_sys() -> System3TMWithBC {
-    let m1 = ThermalReservoir::new(-1.0);
-    let m2 = ThermalMass::new(2.0, 10.0);
-    let h12 = Conductance::new(5.0);
-    let m3 = ThermalMass::new(1.5, 12.0);
-    let h23 = Conductance::new(5.0);
-    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
-
-    System3TMWithBC::new(
-        SolverTypes::EulerFixed { dt: 5e-3 },
-        m1,
-        m2,
-        h12,
-        m3,
-        h23,
-        t_report,
-    )
+    System3TMWithBC::default()
 }
 
 pub fn mock_heuns_sys() -> System3TMWithBC {

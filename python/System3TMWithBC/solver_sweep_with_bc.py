@@ -8,7 +8,7 @@ sns.set()
 
 # %%
 # # Check that `dt` and `t_report` work as expected
-
+#I suspect I will need to update these as well, these look like they would use a new() function
 m1 = dess_pyo3.ThermalReservoir(8.5)
 m2 = dess_pyo3.ThermalMass(2.0, 10.0)
 h12 = dess_pyo3.Conductance(5.0)
