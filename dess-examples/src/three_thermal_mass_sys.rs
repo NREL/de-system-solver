@@ -50,6 +50,7 @@ use crate::imports::*;
             history: Default::default(),
         }
     }
+
     #[getter]
     fn get_solver_conf(&self) -> Option<AdaptiveSolverConfig> {
         match &self.solver_type {
@@ -77,6 +78,7 @@ use crate::imports::*;
         update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
     }
 )]
+#[derive(HistoryMethods, BareClone)]
 #[common_derives]
 pub struct System3TM {
     #[skip_get]

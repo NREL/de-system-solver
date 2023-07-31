@@ -31,28 +31,28 @@ impl Default for SolverTypes {
     }
 }
 //need to make sure something similar is still attached to python
-/* #[pyo3_api(
-    #[new]
-    fn new_py(
-        dt_init: f64,
-        dt_max: Option<f64>,
-        max_iter: Option<u8>,
-        rtol: Option<f64>,
-        atol: Option<f64>,
-        save: Option<bool>,
-        save_states: Option<bool>,
-    ) -> Self {
-        Self::new(
-            dt_init,
-            dt_max,
-            max_iter,
-            rtol,
-            atol,
-            save.unwrap_or_default(),
-            save_states.unwrap_or_default(),
-        )
-    }
-)] */
+#[pyo3_api(
+    // #[new]
+    // fn new_py(
+    //     dt_init: f64,
+    //     dt_max: Option<f64>,
+    //     max_iter: Option<u8>,
+    //     rtol: Option<f64>,
+    //     atol: Option<f64>,
+    //     save: Option<bool>,
+    //     save_states: Option<bool>,
+    // ) -> Self {
+    //     Self::new(
+    //         dt_init,
+    //         dt_max,
+    //         max_iter,
+    //         rtol,
+    //         atol,
+    //         save.unwrap_or_default(),
+    //         save_states.unwrap_or_default(),
+    //     )
+    // }
+)] 
 #[common_derives]
 pub struct AdaptiveSolverConfig {
     /// max allowable dt
