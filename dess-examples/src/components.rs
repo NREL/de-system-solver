@@ -4,11 +4,18 @@ use crate::imports::*;
 #[derive(HistoryMethods, BareClone, Default)]
 #[common_derives]
 #[pyo3_api(
-    // #[new]
-    // /// New thermal mass with capacitance `c` and initial temperature `t0`
-    // pub fn __new__(c: f64, temp0: f64) -> Self {
-    //     Self::new(c, temp0)
-    // }
+    #[new]
+    /// New thermal mass with capacitance `c` and initial temperature `t0`
+    pub fn __new__(c: f64, temp0: f64) -> Self {
+        Self {
+            c,
+            state: ThermalMassState {
+                temp: temp0,
+                dtemp: Default::default(),
+            },
+            history: Default::default(),
+        }
+    }
 )]
 pub struct ThermalMass {
     /// thermal capacitance \[J/K\]
@@ -53,32 +60,25 @@ impl HasState for ThermalMass {
 }
 
 /// ThermalReservoir component with capacitance, state, and history
-/* #[derive(HistoryMethods, BareClone, Default)]
+#[derive(HistoryMethods, BareClone, Default)]
 #[common_derives]
 #[pyo3_api(
     #[new]
-    /// New thermal mass with capacitance `c` and initial temperature `t0`
+    /// New thermal reservoir with initial temperature `t0`
     pub fn __new__(temp0: f64) -> Self {
-        Self::new(temp0)
+        Self {
+            state: ThermalMassState {
+                temp: temp0,
+                dtemp: Default::default(),
+            },
+            history: Default::default(),
+        }
     }
-)] */
+)]
 pub struct ThermalReservoir {
     pub state: ThermalMassState,
     pub history: ThermalMassStateHistoryVec,
 }
-
-// impl ThermalReservoir {
-//     /// New thermal mass with capacitance `c` and initial temperature `t0`
-//     pub fn new(temp: f64) -> Self {
-//         Self {
-//             state: ThermalMassState {
-//                 temp,
-//                 dtemp: Default::default(),
-//             },
-//             history: Default::default(),
-//         }
-//     }
-// }
 
 impl HasState for ThermalReservoir {
     fn set_state(&mut self, val: f64) {
@@ -115,22 +115,8 @@ pub struct ThermalMassState {
 /// Conductance component
 #[derive(HistoryMethods, BareClone)]
 #[pyo3_api(
-    // #[new]
-    // fn __new__(h: f64) -> Self {
-    //     Self::new(h)
-    // }
-)]
-#[common_derives]
-#[derive(Default)]
-pub struct Conductance {
-    /// Thermal conductance \[W/K\] between two temperatures
-    pub h: f64,
-    pub state: ConductanceState,
-    pub history: ConductanceStateHistoryVec,
-}
-
-/* impl Conductance {
-    pub fn new(h: f64) -> Self {
+    #[new]
+    fn __new__(h: f64) -> Self {
         Self {
             h,
             state: ConductanceState {
@@ -141,7 +127,15 @@ pub struct Conductance {
             },
         }
     }
-} */
+)]
+#[common_derives]
+#[derive(Default)]
+pub struct Conductance {
+    /// Thermal conductance \[W/K\] between two temperatures
+    pub h: f64,
+    pub state: ConductanceState,
+    pub history: ConductanceStateHistoryVec,
+}
 
 impl Flow for Conductance {
     fn flow(&self) -> f64 {

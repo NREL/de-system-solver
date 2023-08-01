@@ -8,7 +8,6 @@ sns.set()
 
 # %%
 # # Check that `dt` and `t_report` work as expected
-#I suspect I will need to update these as well, these look like they would use a new() function
 m1 = dess_pyo3.ThermalReservoir(8.5)
 m2 = dess_pyo3.ThermalMass(2.0, 10.0)
 h12 = dess_pyo3.Conductance(5.0)
@@ -215,13 +214,18 @@ t0 = time.perf_counter()
 sys_rk4_large_dt.walk()
 print(f"rk4 dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
-max_iter = 10
-rtol = 1e-3
+dt_max = 10
 dt_init = 1e-3
+#increasing to 1e-5 makes the program take too long to run
+rtol = 1e-4
+atol = 1e-9
+max_iter = 10
 solver = dess_pyo3.AdaptiveSolverConfig(
+    dt_max=dt_max,
     dt_init=dt_init,
-    max_iter=max_iter,
     rtol=rtol,
+    atol=atol,
+    max_iter=max_iter,
 )
 
 sys_rk45 = dess_pyo3.System3TMWithBC.new_rk45_cash_karp(
@@ -241,9 +245,11 @@ print(f"rk45 dt_init={dt_init}")
 
 
 solver_save = dess_pyo3.AdaptiveSolverConfig(
+    dt_max=dt_max,
     dt_init=dt_init,
-    max_iter=max_iter,
     rtol=rtol,
+    atol=atol,
+    max_iter=max_iter,
     save=True,
     save_states=True,
 )
@@ -428,9 +434,11 @@ ax[0].legend(loc='right')
 # %%
 
 solver = dess_pyo3.AdaptiveSolverConfig(
+    dt_max=dt_max,
     dt_init=dt_init,
-    max_iter=max_iter,
     rtol=rtol,
+    atol=atol,
+    max_iter=max_iter,
     save=True,
     save_states=True,
 )

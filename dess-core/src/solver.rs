@@ -30,29 +30,32 @@ impl Default for SolverTypes {
         SolverTypes::RK4Fixed { dt: 0.1 }
     }
 }
-//need to make sure something similar is still attached to python
 #[pyo3_api(
-    // #[new]
-    // fn new_py(
-    //     dt_init: f64,
-    //     dt_max: Option<f64>,
-    //     max_iter: Option<u8>,
-    //     rtol: Option<f64>,
-    //     atol: Option<f64>,
-    //     save: Option<bool>,
-    //     save_states: Option<bool>,
-    // ) -> Self {
-    //     Self::new(
-    //         dt_init,
-    //         dt_max,
-    //         max_iter,
-    //         rtol,
-    //         atol,
-    //         save.unwrap_or_default(),
-    //         save_states.unwrap_or_default(),
-    //     )
-    // }
-)] 
+    #[new]
+    fn new_py(
+        dt_init: f64,
+        dt_max: f64,
+        max_iter: u8,
+        rtol: f64,
+        atol: f64,
+        save: Option<bool>,
+        save_states: Option<bool>,
+    ) -> Self {
+        Self{
+            dt_max,
+            max_iter,
+            atol,
+            rtol,
+            save: save.unwrap_or(false),
+            save_states: save_states.unwrap_or(false),
+            state: SolverState {
+                dt: dt_init,
+                ..Default::default()
+            },
+            history: Default::default(),
+        }
+    }
+)]
 #[common_derives]
 pub struct AdaptiveSolverConfig {
     /// max allowable dt
@@ -74,46 +77,17 @@ pub struct AdaptiveSolverConfig {
     pub history: SolverStateHistoryVec,
 }
 
-/* impl AdaptiveSolverConfig {
-    pub fn new(
-        dt_init: f64,
-        dt_max: Option<f64>,
-        max_iter: Option<u8>,
-        rtol: Option<f64>,
-        atol: Option<f64>,
-        save: bool,
-        save_states: bool,
-    ) -> Self {
-        let state = SolverState {
-            dt: dt_init,
-            //can use this elsewhere when creating structs directly
-            ..Default::default()
-        };
-        //maybe have this in default instead? find everywhere unwrap or is happening, and change to default
-        Self {
-            dt_max: dt_max.unwrap_or(10.),
-            max_iter: max_iter.unwrap_or(2),
-            rtol: rtol.unwrap_or(1e-3),
-            atol: atol.unwrap_or(1e-9),
-            save,
-            save_states,
-            state,
-            history: Default::default(),
-        }
-    }
-} */
-//delete this (replace with different default that doesn't use self)
 impl Default for AdaptiveSolverConfig {
     fn default() -> Self {
         Self {
             dt_max: 10.,
-            max_iter: 2,
+            max_iter: 5,
             rtol: 1e-5,
             atol: 1e-9,
             save: false,
             save_states: false,
             state: SolverState {
-                dt: 0.1,
+                dt: 1e-3,
                 ..Default::default()
             },
             history: Default::default(),

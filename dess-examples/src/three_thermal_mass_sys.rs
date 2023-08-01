@@ -82,7 +82,7 @@ use crate::imports::*;
 #[common_derives]
 pub struct System3TM {
     #[skip_get]
-    solver_type: SolverTypes,
+    pub solver_type: SolverTypes,
     // components
     // the `use_state` attribute tells the SystemSolver TODO: finish this thought
     #[use_state]
@@ -154,29 +154,7 @@ impl Default for System3TM {
         }
     }
 }
-/* impl System3TM {
-    pub fn new(
-        solver_type: SolverTypes,
-        m1: ThermalMass,
-        m2: ThermalMass,
-        h12: Conductance,
-        m3: ThermalMass,
-        h23: Conductance,
-        t_report: Vec<f64>,
-    ) -> Self {
-        Self {
-            solver_type,
-            m1,
-            m2,
-            h12,
-            m3,
-            h23,
-            t_report,
-            state: Default::default(),
-            history: Default::default(),
-        }
-    }
-} */
+
 pub fn mock_euler_sys() -> System3TM {
     System3TM::default()
 }

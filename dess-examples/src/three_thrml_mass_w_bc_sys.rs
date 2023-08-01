@@ -90,7 +90,7 @@ use crate::imports::*;
 #[common_derives]
 pub struct System3TMWithBC {
     #[skip_get]
-    solver_type: SolverTypes,
+    pub solver_type: SolverTypes,
     // components
     #[use_state]
     pub m1: ThermalReservoir,
@@ -160,29 +160,6 @@ impl Default for System3TMWithBC {
         }
     }
 }
-// impl System3TMWithBC {
-//     pub fn new(
-//         solver_type: SolverTypes,
-//         m1: ThermalReservoir,
-//         m2: ThermalMass,
-//         h12: Conductance,
-//         m3: ThermalMass,
-//         h23: Conductance,
-//         t_report: Vec<f64>,
-//     ) -> Self {
-//         Self {
-//             solver_type,
-//             m1,
-//             m2,
-//             h12,
-//             m3,
-//             h23,
-//             t_report,
-//             state: Default::default(),
-//             history: Default::default(),
-//         }
-//     }
-// }
 
 #[derive(Copy, HistoryVec, Default)]
 #[common_derives]

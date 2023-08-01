@@ -30,14 +30,10 @@ pub(crate) fn history_vec_derive(input: TokenStream) -> TokenStream {
         .map(|f| {
             let ident = f.ident.as_ref().unwrap();
             quote! {
-                //does this new() need to be changed?
                 #ident: Vec::new(),
             }
         })
         .concat();
-    //does this new() need to be changed? -- I think this is defined in a
-    //lib.rs that isn't part of the repo somehow, not sure if I can change it.
-    //(changes don't show up when I try)
     let mut generated = TokenStream2::new();
     let struct_doc: TokenStream2 = format!("/// Stores history of {}", original_name_str)
         .parse()
