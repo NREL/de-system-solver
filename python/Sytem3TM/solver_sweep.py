@@ -216,9 +216,9 @@ sys_rk4_large_dt.walk()
 print(f"rk4 dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 dt_max = 10
-dt_init = 1e-3
+dt_init = 0.1
 #increasing to 1e-5 makes the program take longer to run
-rtol = 1e-4
+rtol = 1e-3
 atol = 1e-9
 max_iter = 5
 solver = dess_pyo3.AdaptiveSolverConfig(

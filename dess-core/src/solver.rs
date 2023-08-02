@@ -82,12 +82,12 @@ impl Default for AdaptiveSolverConfig {
         Self {
             dt_max: 10.,
             max_iter: 5,
-            rtol: 1e-5,
+            rtol: 1e-3,
             atol: 1e-9,
             save: false,
             save_states: false,
             state: SolverState {
-                dt: 1e-3,
+                dt: 0.1,
                 ..Default::default()
             },
             history: Default::default(),

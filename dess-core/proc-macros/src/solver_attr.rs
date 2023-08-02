@@ -126,6 +126,19 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                 }
             }
 
+            // iterates through time until last value of `t_report` and records time steps (useful for adaptive time step functions)
+            pub fn walk_with_time_step(&mut self) -> Vec<f64>{
+                let mut time_steps: Vec<f64> = vec![];
+                while &self.state.time < self.t_report.last().unwrap() {
+                    let partial_time_steps = self.solve_step_return_dt();
+                    for time in partial_time_steps {
+                        time_steps.push(time);
+                    }
+                    self.state.i += 1;
+                }
+                time_steps
+            }
+
             /// Runs `solver_type` specific step method that calls
             /// [Self::step] in solver-specific manner
             pub fn solve_step(&mut self) {
@@ -158,8 +171,45 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     }
                 }
             }
+            pub fn solve_step_return_dt(&mut self) -> Vec<f64>{
+                let mut time_steps: Vec<f64> = vec![];
+                while self.state.time < self.t_report[self.state.i] {
+                    let dt = self.t_report[self.state.i] - self.state.time;
+                    match &self.solver_type {
+                        SolverTypes::EulerFixed{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
+                            self.euler(&dt);
+                            time_steps.push(dt);
+                        },
+                        SolverTypes::HeunsMethod{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
+                            self.heun(&dt);
+                            time_steps.push(dt);
+                        },
+                        SolverTypes::MidpointMethod{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
+                            self.midpoint(&dt);
+                            time_steps.push(dt);
+                        },
+                        SolverTypes::RalstonsMethod{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
+                            self.ralston(&dt);
+                            time_steps.push(dt);
+                        },
+                        SolverTypes::RK4Fixed{dt: dt_fixed} => {
+                            let dt = dt.min(dt_fixed.clone());
+                            self.rk4fixed(&dt);
+                            time_steps.push(dt);
+                        },
+                        SolverTypes::RK45CashKarp(_sc) => {
+                            let dt = self.rk45_cash_karp(&dt);
+                            time_steps.push(dt);
+                        },
+                    }
+                }
+                time_steps
+            }
         }
     });
-
     item_and_impl_block.into()
 }

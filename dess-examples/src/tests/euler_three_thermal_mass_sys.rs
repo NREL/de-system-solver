@@ -1,6 +1,7 @@
 use crate::imports::*;
 use crate::three_thermal_mass_sys::System3TM;
 use dess_core::solver::SolverTypes;
+use super::tests_core::*;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TM {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 21);
@@ -85,4 +86,10 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
         "Stays within {} of m3 solution: {}",
         epsilon, m3_within_epsilon
     );
+}
+//given a solver type, outputs average time step (only useful for adaptive solvers)
+pub fn method_average_time_step(method: SolverTypes) -> f64{
+    let mut sys = mock_method_sys(method);
+    let time_steps: Vec<f64> = sys.walk_with_time_step();
+    vector_average(time_steps)
 }
