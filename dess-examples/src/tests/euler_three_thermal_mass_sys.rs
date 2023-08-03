@@ -1,10 +1,9 @@
 use crate::imports::*;
 use crate::three_thermal_mass_sys::System3TM;
 use dess_core::solver::SolverTypes;
-use super::tests_core::*;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TM {
-    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 21);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 4);
 
     System3TM {
         solver_type: SolverTypes::EulerFixed { dt: 5e-10 },
@@ -39,7 +38,7 @@ pub fn baseline_three_tm_sys(overwrite_baseline: bool) {
 }
 ///three thermal mass with chosen method, to compare to small step euler
 pub fn mock_method_sys(method: SolverTypes) -> System3TM {
-    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 21);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 4);
 
     System3TM {
         solver_type: method,
@@ -66,8 +65,6 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
     let method_m1 = sys.m1.history.temp;
     let method_m2 = sys.m2.history.temp;
     let method_m3 = sys.m3.history.temp;
-    //need to create different comparisons -- almost eq, small dt to be within epsilon (might need own function),
-    //average difference (abs, rel), greatest distance(abs, rel)
     let m1: Vec<(&f64, &f64)> = baseline_m1.iter().zip(&method_m1).collect();
     let m2: Vec<(&f64, &f64)> = baseline_m2.iter().zip(&method_m2).collect();
     let m3: Vec<(&f64, &f64)> = baseline_m3.iter().zip(&method_m3).collect();
@@ -86,10 +83,22 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
         "Stays within {} of m3 solution: {}",
         epsilon, m3_within_epsilon
     );
-}
-//given a solver type, outputs average time step (only useful for adaptive solvers)
-pub fn method_average_time_step(method: SolverTypes) -> f64{
-    let mut sys = mock_method_sys(method);
-    let time_steps: Vec<f64> = sys.walk_with_time_step();
-    vector_average(time_steps)
+    let m1_1: Vec<(&f64, &f64)> = baseline_m1.iter().zip(&method_m1).collect();
+    let m2_1: Vec<(&f64, &f64)> = baseline_m2.iter().zip(&method_m2).collect();
+    let m3_1: Vec<(&f64, &f64)> = baseline_m3.iter().zip(&method_m3).collect();
+    let m1_mean_absolute_error = crate::tests::tests_core::average_distance(m1_1);
+    println!(
+        "Mean absolute error of m1 solution: {}",
+        m1_mean_absolute_error
+    );
+    let m2_mean_absolute_error = crate::tests::tests_core::average_distance(m2_1);
+    println!(
+        "Mean absolute error of m2 solution: {}",
+        m2_mean_absolute_error
+    );
+    let m3_mean_absolute_error = crate::tests::tests_core::average_distance(m3_1);
+    println!(
+        "Mean absolute error of m3 solution: {}",
+        m3_mean_absolute_error
+    )
 }

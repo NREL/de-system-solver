@@ -55,6 +55,11 @@ impl Default for SolverTypes {
             history: Default::default(),
         }
     }
+
+    #[pyo3(name = "dt_mean")]
+    fn dt_mean_py(&self) -> Option<f64> {
+        self.dt_mean()
+    }
 )]
 #[common_derives]
 pub struct AdaptiveSolverConfig {
@@ -82,7 +87,7 @@ impl Default for AdaptiveSolverConfig {
         Self {
             dt_max: 10.,
             max_iter: 5,
-            rtol: 1e-3,
+            rtol: 1e-5,
             atol: 1e-9,
             save: false,
             save_states: false,
@@ -91,6 +96,16 @@ impl Default for AdaptiveSolverConfig {
                 ..Default::default()
             },
             history: Default::default(),
+        }
+    }
+}
+
+impl AdaptiveSolverConfig {
+    pub fn dt_mean(&self) -> Option<f64> {
+        if !self.history.is_empty() {
+            Some(self.history.dt.iter().fold(0., |acc, &x| acc + x) / self.history.len() as f64)
+        } else {
+            None
         }
     }
 }
@@ -273,7 +288,7 @@ pub trait SolverVariantMethods: SolverBase {
         let sc_mut = self.sc_mut().unwrap();
         // reset iteration counter
         sc_mut.state.n_iter = 0;
-        sc_mut.state.dt = sc_mut.state.dt.min(*dt_max);
+        sc_mut.state.dt = sc_mut.state.dt.min(*dt_max).min(sc_mut.dt_max);
 
         // loop to find `dt` that results in meeting tolerance
         // and does not exceed `dt_max`
@@ -457,25 +472,32 @@ pub trait SolverVariantMethods: SolverBase {
         sys4.update_derivs();
         let k5s = sys4.derivs();
 
-        // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k4 * h)
+        // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k5 * h)
         let mut sys5 = self.bare_clone();
         sys5.step_time(&(dt * 7. / 8.));
         sys5.step_states({
-            let (k1s, k2s, k3s, k4s) = (k1s.clone(), k2s.clone(), k3s.clone(), k4s.clone());
-            let zipped = zip!(k1s, k2s, k3s, k4s);
+            let (k1s, k2s, k3s, k4s, k5s) = (
+                k1s.clone(),
+                k2s.clone(),
+                k3s.clone(),
+                k4s.clone(),
+                k5s.clone(),
+            );
+            let zipped = zip!(k1s, k2s, k3s, k4s, k5s);
             let mut steps = vec![];
-            for (k1, (k2, (k3, k4))) in zipped {
+            for (k1, (k2, (k3, (k4, k5)))) in zipped {
                 steps.push(
                     (1_631. / 55_296. * k1
                         + 175. / 512. * k2
                         + 575. / 13_824. * k3
                         + 44_275. / 110_592. * k4
-                        + 253. / 4096. * k4)
+                        + 253. / 4096. * k5)
                         * dt,
                 );
             }
             steps
         });
+        sys5.update_derivs();
         let k6s = sys5.derivs();
 
         // 4th order delta

@@ -24,20 +24,6 @@ pub struct ThermalMass {
     pub history: ThermalMassStateHistoryVec,
 }
 
-/* impl ThermalMass {
-    /// New thermal mass with capacitance `c` and initial temperature `t0`
-    pub fn new(c: f64, temp0: f64) -> Self {
-        Self {
-            c,
-            state: ThermalMassState {
-                temp: temp0,
-                dtemp: Default::default(),
-            },
-            history: Default::default(),
-        }
-    }
-} */
-
 impl HasState for ThermalMass {
     fn set_state(&mut self, val: f64) {
         self.state.temp = val;

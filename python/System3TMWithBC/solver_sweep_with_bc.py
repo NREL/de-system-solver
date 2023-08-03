@@ -14,7 +14,7 @@ h12 = dess_pyo3.Conductance(5.0)
 m3 = dess_pyo3.ThermalMass(1.5, 10.0)
 h23 = dess_pyo3.Conductance(5.0)
 
-t_report = np.linspace(0.0, 1.0, 11).tolist()
+t_report = np.linspace(0.0, 1.0, 4).tolist()
 dt_small = (t_report[1] - t_report[0]) / 1e2
 dt_medium = (t_report[1] - t_report[0]) / 1e1
 dt_large = (t_report[1] - t_report[0]) * 1.0
@@ -216,8 +216,7 @@ print(f"rk4 dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 dt_max = 10
 dt_init = 0.1
-#increasing to 1e-5 makes the program take too long to run
-rtol = 1e-3
+rtol = 1e-5
 atol = 1e-9
 max_iter = 10
 solver = dess_pyo3.AdaptiveSolverConfig(
@@ -457,6 +456,7 @@ sys_rk45.walk()
 print(f"rk45 elapsed: {time.perf_counter() - t0:.3g} s")
 print(f"rk45 rtol={sys_rk45.solver_conf.rtol}")
 print(f"rk45 dt_init={dt_init}")
+print("rk45 dt_mean", np.array(sys_rk45.solver_conf.history.dt).mean())
 
 fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(

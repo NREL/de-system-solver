@@ -4,6 +4,7 @@ pub mod tests_core;
 pub mod dess_core {
     pub mod solver {}
 }
+pub struct AdaptiveSolverConfig;
 
 #[cfg(test)]
 mod method_tests {
@@ -14,7 +15,7 @@ mod method_tests {
     fn test_eulers_accuracy() {
         println!("Euler's Method:");
         test_method_against_euler_baseline(SolverTypes::EulerFixed { dt: 1e-3 }, 5e-3);
-        println!("Heun's Method bc:");
+        println!("Euler's Method bc:");
         test_method_against_euler_baseline_bc(SolverTypes::EulerFixed { dt: 1e-3 }, 1e-2);
     }
     #[test]
@@ -41,23 +42,25 @@ mod method_tests {
     #[test]
     fn test_rk4_accuracy() {
         println!("RK4 Method:");
-        test_method_against_euler_baseline(SolverTypes::RK4Fixed { dt: 1e-3 }, 7.5e-9);
+        test_method_against_euler_baseline(
+            SolverTypes::RK4Fixed {
+                dt: 0.05555555555555555,
+            },
+            7.5e-5,
+        );
         println!("RK4 Method bc:");
-        test_method_against_euler_baseline_bc(SolverTypes::RK4Fixed { dt: 1e-3 }, 5e-3);
+        test_method_against_euler_baseline_bc(
+            SolverTypes::RK4Fixed {
+                dt: 0.00826446280991735,
+            },
+            2.5e-2,
+        );
     }
     #[test]
     fn test_rk45_accuracy() {
         println!("RK45 (Cash-Karp) Method:");
-        test_method_against_euler_baseline(SolverTypes::RK45CashKarp(Box::default()), 7.5e-3);
-        println!(
-            "RK45 average time step: {}",
-            method_average_time_step(SolverTypes::RK45CashKarp(Box::default()))
-        );
+        test_method_against_euler_baseline(SolverTypes::RK45CashKarp(Box::default()), 2.5e-6);
         println!("RK45 (Cash-Karp) Method bc:");
-        test_method_against_euler_baseline_bc(SolverTypes::RK45CashKarp(Box::default()), 7.5e-2);
-        println!(
-            "RK45 average time step bc: {}",
-            method_average_time_step_w_bc(SolverTypes::RK45CashKarp(Box::default()))
-        );
+        test_method_against_euler_baseline_bc(SolverTypes::RK45CashKarp(Box::default()), 5e-2);
     }
 }

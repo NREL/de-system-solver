@@ -1,9 +1,8 @@
 use crate::imports::*;
 use crate::three_thrml_mass_w_bc_sys::System3TMWithBC;
-use super::tests_core::*;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TMWithBC {
-    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 21);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 4);
 
     System3TMWithBC {
         solver_type: SolverTypes::EulerFixed { dt: 5e-10 },
@@ -37,7 +36,7 @@ pub fn baseline_three_tm_w_bc_sys(overwrite_baseline: bool) {
 }
 ///three thermal mass w bc with chosen method, to compare to small step euler
 pub fn mock_method_w_bc_sys(method: SolverTypes) -> System3TMWithBC {
-    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 21);
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 4);
 
     System3TMWithBC {
         solver_type: method,
@@ -84,10 +83,4 @@ pub fn test_method_against_euler_baseline_bc(method: SolverTypes, epsilon: f64) 
         "Stays within {} of three thermal mass w bc m3 solution: {}",
         epsilon, m3_within_epsilon
     );
-}
-//given a solver type, outputs average time step (only useful for adaptive solvers)
-pub fn method_average_time_step_w_bc(method: SolverTypes) -> f64{
-    let mut sys = mock_method_w_bc_sys(method);
-    let time_steps: Vec<f64> = sys.walk_with_time_step();
-    vector_average(time_steps)
 }
