@@ -73,14 +73,11 @@ use crate::imports::*;
         self.reset_derivs();
         connect_states!(self, (m1, m2, h12), (m2, m3, h23));
         update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
-        if self.state.time > 0.5 {
-            let offset = 10.0;
-            let freq = 100. * self.state.time;
-            let lag = 0.25;
-            
-            // change in temperature to test what the solver does
-            self.m1.state.temp = offset + 3. * f64::sin(freq * self.state.time) * f64::exp(-self.state.time / lag);
-        }
+        let offset = 10.0;
+        let freq = 100. * self.state.time;
+        let lag = 0.25;
+        // change in temperature to test what the solver does
+        self.m1.state.temp = offset + 3. * f64::sin(freq * self.state.time) * f64::exp(-self.state.time / lag);
     }
 )]
 #[common_derives]

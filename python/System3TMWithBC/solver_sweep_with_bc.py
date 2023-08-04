@@ -494,9 +494,11 @@ ax[-1].set_xlabel('Sim. Time [s]')
 # %%
 
 fig, ax = plt.subplots()
+err_rel = np.array(sys_rk45.solver_conf.history.norm_err_rel)
+err_rel = [x if x is not None else 0 for x in err_rel]
 ax.plot(
     sys_rk45.solver_conf.history.t_curr,
-    np.array(sys_rk45.solver_conf.history.norm_err_rel) < sys_rk45.solver_conf.rtol
+    np.array(err_rel) < sys_rk45.solver_conf.rtol
 )
 ax.set_xlabel("Time [s]")
 ax.set_ylabel('rtol met')
