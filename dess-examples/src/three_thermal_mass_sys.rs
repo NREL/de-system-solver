@@ -2,7 +2,6 @@ use crate::components::*;
 use crate::imports::*;
 
 /// System of connected components
-#[derive(HistoryMethods, BareClone)]
 #[pyo3_api(
     #[new]
     fn __new__(
@@ -13,16 +12,18 @@ use crate::imports::*;
         m3: ThermalMass,
         h23: Conductance,
         t_report: Vec<f64>,
-    ) -> Self {
-        Self::new(
-            SolverTypes::from_json(&solver_type).unwrap(),
-            m1,
-            m2,
-            h12,
-            m3,
-            h23,
+    ) -> Self { 
+        Self{
+            solver_type: SolverTypes::from_json(&solver_type).unwrap(), 
+            m1, 
+            m2, 
+            h12, 
+            m3, 
+            h23, 
             t_report,
-        )
+            state: Default::default(),
+            history: Default::default(),
+        }
     }
 
     #[classmethod]
@@ -37,15 +38,17 @@ use crate::imports::*;
         h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
-        Self::new(
-            SolverTypes::RK45CashKarp(Box::new(sol)),
-            m1,
-            m2,
-            h12,
-            m3,
-            h23,
-            t_report
-        )
+        Self{
+            solver_type: SolverTypes::RK45CashKarp(Box::new(sol)),
+            m1, 
+            m2, 
+            h12, 
+            m3, 
+            h23, 
+            t_report,
+            state: Default::default(),
+            history: Default::default(),
+        }
     }
 
     #[getter]
@@ -75,11 +78,11 @@ use crate::imports::*;
         update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
     }
 )]
+#[derive(HistoryMethods, BareClone)]
 #[common_derives]
-#[derive(Default)]
 pub struct System3TM {
     #[skip_get]
-    solver_type: SolverTypes,
+    pub solver_type: SolverTypes,
     // components
     // the `use_state` attribute tells the SystemSolver TODO: finish this thought
     #[use_state]
@@ -99,24 +102,53 @@ pub struct System3TM {
     pub history: SystemStateHistoryVec,
 }
 
-impl System3TM {
-    pub fn new(
-        solver_type: SolverTypes,
-        m1: ThermalMass,
-        m2: ThermalMass,
-        h12: Conductance,
-        m3: ThermalMass,
-        h23: Conductance,
-        t_report: Vec<f64>,
-    ) -> Self {
+impl Default for System3TM {
+    fn default() -> Self {
         Self {
-            solver_type,
-            m1,
-            m2,
-            h12,
-            m3,
-            h23,
-            t_report,
+            solver_type: SolverTypes::EulerFixed { dt: 5e-3 },
+            m1: ThermalMass {
+                c: 1.0,
+                state: ThermalMassState {
+                    temp: 0.0,
+                    dtemp: Default::default(),
+                },
+                history: Default::default(),
+            },
+            m2: ThermalMass {
+                c: 2.0,
+                state: ThermalMassState {
+                    temp: 10.,
+                    dtemp: Default::default(),
+                },
+                history: Default::default(),
+            },
+            h12: Conductance {
+                h: 5.0,
+                state: ConductanceState {
+                    q: Default::default(),
+                },
+                history: ConductanceStateHistoryVec {
+                    q: Default::default(),
+                },
+            },
+            m3: ThermalMass {
+                c: 1.5,
+                state: ThermalMassState {
+                    temp: 12.,
+                    dtemp: Default::default(),
+                },
+                history: Default::default(),
+            },
+            h23: Conductance {
+                h: 5.0,
+                state: ConductanceState {
+                    q: Default::default(),
+                },
+                history: ConductanceStateHistoryVec {
+                    q: Default::default(),
+                },
+            },
+            t_report: Vec::linspace(0.0, 1.0, 201),
             state: Default::default(),
             history: Default::default(),
         }
@@ -124,22 +156,7 @@ impl System3TM {
 }
 
 pub fn mock_euler_sys() -> System3TM {
-    let m1 = ThermalMass::new(1.0, 0.0);
-    let m2 = ThermalMass::new(2.0, 10.0);
-    let h12 = Conductance::new(5.0);
-    let m3 = ThermalMass::new(1.5, 12.0);
-    let h23 = Conductance::new(5.0);
-    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
-
-    System3TM::new(
-        SolverTypes::EulerFixed { dt: 5e-3 },
-        m1,
-        m2,
-        h12,
-        m3,
-        h23,
-        t_report,
-    )
+    System3TM::default()
 }
 
 pub fn mock_heuns_sys() -> System3TM {
@@ -212,7 +229,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/euler benchmark.yaml");
 
         sys_euler
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -238,7 +255,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/heuns benchmark.yaml");
 
         sys_heuns
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -263,7 +280,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/midpoint benchmark.yaml");
 
         sys_midpoint
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -288,7 +305,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/ralstons benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/ralstons benchmark.yaml");
 
         sys_ralstons
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -313,7 +330,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk4 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk4 benchmark.yaml");
 
         sys_rk4
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
@@ -338,7 +355,7 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk45 benchmark.yaml");
         sys_rk45
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
@@ -375,7 +392,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/euler benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -391,7 +408,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/heuns benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -407,7 +424,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/midpoint benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -423,7 +440,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/ralstons benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/ralstons benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -438,7 +455,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk4 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk4 benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
@@ -506,7 +523,7 @@ mod tests {
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk45 benchmark.yaml");
 
         let benchmark_sys =
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();

@@ -125,9 +125,6 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     self.save_state();
                 }
             }
-
-            /// Runs `solver_type` specific step method that calls
-            /// [Self::step] in solver-specific manner
             pub fn solve_step(&mut self) {
                 while self.state.time < self.t_report[self.state.i] {
                     let dt = self.t_report[self.state.i] - self.state.time;
@@ -160,6 +157,5 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             }
         }
     });
-
     item_and_impl_block.into()
 }

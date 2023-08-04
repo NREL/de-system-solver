@@ -30,27 +30,35 @@ impl Default for SolverTypes {
         SolverTypes::RK4Fixed { dt: 0.1 }
     }
 }
-
 #[pyo3_api(
     #[new]
     fn new_py(
         dt_init: f64,
-        dt_max: Option<f64>,
-        max_iter: Option<u8>,
-        rtol: Option<f64>,
-        atol: Option<f64>,
+        dt_max: f64,
+        max_iter: u8,
+        rtol: f64,
+        atol: f64,
         save: Option<bool>,
         save_states: Option<bool>,
     ) -> Self {
-        Self::new(
-            dt_init,
+        Self{
             dt_max,
             max_iter,
-            rtol,
             atol,
-            save.unwrap_or_default(),
-            save_states.unwrap_or_default(),
-        )
+            rtol,
+            save: save.unwrap_or(false),
+            save_states: save_states.unwrap_or(false),
+            state: SolverState {
+                dt: dt_init,
+                ..Default::default()
+            },
+            history: Default::default(),
+        }
+    }
+
+    #[pyo3(name = "dt_mean")]
+    fn dt_mean_py(&self) -> Option<f64> {
+        self.dt_mean()
     }
 )]
 #[common_derives]
@@ -74,36 +82,31 @@ pub struct AdaptiveSolverConfig {
     pub history: SolverStateHistoryVec,
 }
 
-impl AdaptiveSolverConfig {
-    pub fn new(
-        dt_init: f64,
-        dt_max: Option<f64>,
-        max_iter: Option<u8>,
-        rtol: Option<f64>,
-        atol: Option<f64>,
-        save: bool,
-        save_states: bool,
-    ) -> Self {
-        let state = SolverState {
-            dt: dt_init,
-            ..Default::default()
-        };
+impl Default for AdaptiveSolverConfig {
+    fn default() -> Self {
         Self {
-            dt_max: dt_max.unwrap_or(10.),
-            max_iter: max_iter.unwrap_or(2),
-            rtol: rtol.unwrap_or(1e-3),
-            atol: atol.unwrap_or(1e-9),
-            save,
-            save_states,
-            state,
+            dt_max: 10.,
+            max_iter: 5,
+            rtol: 1e-5,
+            atol: 1e-9,
+            save: false,
+            save_states: false,
+            state: SolverState {
+                dt: 0.1,
+                ..Default::default()
+            },
             history: Default::default(),
         }
     }
 }
 
-impl Default for AdaptiveSolverConfig {
-    fn default() -> Self {
-        Self::new(0.1, None, None, None, None, false, false)
+impl AdaptiveSolverConfig {
+    pub fn dt_mean(&self) -> Option<f64> {
+        if !self.history.is_empty() {
+            Some(self.history.dt.iter().fold(0., |acc, &x| acc + x) / self.history.len() as f64)
+        } else {
+            None
+        }
     }
 }
 
@@ -134,7 +137,8 @@ pub struct SolverState {
     /// current values of states
     pub states: Vec<f64>,
 }
-
+//what should the defaults be for norm_err and norm_err_rel? can't find what they should be...maybe those fields aren't required
+//and that's why they use option?
 impl Default for SolverState {
     fn default() -> Self {
         Self {
@@ -284,7 +288,7 @@ pub trait SolverVariantMethods: SolverBase {
         let sc_mut = self.sc_mut().unwrap();
         // reset iteration counter
         sc_mut.state.n_iter = 0;
-        sc_mut.state.dt = sc_mut.state.dt.min(*dt_max);
+        sc_mut.state.dt = sc_mut.state.dt.min(*dt_max).min(sc_mut.dt_max);
 
         // loop to find `dt` that results in meeting tolerance
         // and does not exceed `dt_max`
@@ -468,25 +472,32 @@ pub trait SolverVariantMethods: SolverBase {
         sys4.update_derivs();
         let k5s = sys4.derivs();
 
-        // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k4 * h)
+        // k6 = f(x_i + 7 / 8 * h, y_i + 1631 / 55296 * k1 * h + 175 / 512 * k2 * h + 575 / 13824 * k3 * h + 44275 / 110592 * k4 * h + 253 / 4096 * k5 * h)
         let mut sys5 = self.bare_clone();
         sys5.step_time(&(dt * 7. / 8.));
         sys5.step_states({
-            let (k1s, k2s, k3s, k4s) = (k1s.clone(), k2s.clone(), k3s.clone(), k4s.clone());
-            let zipped = zip!(k1s, k2s, k3s, k4s);
+            let (k1s, k2s, k3s, k4s, k5s) = (
+                k1s.clone(),
+                k2s.clone(),
+                k3s.clone(),
+                k4s.clone(),
+                k5s.clone(),
+            );
+            let zipped = zip!(k1s, k2s, k3s, k4s, k5s);
             let mut steps = vec![];
-            for (k1, (k2, (k3, k4))) in zipped {
+            for (k1, (k2, (k3, (k4, k5)))) in zipped {
                 steps.push(
                     (1_631. / 55_296. * k1
                         + 175. / 512. * k2
                         + 575. / 13_824. * k3
                         + 44_275. / 110_592. * k4
-                        + 253. / 4096. * k4)
+                        + 253. / 4096. * k5)
                         * dt,
                 );
             }
             steps
         });
+        sys5.update_derivs();
         let k6s = sys5.derivs();
 
         // 4th order delta

@@ -8,14 +8,13 @@ sns.set()
 
 # %%
 # # Check that `dt` and `t_report` work as expected
-
 m1 = dess_pyo3.ThermalReservoir(8.5)
 m2 = dess_pyo3.ThermalMass(2.0, 10.0)
 h12 = dess_pyo3.Conductance(5.0)
 m3 = dess_pyo3.ThermalMass(1.5, 10.0)
 h23 = dess_pyo3.Conductance(5.0)
 
-t_report = np.linspace(0.0, 1.0, 11).tolist()
+t_report = np.linspace(0.0, 1.0, 4).tolist()
 dt_small = (t_report[1] - t_report[0]) / 1e2
 dt_medium = (t_report[1] - t_report[0]) / 1e1
 dt_large = (t_report[1] - t_report[0]) * 1.0
@@ -215,13 +214,17 @@ t0 = time.perf_counter()
 sys_rk4_large_dt.walk()
 print(f"rk4 dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
+dt_max = 10
+dt_init = 0.1
+rtol = 1e-5
+atol = 1e-9
 max_iter = 10
-rtol = 1e-3
-dt_init = 1e-3
 solver = dess_pyo3.AdaptiveSolverConfig(
+    dt_max=dt_max,
     dt_init=dt_init,
-    max_iter=max_iter,
     rtol=rtol,
+    atol=atol,
+    max_iter=max_iter,
 )
 
 sys_rk45 = dess_pyo3.System3TMWithBC.new_rk45_cash_karp(
@@ -241,9 +244,11 @@ print(f"rk45 dt_init={dt_init}")
 
 
 solver_save = dess_pyo3.AdaptiveSolverConfig(
+    dt_max=dt_max,
     dt_init=dt_init,
-    max_iter=max_iter,
     rtol=rtol,
+    atol=atol,
+    max_iter=max_iter,
     save=True,
     save_states=True,
 )
@@ -428,9 +433,11 @@ ax[0].legend(loc='right')
 # %%
 
 solver = dess_pyo3.AdaptiveSolverConfig(
+    dt_max=dt_max,
     dt_init=dt_init,
-    max_iter=max_iter,
     rtol=rtol,
+    atol=atol,
+    max_iter=max_iter,
     save=True,
     save_states=True,
 )
@@ -449,6 +456,7 @@ sys_rk45.walk()
 print(f"rk45 elapsed: {time.perf_counter() - t0:.3g} s")
 print(f"rk45 rtol={sys_rk45.solver_conf.rtol}")
 print(f"rk45 dt_init={dt_init}")
+print("rk45 dt_mean", np.array(sys_rk45.solver_conf.history.dt).mean())
 
 fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
