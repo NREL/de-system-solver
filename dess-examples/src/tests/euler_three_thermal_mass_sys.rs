@@ -1,6 +1,7 @@
 use crate::imports::*;
 use crate::three_thermal_mass_sys::System3TM;
 use dess_core::solver::SolverTypes;
+use eng_fmt::FormatEng;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TM {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 4);
@@ -70,35 +71,38 @@ pub fn test_method_against_euler_baseline(method: SolverTypes, epsilon: f64) {
     let m3: Vec<(&f64, &f64)> = baseline_m3.iter().zip(&method_m3).collect();
     let m1_within_epsilon = crate::tests::tests_core::within_epsilon(m1, epsilon);
     println!(
-        "Stays within {} of m1 solution: {}",
-        epsilon, m1_within_epsilon
+        "Stays within {:?} of m1 solution: {}",
+        FormatEng::format_eng(&epsilon, Some(8)),
+        m1_within_epsilon
     );
     let m2_within_epsilon = crate::tests::tests_core::within_epsilon(m2, epsilon);
     println!(
-        "Stays within {} of m2 solution: {}",
-        epsilon, m2_within_epsilon
+        "Stays within {:?} of m2 solution: {}",
+        FormatEng::format_eng(&epsilon, Some(8)),
+        m2_within_epsilon
     );
     let m3_within_epsilon = crate::tests::tests_core::within_epsilon(m3, epsilon);
     println!(
-        "Stays within {} of m3 solution: {}",
-        epsilon, m3_within_epsilon
+        "Stays within {:?} of m3 solution: {}",
+        FormatEng::format_eng(&epsilon, Some(8)),
+        m3_within_epsilon
     );
     let m1_1: Vec<(&f64, &f64)> = baseline_m1.iter().zip(&method_m1).collect();
     let m2_1: Vec<(&f64, &f64)> = baseline_m2.iter().zip(&method_m2).collect();
     let m3_1: Vec<(&f64, &f64)> = baseline_m3.iter().zip(&method_m3).collect();
     let m1_mean_absolute_error = crate::tests::tests_core::average_distance(m1_1);
     println!(
-        "Mean absolute error of m1 solution: {}",
-        m1_mean_absolute_error
+        "Mean absolute error of m1 solution: {:?}",
+        FormatEng::format_eng(&m1_mean_absolute_error, Some(10))
     );
     let m2_mean_absolute_error = crate::tests::tests_core::average_distance(m2_1);
     println!(
-        "Mean absolute error of m2 solution: {}",
-        m2_mean_absolute_error
+        "Mean absolute error of m2 solution: {:?}",
+        FormatEng::format_eng(&m2_mean_absolute_error, Some(10))
     );
     let m3_mean_absolute_error = crate::tests::tests_core::average_distance(m3_1);
     println!(
-        "Mean absolute error of m3 solution: {}",
-        m3_mean_absolute_error
+        "Mean absolute error of m3 solution: {:?}",
+        FormatEng::format_eng(&m3_mean_absolute_error, Some(10))
     )
 }
