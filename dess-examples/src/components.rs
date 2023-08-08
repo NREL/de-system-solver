@@ -7,19 +7,6 @@ use crate::imports::*;
     #[new]
     /// New thermal mass with capacitance `c` and initial temperature `t0`
     pub fn __new__(c: f64, temp0: f64) -> Self {
-        Self::new(c, temp0)
-    }
-)]
-pub struct ThermalMass {
-    /// thermal capacitance \[J/K\]
-    pub c: f64,
-    pub state: ThermalMassState,
-    pub history: ThermalMassStateHistoryVec,
-}
-
-impl ThermalMass {
-    /// New thermal mass with capacitance `c` and initial temperature `t0`
-    pub fn new(c: f64, temp0: f64) -> Self {
         Self {
             c,
             state: ThermalMassState {
@@ -29,6 +16,12 @@ impl ThermalMass {
             history: Default::default(),
         }
     }
+)]
+pub struct ThermalMass {
+    /// thermal capacitance \[J/K\]
+    pub c: f64,
+    pub state: ThermalMassState,
+    pub history: ThermalMassStateHistoryVec,
 }
 
 impl HasState for ThermalMass {
@@ -57,27 +50,20 @@ impl HasState for ThermalMass {
 #[common_derives]
 #[pyo3_api(
     #[new]
-    /// New thermal mass with capacitance `c` and initial temperature `t0`
+    /// New thermal reservoir with initial temperature `t0`
     pub fn __new__(temp0: f64) -> Self {
-        Self::new(temp0)
-    }
-)]
-pub struct ThermalReservoir {
-    pub state: ThermalMassState,
-    pub history: ThermalMassStateHistoryVec,
-}
-
-impl ThermalReservoir {
-    /// New thermal mass with capacitance `c` and initial temperature `t0`
-    pub fn new(temp: f64) -> Self {
         Self {
             state: ThermalMassState {
-                temp,
+                temp: temp0,
                 dtemp: Default::default(),
             },
             history: Default::default(),
         }
     }
+)]
+pub struct ThermalReservoir {
+    pub state: ThermalMassState,
+    pub history: ThermalMassStateHistoryVec,
 }
 
 impl HasState for ThermalReservoir {
@@ -117,20 +103,6 @@ pub struct ThermalMassState {
 #[pyo3_api(
     #[new]
     fn __new__(h: f64) -> Self {
-        Self::new(h)
-    }
-)]
-#[common_derives]
-#[derive(Default)]
-pub struct Conductance {
-    /// Thermal conductance \[W/K\] between two temperatures
-    pub h: f64,
-    pub state: ConductanceState,
-    pub history: ConductanceStateHistoryVec,
-}
-
-impl Conductance {
-    pub fn new(h: f64) -> Self {
         Self {
             h,
             state: ConductanceState {
@@ -141,6 +113,14 @@ impl Conductance {
             },
         }
     }
+)]
+#[common_derives]
+#[derive(Default)]
+pub struct Conductance {
+    /// Thermal conductance \[W/K\] between two temperatures
+    pub h: f64,
+    pub state: ConductanceState,
+    pub history: ConductanceStateHistoryVec,
 }
 
 impl Flow for Conductance {

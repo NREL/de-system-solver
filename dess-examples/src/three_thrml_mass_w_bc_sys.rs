@@ -14,15 +14,17 @@ use crate::imports::*;
         h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
-        Self::new(
-            SolverTypes::from_json(&solver_type).unwrap(),
+        Self{
+            solver_type: SolverTypes::from_json(&solver_type).unwrap(),
             m1,
             m2,
             h12,
             m3,
             h23,
             t_report,
-        )
+            state: Default::default(),
+            history: Default::default(),
+        }
     }
 
     #[classmethod]
@@ -37,15 +39,17 @@ use crate::imports::*;
         h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
-        Self::new(
-            SolverTypes::RK45CashKarp(Box::new(sol)),
+        Self{
+            solver_type: SolverTypes::RK45CashKarp(Box::new(sol)),
             m1,
             m2,
             h12,
             m3,
             h23,
-            t_report
-        )
+            t_report,
+            state: Default::default(),
+            history: Default::default(),
+        }
     }
 
     #[classmethod]
@@ -60,15 +64,17 @@ use crate::imports::*;
         h23: Conductance,
         t_report: Vec<f64>,
     ) -> Self {
-        Self::new(
-            SolverTypes::RK23BogackiShampine(Box::new(sol)),
+        Self{
+            solver_type: SolverTypes::RK23BogackiShampine(Box::new(sol)),
             m1,
             m2,
             h12,
             m3,
             h23,
-            t_report
-        )
+            t_report,
+            state: Default::default(),
+            history: Default::default(),
+        }
     }
 
     #[getter]
@@ -97,21 +103,17 @@ use crate::imports::*;
         self.reset_derivs();
         connect_states!(self, (m1, m2, h12), (m2, m3, h23));
         update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
-        if self.state.time > 0.5 {
-            let offset = 10.0;
-            let freq = 100. * self.state.time;
-            let lag = 0.25;
-            
-            // change in temperature to test what the solver does
-            self.m1.state.temp = offset + 3. * f64::sin(freq * self.state.time) * f64::exp(-self.state.time / lag);
-        }
+        let offset = 10.0;
+        let freq = 100. * self.state.time;
+        let lag = 0.25;
+        // change in temperature to test what the solver does
+        self.m1.state.temp = offset + 3. * f64::sin(freq * self.state.time) * f64::exp(-self.state.time / lag);
     }
 )]
 #[common_derives]
-#[derive(Default)]
 pub struct System3TMWithBC {
     #[skip_get]
-    solver_type: SolverTypes,
+    pub solver_type: SolverTypes,
     // components
     #[use_state]
     pub m1: ThermalReservoir,
@@ -130,24 +132,52 @@ pub struct System3TMWithBC {
     pub history: SystemStateHistoryVec,
 }
 
-impl System3TMWithBC {
-    pub fn new(
-        solver_type: SolverTypes,
-        m1: ThermalReservoir,
-        m2: ThermalMass,
-        h12: Conductance,
-        m3: ThermalMass,
-        h23: Conductance,
-        t_report: Vec<f64>,
-    ) -> Self {
+impl Default for System3TMWithBC {
+    fn default() -> Self {
         Self {
-            solver_type,
-            m1,
-            m2,
-            h12,
-            m3,
-            h23,
-            t_report,
+            solver_type: SolverTypes::EulerFixed { dt: 5e-3 },
+            m1: ThermalReservoir{
+                state: ThermalMassState {
+                    temp: -1.0, 
+                    dtemp: Default::default(),
+                }, 
+                history: Default::default(),
+            },
+            m2: ThermalMass {
+                c: 2.0,
+                state: ThermalMassState {
+                    temp: 10.,
+                    dtemp: Default::default(),
+                },
+                history: Default::default(),
+            },
+            h12: Conductance {
+                h: 5.0,
+                state: ConductanceState {
+                    q: Default::default(),
+                },
+                history: ConductanceStateHistoryVec {
+                    q: Default::default(),
+                },
+            },
+            m3: ThermalMass {
+                c: 1.5,
+                state: ThermalMassState {
+                    temp: 12.,
+                    dtemp: Default::default(),
+                },
+                history: Default::default(),
+            },
+            h23: Conductance {
+                h: 5.0,
+                state: ConductanceState {
+                    q: Default::default(),
+                },
+                history: ConductanceStateHistoryVec {
+                    q: Default::default(),
+                },
+            },
+            t_report: Vec::linspace(0.0, 1.0, 201),
             state: Default::default(),
             history: Default::default(),
         }
@@ -163,24 +193,8 @@ pub struct SystemState3TM {
     // current time
     time: f64,
 }
-
 pub fn mock_euler_sys() -> System3TMWithBC {
-    let m1 = ThermalReservoir::new(-1.0);
-    let m2 = ThermalMass::new(2.0, 10.0);
-    let h12 = Conductance::new(5.0);
-    let m3 = ThermalMass::new(1.5, 12.0);
-    let h23 = Conductance::new(5.0);
-    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 201);
-
-    System3TMWithBC::new(
-        SolverTypes::EulerFixed { dt: 5e-3 },
-        m1,
-        m2,
-        h12,
-        m3,
-        h23,
-        t_report,
-    )
+    System3TMWithBC::default()
 }
 
 pub fn mock_heuns_sys() -> System3TMWithBC {
@@ -244,7 +258,7 @@ pub fn mock_rk45_sys() -> System3TMWithBC {
 }
 
 pub fn run_three_tm_w_bc_sys() {
-    let overwrite_benchmarks = false;
+    //let overwrite_benchmarks = false;
     // build and run prescribed-step Euler system
     let mut sys_euler = mock_euler_sys();
 
@@ -258,18 +272,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_euler.as_micros()
     );
 
-    let overwrite_euler_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_euler_benchmark: bool = overwrite_benchmarks;
     if overwrite_euler_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/euler benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/euler_benchmark_w_bc.yaml");
 
         sys_euler
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run prescribed-step Heuns system
     let mut sys_heuns = mock_heuns_sys();
@@ -284,18 +298,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_heuns.as_micros()
     );
 
-    let overwrite_heuns_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_heuns_benchmark: bool = overwrite_benchmarks;
     if overwrite_heuns_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/heuns benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/heuns_benchmark_w_bc.yaml");
 
         sys_heuns
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run prescribed-step Midpoint system
     let mut sys_midpoint = mock_midpoint_sys();
@@ -310,18 +324,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_midpoint.as_micros()
     );
 
-    let overwrite_midpoint_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_midpoint_benchmark: bool = overwrite_benchmarks;
     if overwrite_midpoint_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/midpoint benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/midpoint_benchmark_w_bc.yaml");
 
         sys_midpoint
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run prescribed-step Ralston's system
     let mut sys_ralstons = mock_ralstons_sys();
@@ -336,18 +350,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_ralstons.as_micros()
     );
 
-    let overwrite_ralstons_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_ralstons_benchmark: bool = overwrite_benchmarks;
     if overwrite_ralstons_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/ralstons benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/ralstons_benchmark_w_bc.yaml");
 
         sys_ralstons
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run adaptive RK23
     let mut sys_rk23 = mock_rk23_sys();
@@ -362,18 +376,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_rk23.as_micros()
     );
 
-    let overwrite_rk23_benchmark: bool = overwrite_benchmarks;
-    if overwrite_rk23_benchmark {
-        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
-            .parent()
-            .unwrap()
-            .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk23 benchmark.yaml");
+    // let overwrite_rk23_benchmark: bool = overwrite_benchmarks;
+    // if overwrite_rk23_benchmark {
+    //     let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+    //         .parent()
+    //         .unwrap()
+    //         .to_path_buf()
+    //         .join("dess-examples/tests/fixtures/rk23 benchmark.yaml");
 
-        sys_rk23
-            .to_file(benchmark_file.as_os_str().to_str().unwrap())
-            .unwrap();
-    }
+    //     sys_rk23
+    //         .to_file(benchmark_file.as_os_str().to_str().unwrap())
+    //         .unwrap();
+    // }
     
     // build and run prescribed-step 4th-order Runge-Kutta system
     let mut sys_rk4 = mock_rk4fixed_sys();
@@ -388,18 +402,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_rk4.as_micros()
     );
 
-    let overwrite_rk4_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_rk4_benchmark: bool = overwrite_benchmarks;
     if overwrite_rk4_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk4 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk4_benchmark_w_bc.yaml");
 
         sys_rk4
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 
     // build and run adaptive RK45
     let mut sys_rk45 = mock_rk45_sys();
@@ -414,18 +428,18 @@ pub fn run_three_tm_w_bc_sys() {
         t_rk45.as_micros()
     );
 
-    let overwrite_rk45_benchmark: bool = overwrite_benchmarks;
+    /* let overwrite_rk45_benchmark: bool = overwrite_benchmarks;
     if overwrite_rk45_benchmark {
         let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("dess-examples/tests/fixtures/rk45 benchmark.yaml");
+            .join("dess-examples/src/tests/fixtures/rk45_benchmark_w_bc.yaml");
 
         sys_rk45
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
-    }
+    } */
 }
 
 // #[cfg(test)]
