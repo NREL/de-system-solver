@@ -1,5 +1,5 @@
 (
-    cd python/Sytem3TM/ && 
+    cd python/System3TM/ && 
     for file in *.py; do 
         python "$file"
     done
