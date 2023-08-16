@@ -413,6 +413,7 @@ pub trait SolverVariantMethods: SolverBase {
         // increment forward with 5th order solution
         self.step_states(delta5);
         self.step_time(&dt_used);
+        self.update_derivs();
         // dbg!(self.state.time);
         // dbg!(self.t_report[self.state.i]);
         dt_used
