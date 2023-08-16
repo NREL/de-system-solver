@@ -268,21 +268,12 @@ default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 #Plot with three subplots -- one for each dt
 fig, ax = plt.subplots(3, 1, sharex=True)
 ax[0].plot(
-    sys_small_dt.history.time,
-    np.array(sys_small_dt.m3.history.temp),
-    label='euler',
-    color=default_colors[0],
-    markersize=markersize,
-    linestyle='',
-    marker='s',
-)
-ax[0].plot(
     sys_rk45_save.solver_conf.history.t_curr,
     np.array([
         states[0]
         for states in sys_rk45_save.solver_conf.history.states]),
     label='m1',
-    color=default_colors[0],
+    color='violet',
     markersize=markersize,
 )
 ax[0].plot(
@@ -291,14 +282,23 @@ ax[0].plot(
         states[2]
         for states in sys_rk45_save.solver_conf.history.states]),
     label='m3 rk45',
-    color=default_colors[2],
+    color='indigo',
     markersize=markersize,
+)
+ax[0].plot(
+    sys_small_dt.history.time,
+    np.array(sys_small_dt.m3.history.temp),
+    label='euler',
+    color='red',
+    markersize=markersize,
+    linestyle='',
+    marker='s',
 )
 ax[0].set_title(f'dt = {dt_small:.3g}')
 ax[1].plot(
     sys_small_dt.history.time,
     np.array(sys_medium_dt.m3.history.temp),
-    color=default_colors[0],
+    color='red',
     markersize=markersize,
     marker='s',
     linestyle='',
@@ -307,7 +307,7 @@ ax[1].set_title(f'dt = {dt_medium:.3g}')
 ax[2].plot(
     sys_small_dt.history.time,
     np.array(sys_large_dt.m3.history.temp),
-    color=default_colors[0],
+    color='red',
     markersize=markersize,
     marker='s',
     linestyle='',
@@ -317,7 +317,7 @@ ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_rk4_small_dt.m3.history.temp),
     label='rk4',
-    color=default_colors[1],
+    color='orange',
     markersize=markersize,
     linestyle='',
     marker='o',
@@ -325,7 +325,7 @@ ax[0].plot(
 ax[1].plot(
     sys_small_dt.history.time,
     np.array(sys_rk4_medium_dt.m3.history.temp),
-    color=default_colors[1],
+    color='orange',
     markersize=markersize,
     marker='o',
     linestyle='',
@@ -333,7 +333,7 @@ ax[1].plot(
 ax[2].plot(
     sys_small_dt.history.time,
     np.array(sys_rk4_large_dt.m3.history.temp),
-    color=default_colors[1],
+    color='orange',
     markersize=markersize,
     marker='o',
     linestyle='',
@@ -343,7 +343,7 @@ ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_heuns_small_dt.m3.history.temp),
     label='heuns',
-    color=default_colors[3],
+    color='yellow',
     markersize=markersize,
     linestyle='',
     marker='v',
@@ -351,7 +351,7 @@ ax[0].plot(
 ax[1].plot(
     sys_small_dt.history.time,
     np.array(sys_heuns_medium_dt.m3.history.temp),
-    color=default_colors[3],
+    color='yellow',
     markersize=markersize,
     marker='v',
     linestyle='',
@@ -359,7 +359,7 @@ ax[1].plot(
 ax[2].plot(
     sys_small_dt.history.time,
     np.array(sys_heuns_large_dt.m3.history.temp),
-    color=default_colors[3],
+    color='yellow',
     markersize=markersize,
     marker='v',
     linestyle='',
@@ -369,7 +369,7 @@ ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_midpoint_small_dt.m3.history.temp),
     label='midpoint',
-    color=default_colors[4],
+    color='green',
     markersize=markersize,
     linestyle='',
     marker='^',
@@ -377,7 +377,7 @@ ax[0].plot(
 ax[1].plot(
     sys_small_dt.history.time,
     np.array(sys_midpoint_medium_dt.m3.history.temp),
-    color=default_colors[4],
+    color='green',
     markersize=markersize,
     marker='^',
     linestyle='',
@@ -385,7 +385,7 @@ ax[1].plot(
 ax[2].plot(
     sys_small_dt.history.time,
     np.array(sys_midpoint_large_dt.m3.history.temp),
-    color=default_colors[4],
+    color='green',
     markersize=markersize,
     marker='^',
     linestyle='',
@@ -394,7 +394,7 @@ ax[0].plot(
     sys_small_dt.history.time,
     np.array(sys_ralstons_small_dt.m3.history.temp),
     label='ralstons',
-    color=default_colors[5],
+    color='blue',
     markersize=markersize,
     linestyle='',
     marker='<',
@@ -402,7 +402,7 @@ ax[0].plot(
 ax[1].plot(
     sys_small_dt.history.time,
     np.array(sys_ralstons_medium_dt.m3.history.temp),
-    color=default_colors[5],
+    color='blue',
     markersize=markersize,
     marker='<',
     linestyle='',
@@ -410,7 +410,7 @@ ax[1].plot(
 ax[2].plot(
     sys_small_dt.history.time,
     np.array(sys_ralstons_large_dt.m3.history.temp),
-    color=default_colors[5],
+    color='blue',
     markersize=markersize,
     marker='<',
     linestyle='',
@@ -419,7 +419,7 @@ ax[0].plot(
     sys_rk45.history.time,
     np.array(sys_rk45.m3.history.temp),
     label='rk45',
-    color=default_colors[0],
+    color='purple',
     markersize=markersize + 2,
     linestyle='',
     marker='x',
