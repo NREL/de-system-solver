@@ -10,7 +10,7 @@ solver_type: !RK45CashKarp
     n_iter: 1
     norm_err: 1.8236874528918033e-10
     norm_err_rel: 1.518867094705367e-8
-    t_curr: 1.0
+    t_curr: 0.9784790528679919
     states: []
   history:
     dt: []

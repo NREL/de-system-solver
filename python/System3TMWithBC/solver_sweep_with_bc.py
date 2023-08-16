@@ -285,6 +285,18 @@ ax[0].plot(
     color=default_colors[0],
     markersize=markersize,
 )
+offset = 10.0
+lag = 0.25
+ax[0].plot(
+    sys_rk45_save.solver_conf.history.t_curr,
+    np.array([
+        offset + 3. * np.sin((100. * time) * time) * np.exp(-time / lag)
+        for time in sys_rk45_save.solver_conf.history.t_curr]),
+    label='m1 actual',
+    color=default_colors[7],
+    markersize=markersize,
+    linestyle="--",
+)
 ax[0].plot(
     sys_rk45_save.solver_conf.history.t_curr,
     np.array([
