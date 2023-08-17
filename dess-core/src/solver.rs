@@ -311,7 +311,7 @@ pub trait SolverVariantMethods: SolverBase {
             };
 
             // pretty sure `dt` needs to be added here, as is being done
-            sc_mut.state.t_curr = t_curr + dt;
+            sc_mut.state.t_curr = t_curr;
 
             if sc_mut.save_states {
                 sc_mut.state.states = states;
@@ -376,6 +376,7 @@ pub trait SolverVariantMethods: SolverBase {
         // increment forward with 3rd order solution
         self.step_states(delta3);
         self.step_time(&dt_used);
+        self.update_derivs();
         // dbg!(self.state.time);
         // dbg!(self.t_report[self.state.i]);
         dt_used
