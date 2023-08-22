@@ -310,7 +310,6 @@ pub trait SolverVariantMethods: SolverBase {
                 None
             };
 
-            // pretty sure `dt` needs to be added here, as is being done
             sc_mut.state.t_curr = t_curr;
 
             if sc_mut.save_states {
