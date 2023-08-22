@@ -220,24 +220,23 @@ pub trait SolverVariantMethods: SolverBase {
         self.step_states_by_dt(dt);
     }
     /// Ralston's Method
-    /// See Chapra, S. C., &amp; Canale, R. P. (2015). Runge-Kutta Methods.
-    /// In Numerical Methods for Engineers (7th ed., p. 732). McGraw-Hill Education.
+    /// See Ralston's Method: https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods#Ralston.27s_method
     fn ralston(&mut self, dt: &f64) {
         self.update_derivs();
         //making copy without history, to avoid stepping dt twice
         let mut updated_self = self.bare_clone();
         //recording initial derivative for later
         let deriv_0: Vec<f64> = updated_self.derivs();
-        //updating time and state to 3/4 way through line
-        updated_self.step_states_by_dt(&(0.75 * dt));
+        //updating time and state to 2/3 way through line
+        updated_self.step_states_by_dt(&(2.0 * dt / 3.0));
         updated_self.update_derivs();
-        //recording derivative at 3/4 way through line
+        //recording derivative at 2/3 way through line
         let deriv_1: Vec<f64> = updated_self.derivs();
         //creating new vector that is weighted average of deriv_0 and deriv_1
         let deriv_mean: Vec<f64> = deriv_0
             .iter()
             .zip(&deriv_1)
-            .map(|(d_1, d_2)| d_1 / 3.0 + 2.0 * d_2 / 3.0)
+            .map(|(d_1, d_2)| d_1 / 4.0 + 3.0 * d_2 / 4.0)
             .collect::<Vec<f64>>();
         //updates derivative in self to be deriv_mean
         self.set_derivs(&deriv_mean);
