@@ -506,10 +506,10 @@ pub trait SolverVariantMethods: SolverBase {
         let mut delta5: Vec<f64> = vec![];
         let zipped = zip!(k1s, k2s, k3s, k4s, k5s, k6s);
         for (k1, (_k2, (k3, (k4, (k5, k6))))) in zipped {
-            delta4.push(
+            delta5.push(
                 (37. / 378. * k1 + 250. / 621. * k3 + 125. / 594. * k4 + 512. / 1_771. * k6) * dt,
             );
-            delta5.push(
+            delta4.push(
                 (2825. / 27_648. * k1
                     + 18_575. / 48_384. * k3
                     + 13_525. / 55_296. * k4
