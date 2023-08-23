@@ -51,10 +51,36 @@ use crate::imports::*;
         }
     }
 
+    #[classmethod]
+    #[allow(clippy::too_many_arguments)]
+    fn new_rk23_bogacki_shampine(
+        _cls: &PyType,
+        sol: AdaptiveSolverConfig,
+        m1: ThermalMass,
+        m2: ThermalMass,
+        h12: Conductance,
+        m3: ThermalMass,
+        h23: Conductance,
+        t_report: Vec<f64>,
+    ) -> Self {
+        Self{
+            solver_type: SolverTypes::RK23BogackiShampine(Box::new(sol)),
+            m1, 
+            m2, 
+            h12, 
+            m3, 
+            h23, 
+            t_report,
+            state: Default::default(),
+            history: Default::default(),
+        }
+    }
+
     #[getter]
     fn get_solver_conf(&self) -> Option<AdaptiveSolverConfig> {
         match &self.solver_type {
             SolverTypes::RK45CashKarp(sc) => Some(*sc.clone()),
+            SolverTypes::RK23BogackiShampine(sc) => Some(*sc.clone()),
             _ => None,
         }
     }
@@ -189,6 +215,16 @@ pub fn mock_ralstons_sys() -> System3TM {
     }
 }
 
+pub fn mock_rk23_sys() -> System3TM {
+    let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 11);
+
+    System3TM {
+        solver_type: SolverTypes::RK23BogackiShampine(Box::default()),
+        t_report,
+        ..mock_euler_sys()
+    }
+}
+
 pub fn mock_rk4fixed_sys() -> System3TM {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 51);
 
@@ -308,6 +344,29 @@ pub fn run_three_tm_sys(overwrite_benchmarks: bool) {
             .join("dess-examples/src/tests/fixtures/ralstons benchmark.yaml");
 
         sys_ralstons
+            .to_file(benchmark_file.as_os_str().to_str().unwrap())
+            .unwrap();
+    }
+    // build and run adaptive RK23
+    let mut sys_rk23 = mock_rk23_sys();
+    let t_rk23 = time_it!(sys_rk23.walk());
+
+    let dt = sys_rk23.t_report[1] - sys_rk23.t_report.first().unwrap();
+
+    println!(
+        "RK23 Adaptive {} s init time step elapsed time: {} μs",
+        dt,
+        t_rk23.as_micros()
+    );
+
+    let overwrite_rk23_benchmark: bool = overwrite_benchmarks;
+    if overwrite_rk23_benchmark {
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/src/tests/fixtures/rk23 benchmark.yaml");
+        sys_rk23
             .to_file(benchmark_file.as_os_str().to_str().unwrap())
             .unwrap();
     }
@@ -446,7 +505,20 @@ mod tests {
             System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
         assert_eq!(sys, benchmark_sys);
     }
+    #[test]
+    fn test_rk23_against_benchmark() {
+        let mut sys = mock_rk23_sys();
+        sys.walk();
+        let benchmark_file = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("dess-examples/src/tests/fixtures/rk23 benchmark.yaml");
 
+        let benchmark_sys =
+            System3TM::from_file(benchmark_file.as_os_str().to_str().unwrap()).unwrap();
+        assert_eq!(sys, benchmark_sys);
+    }
     #[test]
     fn test_rk4_against_benchmark() {
         let mut sys = mock_rk4fixed_sys();
