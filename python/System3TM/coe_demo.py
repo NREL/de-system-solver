@@ -62,7 +62,7 @@ ax.plot(
     sys_euler.history.time,
     sys_euler.m1.history.temp,
     label='m1',
-    color=default_colors[0],
+    color='red',
     markersize=euler_markersize,
     linestyle='',
     marker=rk4_marker,
@@ -72,7 +72,7 @@ ax.plot(
     sys_rk4.history.time,
     sys_rk4.m1.history.temp,
     label='m1 rk4',
-    color=default_colors[0],
+    color='red',
     markersize=rk4_markersize,
     linestyle='',
     marker='s'
@@ -83,7 +83,7 @@ ax.plot(
     sys_euler.history.time,
     sys_euler.m2.history.temp,
     label='m2',
-    color=default_colors[1],
+    color='orange',
     markersize=euler_markersize,
     linestyle='',
     marker=rk4_marker,
@@ -93,7 +93,7 @@ ax.plot(
     sys_rk4.history.time,
     sys_rk4.m2.history.temp,
     label='m2 rk4',
-    color=default_colors[1],
+    color='orange',
     markersize=rk4_markersize,
     linestyle='',
     marker='s'
@@ -104,7 +104,7 @@ ax.plot(
     sys_euler.history.time,
     sys_euler.m3.history.temp,
     label='m3',
-    color=default_colors[2],
+    color='yellow',
     markersize=euler_markersize,
     linestyle='',
     marker=rk4_marker,
@@ -114,7 +114,7 @@ ax.plot(
     sys_rk4.history.time,
     sys_rk4.m3.history.temp,
     label='m3 rk4',
-    color=default_colors[2],
+    color='yellow',
     markersize=rk4_markersize,
     linestyle='',
     marker='s'
@@ -133,7 +133,7 @@ ax.plot(
     sys_euler.history.time,
     np.array(sys_euler.m1.history.temp) * sys_euler.m1.c,
     label='m1',
-    color=default_colors[0],
+    color='red',
     markersize=euler_markersize,
     linestyle='',
     marker=rk4_marker,
@@ -143,7 +143,7 @@ ax.plot(
     sys_rk4.history.time,
     np.array(sys_rk4.m1.history.temp) * sys_rk4.m1.c,
     label='m1 rk4',
-    color=default_colors[0],
+    color='red',
     markersize=rk4_markersize,
     linestyle='',
     marker='s'
@@ -157,7 +157,7 @@ ax.plot(
         np.array(sys_euler.m2.history.temp) * sys_euler.m2.c
     ),
     label='m1 + m2',
-    color=default_colors[1],
+    color='orange',
     markersize=euler_markersize,
     linestyle='',
     marker=rk4_marker,
@@ -170,7 +170,7 @@ ax.plot(
         np.array(sys_rk4.m2.history.temp) * sys_rk4.m2.c
     ),
     label='m1 + m2 rk4',
-    color=default_colors[1],
+    color='orange',
     markersize=rk4_markersize,
     linestyle='',
     marker='s'
@@ -185,7 +185,7 @@ ax.plot(
         np.array(sys_euler.m3.history.temp) * sys_euler.m3.c
     ),
     label='m1 + m2 + m3',
-    color=default_colors[2],
+    color='yellow',
     markersize=euler_markersize,
     linestyle='',
     marker=rk4_marker,
@@ -199,7 +199,7 @@ ax.plot(
         np.array(sys_rk4.m3.history.temp) * sys_rk4.m3.c
     ),
     label='m1 + m2 + m3 rk4',
-    color=default_colors[2],
+    color='yellow',
     markersize=rk4_markersize,
     linestyle='',
     marker='s'

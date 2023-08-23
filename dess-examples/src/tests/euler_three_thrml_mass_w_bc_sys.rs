@@ -1,5 +1,6 @@
 use crate::imports::*;
 use crate::three_thrml_mass_w_bc_sys::System3TMWithBC;
+use eng_fmt::FormatEng;
 ///building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TMWithBC {
     let t_report: Vec<f64> = Vec::linspace(0.0, 1.0, 4);
@@ -71,16 +72,16 @@ pub fn test_method_against_euler_baseline_bc(method: SolverTypes, epsilon: f64) 
     let m1_within_epsilon = crate::tests::tests_core::within_epsilon(m1, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m1 solution: {}",
-        epsilon, m1_within_epsilon
+        epsilon.format_eng(Some(2)), m1_within_epsilon
     );
     let m2_within_epsilon = crate::tests::tests_core::within_epsilon(m2, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m2 solution: {}",
-        epsilon, m2_within_epsilon
+        epsilon.format_eng(Some(2)), m2_within_epsilon
     );
     let m3_within_epsilon = crate::tests::tests_core::within_epsilon(m3, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m3 solution: {}",
-        epsilon, m3_within_epsilon
+        epsilon.format_eng(Some(2)), m3_within_epsilon
     );
 }

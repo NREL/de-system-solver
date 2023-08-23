@@ -6,6 +6,7 @@ import seaborn as sns # type: ignore
 sns.set()
 
 # %%
+
 # # Check that `dt` and `t_report` work as expected
 
 m1 = dess_pyo3.ThermalMass(1.0, 2.0)
@@ -29,7 +30,7 @@ def trim_t_report(dt) -> np.ndarray:
 
 
 sys_small_dt = dess_pyo3.System3TM(
-    f'{{"EulerFixed": {{"dt": {dt_small}}}}}',
+    f'{{"RK4Fixed": {{"dt": {dt_small}}}}}',
     m1,
     m2,
     h12,
@@ -40,7 +41,7 @@ sys_small_dt = dess_pyo3.System3TM(
 sys_small_dt.walk()
 
 sys_medium_dt = dess_pyo3.System3TM(
-    f'{{"EulerFixed": {{"dt": {dt_medium}}}}}',
+    f'{{"RK4Fixed": {{"dt": {dt_medium}}}}}',
     m1,
     m2,
     h12,
@@ -51,7 +52,7 @@ sys_medium_dt = dess_pyo3.System3TM(
 sys_medium_dt.walk()
 
 sys_ultra_medium_dt = dess_pyo3.System3TM(
-    f'{{"EulerFixed": {{"dt": {dt_ultra_medium}}}}}',
+    f'{{"RK4Fixed": {{"dt": {dt_ultra_medium}}}}}',
     m1,
     m2,
     h12,
@@ -62,7 +63,7 @@ sys_ultra_medium_dt = dess_pyo3.System3TM(
 sys_ultra_medium_dt.walk()
 
 sys_large_dt = dess_pyo3.System3TM(
-    f'{{"EulerFixed": {{"dt": {dt_large}}}}}',
+    f'{{"RK4Fixed": {{"dt": {dt_large}}}}}',
     m1,
     m2,
     h12,
@@ -84,7 +85,7 @@ ax.plot(
     sys_small_dt.history.time,
     np.array(sys_small_dt.m1.history.temp),
     label=f'dt = {dt_small:.3g}',
-    color=default_colors[0],
+    color='red',
     markersize=markersize,
     linestyle='',
     marker='o',
@@ -93,7 +94,7 @@ ax.plot(
     sys_medium_dt.history.time,
     np.array(sys_medium_dt.m1.history.temp),
     label=f'dt = {dt_medium:.3g}',
-    color=default_colors[1],
+    color='orange',
     markersize=markersize,
     marker='s',
     linestyle='',
@@ -102,7 +103,7 @@ ax.plot(
     sys_ultra_medium_dt.history.time,
     np.array(sys_ultra_medium_dt.m1.history.temp),
     label=f'dt = {dt_ultra_medium:.3g}',
-    color=default_colors[2],
+    color='yellow',
     markersize=markersize,
     marker='v',
     linestyle='',
@@ -111,7 +112,7 @@ ax.plot(
     sys_large_dt.history.time,
     np.array(sys_large_dt.m1.history.temp),
     label=f'dt = {dt_large}',
-    color=default_colors[3],
+    color='green',
     markersize=markersize,
     marker='d',
     linestyle='',
@@ -120,5 +121,6 @@ ax.plot(
 ax.set_ylabel('Temperature [°C]')
 ax.set_xlabel('Time [s]')
 ax.legend()
+ax.text(0.2, 5.5, "RK4 is very robust!")
 
 # %%
