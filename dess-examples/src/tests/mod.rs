@@ -77,7 +77,7 @@ mod method_tests {
                 rtol: 1e-3,
                 ..Default::default()
             })),
-            5e-4,
+            2.5e-4,
         );
         println!("RK23 (Bogacki-Shampine) Method bc:");
         test_method_against_euler_baseline_bc(
@@ -85,7 +85,7 @@ mod method_tests {
                 rtol: 1e-3,
                 ..Default::default()
             })),
-            5e-2,
+            5e-3,
         );
     }
     #[test]

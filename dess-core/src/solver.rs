@@ -397,11 +397,11 @@ pub trait SolverVariantMethods: SolverBase {
         sys2.step_states_by_dt(&(dt * 3. / 4.));
         sys2.update_derivs();
         let k3s = sys2.derivs();
-        // k4 = f(x_i + h, y_i + 2 / 9 * k1 * h + 1 / 3 * k2 * h + 4 / 9 * k3 * h)
+        // k4 = f(x_i + h, y_i + 2 / 9 * k1 * h + 1 / 3 * k2 * h + 4 / 9 * k3 * h) = 3rd order solution
         let mut sys3 = self.bare_clone();
         sys3.step_time(&(dt));
-        // 2nd order delta
-        let delta2: Vec<f64> = {
+        // 3nd order delta
+        let delta3: Vec<f64> = {
             let (k1s, k2s, k3s) = (k1s.clone(), k2s.clone(), k3s.clone());
             let zipped = zip!(k1s, k2s, k3s);
             let mut steps = vec![];
@@ -410,17 +410,17 @@ pub trait SolverVariantMethods: SolverBase {
             }
             steps
         };
-        let delta2_new = delta2.clone();
-        sys3.step_states(delta2);
+        let delta3_new = delta3.clone();
+        sys3.step_states(delta3_new);
         sys3.update_derivs();
         let k4s = sys3.derivs();
-        // 3rd order delta
-        let mut delta3: Vec<f64> = vec![];
+        // 2nd order delta
+        let mut delta2: Vec<f64> = vec![];
         let zipped = zip!(k1s, k2s, k3s, k4s);
         for (k1, (k2, (k3, k4))) in zipped {
-            delta3.push((7. / 24. * k1 + 1. / 4. * k2 + 1. / 3. * k3 + 1. / 8. * k4) * dt);
+            delta2.push((7. / 24. * k1 + 1. / 4. * k2 + 1. / 3. * k3 + 1. / 8. * k4) * dt);
         }
-        (delta2_new, delta3)
+        (delta2, delta3)
     }
     /// solves time step with 4th order Runge-Kutta method.
     /// See RK4 method: https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods#Examples
