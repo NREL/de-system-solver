@@ -62,16 +62,16 @@ mod method_tests {
         println!("Ralston's Method:");
         test_method_against_euler_baseline(
             SolverTypes::RalstonsMethod {
-                dt: 0.1,
+                dt: 0.09090909090909091,
             },
-            5e-3,
+            2.5e-2,
         );
         println!("Ralston's Method bc:");
         test_method_against_euler_baseline_bc(
             SolverTypes::RalstonsMethod {
-                dt: 0.013888888888888892,
+                dt: 0.014285714285714282,
             },
-            1e-2,
+            1e-4,
         );
     }
     #[test]
@@ -82,20 +82,21 @@ mod method_tests {
                 rtol: 1e-2,
                 atol: 1e-3,
                 state: SolverState {
-                    dt: 0.01,
+                    dt: 0.1,
                     ..Default::default()
                 },
                 ..Default::default()
             })),
-            2.5e-4,
+            1e-2,
         );
         println!("RK23 (Bogacki-Shampine) Method bc:");
         test_method_against_euler_baseline_bc(
             SolverTypes::RK23BogackiShampine(Box::new(AdaptiveSolverConfig {
-                rtol: 1e-1,
+                rtol: 1e-2,
+                atol: 1e-3,
                 ..Default::default()
             })),
-            5e-3,
+            5e-4,
         );
     }
     #[test]

@@ -177,10 +177,10 @@ print(f"ralstons dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 dt_max = 10
 dt_init = 0.1
-dt_init_rk23 = 0.01
-rtol = 1e-2
+dt_init_rk23 = 0.1
+rtol = 1e-5
 rtol_rk23 = 1e-5
-atol = 1e-3
+atol = 1e-9
 max_iter = 10
 solver_rk23 = dess_pyo3.AdaptiveSolverConfig(
     dt_max=dt_max,
