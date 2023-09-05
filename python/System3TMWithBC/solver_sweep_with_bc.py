@@ -177,12 +177,14 @@ print(f"ralstons dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 dt_max = 10
 dt_init = 0.1
-rtol_rk23 = 1e-3
-atol = 1e-9
+dt_init_rk23 = 0.01
+rtol = 1e-2
+rtol_rk23 = 1e-5
+atol = 1e-3
 max_iter = 10
 solver_rk23 = dess_pyo3.AdaptiveSolverConfig(
     dt_max=dt_max,
-    dt_init=dt_init,
+    dt_init=dt_init_rk23,
     rtol=rtol_rk23,
     atol=atol,
     max_iter=max_iter,
@@ -205,7 +207,7 @@ print(f"rk23 dt_init={dt_init}")
 
 solver_save_rk23 = dess_pyo3.AdaptiveSolverConfig(
     dt_max=dt_max,
-    dt_init=dt_init,
+    dt_init=dt_init_rk23,
     rtol=rtol_rk23,
     atol=atol,
     max_iter=max_iter,
@@ -263,7 +265,6 @@ t0 = time.perf_counter()
 sys_rk4_large_dt.walk()
 print(f"rk4 dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
-rtol = 1e-5
 solver = dess_pyo3.AdaptiveSolverConfig(
     dt_max=dt_max,
     dt_init=dt_init,
@@ -663,10 +664,17 @@ err_rel = np.array(sys_rk23_save.solver_conf.history.norm_err_rel)
 err_rel = [x if x is not None else 0 for x in err_rel]
 ax.plot(
     sys_rk23_save.solver_conf.history.t_curr,
-    np.array(err_rel) < sys_rk23_save.solver_conf.rtol
+    np.array(err_rel) < sys_rk23_save.solver_conf.rtol,
+    label = 'rtol'
+)
+ax.plot(
+    sys_rk23_save.solver_conf.history.t_curr,
+    np.array(sys_rk23_save.solver_conf.history.norm_err) < sys_rk23_save.solver_conf.atol,
+    label = 'atol'
 )
 ax.set_xlabel("Time [s] rk23")
 ax.set_ylabel('rtol met rk23')
+ax.legend()
 
 t0 = time.perf_counter()
 print(f"rk45 elapsed: {time.perf_counter() - t0:.3g} s")
@@ -722,7 +730,14 @@ err_rel = np.array(sys_rk45_save.solver_conf.history.norm_err_rel)
 err_rel = [x if x is not None else 0 for x in err_rel]
 ax.plot(
     sys_rk45_save.solver_conf.history.t_curr,
-    np.array(err_rel) < sys_rk45_save.solver_conf.rtol
+    np.array(err_rel) < sys_rk45_save.solver_conf.rtol,
+    label = 'rtol'
+)
+ax.plot(
+    sys_rk45_save.solver_conf.history.t_curr,
+    np.array(sys_rk45_save.solver_conf.history.norm_err) < sys_rk45_save.solver_conf.atol,
+    label = 'atol'
 )
 ax.set_xlabel("Time [s] rk45")
 ax.set_ylabel('rtol met rk45')
+ax.legend()
