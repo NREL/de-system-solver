@@ -101,13 +101,15 @@ use crate::imports::*;
     /// This method must be user defined in `solver` macro args.
     fn update_derivs(&mut self) {
         self.reset_derivs();
-        connect_states!(self, (m1, m2, h12), (m2, m3, h23));
-        update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
+        // change in temperature to test what the solver does
         let offset = 10.0;
         let freq = 100. * self.state.time;
         let lag = 0.25;
-        // change in temperature to test what the solver does
         self.m1.state.temp = offset + 3. * f64::sin(freq * self.state.time) * f64::exp(-self.state.time / lag);
+        //create system of equations/relationships
+        connect_states!(self, (m1, m2, h12), (m2, m3, h23));
+        //update derivs based on system of equations created
+        update_derivs!(self, (m1, m2, h12), (m2, m3, h23));
     }
 )]
 #[common_derives]
@@ -136,11 +138,11 @@ impl Default for System3TMWithBC {
     fn default() -> Self {
         Self {
             solver_type: SolverTypes::EulerFixed { dt: 5e-3 },
-            m1: ThermalReservoir{
+            m1: ThermalReservoir {
                 state: ThermalMassState {
-                    temp: -1.0, 
+                    temp: -1.0,
                     dtemp: Default::default(),
-                }, 
+                },
                 history: Default::default(),
             },
             m2: ThermalMass {
@@ -388,7 +390,7 @@ pub fn run_three_tm_w_bc_sys() {
     //         .to_file(benchmark_file.as_os_str().to_str().unwrap())
     //         .unwrap();
     // }
-    
+
     // build and run prescribed-step 4th-order Runge-Kutta system
     let mut sys_rk4 = mock_rk4fixed_sys();
 

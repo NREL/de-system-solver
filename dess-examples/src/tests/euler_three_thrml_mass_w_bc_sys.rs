@@ -72,16 +72,37 @@ pub fn test_method_against_euler_baseline_bc(method: SolverTypes, epsilon: f64) 
     let m1_within_epsilon = crate::tests::tests_core::within_epsilon(m1, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m1 solution: {}",
-        epsilon.format_eng(Some(2)), m1_within_epsilon
+        epsilon.format_eng(Some(2)),
+        m1_within_epsilon
     );
     let m2_within_epsilon = crate::tests::tests_core::within_epsilon(m2, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m2 solution: {}",
-        epsilon.format_eng(Some(2)), m2_within_epsilon
+        epsilon.format_eng(Some(2)),
+        m2_within_epsilon
     );
     let m3_within_epsilon = crate::tests::tests_core::within_epsilon(m3, epsilon);
     println!(
         "Stays within {} of three thermal mass w bc m3 solution: {}",
-        epsilon.format_eng(Some(2)), m3_within_epsilon
+        epsilon.format_eng(Some(2)),
+        m3_within_epsilon
     );
+    let m1_1: Vec<(&f64, &f64)> = baseline_m1.iter().zip(&method_m1).collect();
+    let m2_1: Vec<(&f64, &f64)> = baseline_m2.iter().zip(&method_m2).collect();
+    let m3_1: Vec<(&f64, &f64)> = baseline_m3.iter().zip(&method_m3).collect();
+    let m1_mean_absolute_error = crate::tests::tests_core::average_distance(m1_1);
+    println!(
+        "Mean absolute error of m1 solution: {}",
+        m1_mean_absolute_error.format_eng(Some(10))
+    );
+    let m2_mean_absolute_error = crate::tests::tests_core::average_distance(m2_1);
+    println!(
+        "Mean absolute error of m2 solution: {}",
+        m2_mean_absolute_error.format_eng(Some(10))
+    );
+    let m3_mean_absolute_error = crate::tests::tests_core::average_distance(m3_1);
+    println!(
+        "Mean absolute error of m3 solution: {}",
+        m3_mean_absolute_error.format_eng(Some(10))
+    )
 }

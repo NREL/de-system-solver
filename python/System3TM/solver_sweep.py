@@ -217,7 +217,9 @@ print(f"rk4 dt={dt_large:.3g} s elapsed: {time.perf_counter() - t0:.3g} s")
 
 dt_max = 10.
 dt_init = 0.1
+dt_init_rk23 = 0.1
 rtol = 1e-5
+rk23_rtol = 1e-5
 atol = 1e-9
 max_iter = 5
 solver = dess_pyo3.AdaptiveSolverConfig(
@@ -227,6 +229,28 @@ solver = dess_pyo3.AdaptiveSolverConfig(
     atol=atol,
     max_iter=max_iter,
 )
+rk23_solver = dess_pyo3.AdaptiveSolverConfig(
+    dt_max=dt_max,
+    dt_init=dt_init_rk23,
+    rtol=rk23_rtol,
+    atol=atol,
+    max_iter=max_iter,
+)
+
+sys_rk23 = dess_pyo3.System3TM.new_rk23_bogacki_shampine(
+    rk23_solver,
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_rk23.walk()
+print(f"rk23 elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk23 rtol={sys_rk23.solver_conf.rtol}")
+print(f"rk23 dt_init={dt_init}")
 
 sys_rk45 = dess_pyo3.System3TM.new_rk45_cash_karp(
     solver,
@@ -389,6 +413,15 @@ ax[0].plot(
     marker='x',
 )
 
+ax[0].plot(
+    sys_rk23.history.time,
+    np.array(sys_rk23.m1.history.temp),
+    label='rk23',
+    color='brown',
+    markersize=markersize,
+    linestyle='',
+    marker='1',
+)
 
 ax[0].set_ylabel('Temp. [°C]')
 ax[-1].set_xlabel('Time [s]')
@@ -400,6 +433,15 @@ solver = dess_pyo3.AdaptiveSolverConfig(
     dt_max=dt_max,
     dt_init=dt_init,
     rtol=rtol,
+    atol=atol,
+    max_iter=max_iter,
+    save=True
+)
+
+rk23_solver = dess_pyo3.AdaptiveSolverConfig(
+    dt_max=dt_max,
+    dt_init=dt_init_rk23,
+    rtol=rk23_rtol,
     atol=atol,
     max_iter=max_iter,
     save=True
@@ -428,7 +470,7 @@ ax[0].plot(
     linestyle='',
     marker='x',
 )
-ax[0].set_ylabel('n_iter')
+ax[0].set_ylabel('n_iter rk45')
 
 ax[1].plot(
     np.array(sys_rk45.solver_conf.history.t_curr),
@@ -450,7 +492,7 @@ ax[1].plot(
     label='rtol',
     color='k'
 )
-ax[1].set_ylabel('Norm Error')
+ax[1].set_ylabel('Norm Error rk45')
 ax[1].legend()
 
 ax[-1].plot(
@@ -459,15 +501,97 @@ ax[-1].plot(
     linestyle='',
     marker='x',
 )
-ax[-1].set_ylabel('dt')
-ax[-1].set_xlabel('Sim. Time [s]')
+ax[-1].set_ylabel('dt rk45')
+ax[-1].set_xlabel('Sim. Time [s] rk45')
 
 # %%
 
 fig, ax = plt.subplots()
 ax.plot(
     sys_rk45.solver_conf.history.t_curr,
-    np.array(sys_rk45.solver_conf.history.norm_err_rel) < sys_rk45.solver_conf.rtol
+    np.array(sys_rk45.solver_conf.history.norm_err_rel) < sys_rk45.solver_conf.rtol,
+    label = 'rtol'
+)
+ax.plot(
+    sys_rk45.solver_conf.history.t_curr,
+    np.array(sys_rk45.solver_conf.history.norm_err) < sys_rk45.solver_conf.atol,
+    label = 'atol'
+)
+
+ax.set_xlabel("Time [s]")
+ax.set_ylabel('rk45 rtol met')
+ax.legend()
+
+sys_rk23 = dess_pyo3.System3TM.new_rk23_bogacki_shampine(
+    rk23_solver,
+    m1,
+    m2,
+    h12,
+    m3,
+    h23,
+    t_report,
+)
+t0 = time.perf_counter()
+sys_rk23.walk()
+print(f"rk23 dt elapsed: {time.perf_counter() - t0:.3g} s")
+print(f"rk23 rtol={sys_rk23.solver_conf.rtol}")
+print(f"rk23 dt_init={dt_init}")
+print("rk23 dt_mean", np.array(sys_rk23.solver_conf.history.dt).mean())
+
+fig, ax = plt.subplots(3, 1, sharex=True)
+ax[0].plot(
+    np.array(sys_rk23.solver_conf.history.t_curr),
+    np.array(sys_rk23.solver_conf.history.n_iter),
+    linestyle='',
+    marker='x',
+)
+ax[0].set_ylabel('n_iter rk23')
+
+ax[1].plot(
+    np.array(sys_rk23.solver_conf.history.t_curr),
+    np.array(sys_rk23.solver_conf.history.norm_err),
+    linestyle='',
+    marker='x',
+    label='absolute',
+)
+ax[1].plot(
+    np.array(sys_rk23.solver_conf.history.t_curr),
+    np.array(sys_rk23.solver_conf.history.norm_err_rel),
+    linestyle='',
+    marker='o',
+    label='relative',
+)
+ax[1].plot(
+    [sys_rk23.history.time[0], sys_rk23.history.time[-1]],
+    [sys_rk23.solver_conf.rtol] * 2,
+    label='rtol rk23',
+    color='k'
+)
+ax[1].set_ylabel('Norm Error rk23')
+ax[1].legend()
+
+ax[-1].plot(
+    np.array(sys_rk23.solver_conf.history.t_curr),
+    np.array(sys_rk23.solver_conf.history.dt),
+    linestyle='',
+    marker='x',
+)
+ax[-1].set_ylabel('dt rk23')
+ax[-1].set_xlabel('Sim. Time [s] rk23')
+
+# %%
+
+fig, ax = plt.subplots()
+ax.plot(
+    sys_rk23.solver_conf.history.t_curr,
+    np.array(sys_rk23.solver_conf.history.norm_err_rel) < sys_rk23.solver_conf.rtol,
+    label = 'rtol'
+)
+ax.plot(
+    sys_rk23.solver_conf.history.t_curr,
+    np.array(sys_rk23.solver_conf.history.norm_err) < sys_rk23.solver_conf.atol,
+    label = 'atol'
 )
 ax.set_xlabel("Time [s]")
-ax.set_ylabel('rtol met')
+ax.set_ylabel('rk23 rtol met')
+ax.legend()

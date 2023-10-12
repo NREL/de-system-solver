@@ -174,6 +174,7 @@ pub trait SolverVariantMethods: SolverBase {
     fn euler(&mut self, dt: &f64) {
         self.update_derivs();
         self.step_states_by_dt(dt);
+        self.update_derivs();
     }
     /// Heun's Method (starts out with Euler's method but adds an extra step)
     /// See Heun's Method (the first listed Heun's method, not the one also known as Ralston's Method):
@@ -203,6 +204,7 @@ pub trait SolverVariantMethods: SolverBase {
         let new_state = updated_self.states();
         //setting state to be the updated state
         self.set_states(new_state);
+        self.update_derivs();
     }
     /// Midpoint Method
     /// See: https://en.wikipedia.org/wiki/Midpoint_method
@@ -219,6 +221,7 @@ pub trait SolverVariantMethods: SolverBase {
         self.set_derivs(&deriv_1);
         //steps states using the midpoint derivative
         self.step_states_by_dt(dt);
+        self.update_derivs();
     }
     /// Ralston's Method
     /// See Ralston's Method: https://en.wikipedia.org/wiki/List_of_Runge%E2%80%93Kutta_methods#Ralston.27s_method
@@ -243,6 +246,7 @@ pub trait SolverVariantMethods: SolverBase {
         self.set_derivs(&deriv_mean);
         //steps states using deriv_mean
         self.step_states_by_dt(dt);
+        self.update_derivs();
     }
     ///solves time step with adaptive Bogacki Shampine Method (variant of RK23) and returns 'dt' used
     ///see: https://en.wikipedia.org/wiki/Bogacki%E2%80%93Shampine_method
@@ -283,6 +287,28 @@ pub trait SolverVariantMethods: SolverBase {
             // update `n_iter`, `norm_err`, `norm_err_rel`, `t_curr`, and `states`
             // still need to update dt at some point
             sc_mut.state.n_iter += 1;
+            // different way of calculating norm -- could add in via an enum later
+            // let mut length = 0.;
+            // for _item in &delta2 {
+            //     length += 1.;
+            // }
+            // sc_mut.state.norm_err = Some(
+            //     delta2
+            //         .iter()
+            //         .zip(&delta3)
+            //         .map(|(d2, d3)| (((d2 - d3).powi(2)).sqrt()))
+            //         .collect::<Vec<f64>>()
+            //         .iter()
+            //         .sum::<f64>()
+            //         / length,
+            // );
+            // let norm_d3 = delta3
+            //     .iter()
+            //     .map(|d3| (d3.powi(2)).sqrt())
+            //     .collect::<Vec<f64>>()
+            //     .iter()
+            //     .sum::<f64>()
+            //     / length;
             sc_mut.state.norm_err = Some(
                 delta2
                     .iter()
@@ -300,12 +326,12 @@ pub trait SolverVariantMethods: SolverBase {
                 .iter()
                 .sum::<f64>()
                 .sqrt();
-
-            sc_mut.state.norm_err_rel = if norm_d3 > sc_mut.atol {
+            //making sure that rtol is always considered as long as you don't divide by 0
+            sc_mut.state.norm_err_rel = if norm_d3 != 0. {
                 // `unwrap` is ok here because `norm_err` will always be some by this point
                 Some(sc_mut.state.norm_err.unwrap() / norm_d3)
             } else {
-                // avoid dividing by a really small denominator
+                // avoid dividing by 0
                 None
             };
 
@@ -333,22 +359,41 @@ pub trait SolverVariantMethods: SolverBase {
             // The approach is to adapt more aggressively to meet rtol when decreasing the time step size
             // than when increasing time step size.
             let dt_coeff = match sc_mut.state.norm_err_rel {
-                Some(norm_err_rel) => {
-                    (sc_mut.rtol / norm_err_rel).powf(if norm_err_rel <= sc_mut.rtol {
+                Some(norm_err_rel) => match sc_mut.state.norm_err {
+                    //ensures that if either rtol or atol are met, then the step succeeds
+                    //prioritizes rtol -- if both are met, then rtol is used
+                    //if no atol exists, just considers rtol
+                    Some(norm_err) => {
+                        if norm_err_rel <= sc_mut.rtol {
+                            (sc_mut.rtol / norm_err_rel).powf(0.2)
+                        } else if norm_err <= sc_mut.atol {
+                            (sc_mut.atol / norm_err).powf(0.2)
+                        } else {
+                            0.25
+                        }
+                    }
+                    // (sc_mut.rtol / norm_err_rel).powf(
+                    //     if norm_err_rel <= sc_mut.rtol || norm_err <= sc_mut.atol {
+                    //         0.2
+                    //     } else {
+                    //         0.25
+                    //     },
+                    // ),
+                    None => (sc_mut.rtol / norm_err_rel).powf(if norm_err_rel <= sc_mut.rtol {
                         0.2
                     } else {
                         0.25
-                    })
-                }
+                    }),
+                },
+                //if no rtol exists, just consideres atol
                 None => {
                     match sc_mut.state.norm_err {
                         Some(norm_err) => (sc_mut.atol / norm_err)
                             .powf(if norm_err <= sc_mut.atol { 0.2 } else { 0.25 }),
-                        None => 1., // don't adapt if there is not enough information to do so
+                        None => 1., // don't adapt if there is not enough information to do so (if neither atol or rtol exist)
                     }
                 }
             };
-
             // if tolerance is achieved here, then we proceed to the next time step, and
             // `dt` will be limited to `dt_max` at the start of the next time step.  If tolerance
             // is not achieved, then time step will be decreased.
@@ -457,6 +502,7 @@ pub trait SolverVariantMethods: SolverBase {
 
         self.step_states(delta);
         self.step_time(dt);
+        self.update_derivs();
     }
     /// solves time step with adaptive Cash-Karp Method (variant of RK45) and returns `dt` used
     /// https://en.wikipedia.org/wiki/Cash%E2%80%93Karp_method
@@ -497,6 +543,28 @@ pub trait SolverVariantMethods: SolverBase {
             // update `n_iter`, `norm_err`, `norm_err_rel`, `t_curr`, and `states`
             // still need to update dt at some point
             sc_mut.state.n_iter += 1;
+            //another way to calculate norm -- can be added in later via an enum
+            // let mut length = 0.;
+            // for _item in &delta4 {
+            //     length += 1.;
+            // }
+            // sc_mut.state.norm_err = Some(
+            //     delta4
+            //         .iter()
+            //         .zip(&delta5)
+            //         .map(|(d4, d5)| (((d4 - d5).powi(2)).sqrt()))
+            //         .collect::<Vec<f64>>()
+            //         .iter()
+            //         .sum::<f64>()
+            //         / length,
+            // );
+            // let norm_d5 = delta5
+            //     .iter()
+            //     .map(|d5| (d5.powi(2)).sqrt())
+            //     .collect::<Vec<f64>>()
+            //     .iter()
+            //     .sum::<f64>()
+            //     / length;
             sc_mut.state.norm_err = Some(
                 delta4
                     .iter()
@@ -514,12 +582,12 @@ pub trait SolverVariantMethods: SolverBase {
                 .iter()
                 .sum::<f64>()
                 .sqrt();
-
-            sc_mut.state.norm_err_rel = if norm_d5 > sc_mut.atol {
+            //ensures that rtol is calculated and considered as long as you are not dividing by 0
+            sc_mut.state.norm_err_rel = if norm_d5 != 0. {
                 // `unwrap` is ok here because `norm_err` will always be some by this point
                 Some(sc_mut.state.norm_err.unwrap() / norm_d5)
             } else {
-                // avoid dividing by a really small denominator
+                // avoid dividing by 0
                 None
             };
 
@@ -548,12 +616,24 @@ pub trait SolverVariantMethods: SolverBase {
             // than when increasing time step size.
             let dt_coeff = match sc_mut.state.norm_err_rel {
                 Some(norm_err_rel) => {
-                    (sc_mut.rtol / norm_err_rel).powf(if norm_err_rel <= sc_mut.rtol {
-                        0.2
+                    //ensures that if either rtol or atol are met, then the step succeeds
+                    //prioritizes rtol -- if both atol and rtol are met, rtol is used
+                    if norm_err_rel <= sc_mut.rtol {
+                        (sc_mut.rtol / norm_err_rel).powf(0.2)
+                    } else if sc_mut.state.norm_err.unwrap() <= sc_mut.atol {
+                        (sc_mut.atol / sc_mut.state.norm_err.unwrap()).powf(0.2)
                     } else {
                         0.25
-                    })
+                    }
+                    // (sc_mut.rtol / norm_err_rel).powf(
+                    //     if norm_err_rel <= sc_mut.rtol || norm_err <= sc_mut.atol {
+                    //         0.2
+                    //     } else {
+                    //         0.25
+                    //     },
+                    // ),
                 }
+                //if rtol doesn't exist just use atol
                 None => {
                     match sc_mut.state.norm_err {
                         Some(norm_err) => (sc_mut.atol / norm_err)
@@ -682,10 +762,10 @@ pub trait SolverVariantMethods: SolverBase {
         let mut delta5: Vec<f64> = vec![];
         let zipped = zip!(k1s, k2s, k3s, k4s, k5s, k6s);
         for (k1, (_k2, (k3, (k4, (k5, k6))))) in zipped {
-            delta4.push(
+            delta5.push(
                 (37. / 378. * k1 + 250. / 621. * k3 + 125. / 594. * k4 + 512. / 1_771. * k6) * dt,
             );
-            delta5.push(
+            delta4.push(
                 (2825. / 27_648. * k1
                     + 18_575. / 48_384. * k3
                     + 13_525. / 55_296. * k4
