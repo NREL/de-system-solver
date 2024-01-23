@@ -4,9 +4,9 @@ use dess_examples::*;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    //Creating benchmarks for each method so that any changes that result in different values will be flagged
+    // Creating benchmarks for each method so that any changes that result in different values will be flagged
     // Default value is false if no argument is provided
-    //To change benchmarks, change value to true
+    // To change benchmarks, change value to true
     let mut overwrite_benchmarks = false;
 
     if args.len() > 1 {
@@ -18,7 +18,7 @@ fn main() {
     three_thermal_mass_sys::run_three_tm_sys(overwrite_benchmarks);
     three_thrml_mass_w_bc_sys::run_three_tm_w_bc_sys();
 
-    //creating small step euler baseline to compare to other methods
+    // Creating small step euler baseline to compare to other methods
     let mut overwrite_baseline = false;
 
     if args.len() > 1 {
