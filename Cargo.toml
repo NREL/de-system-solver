@@ -4,6 +4,7 @@
 authors = [
     "Chad Baker, Lead Developer",
     "Robin Steuteville, Developer",
+    "Nick Reinicke, Developer",
 ]
 license = "BSD-3-Clause"
 edition = "2024"
