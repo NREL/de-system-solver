@@ -7,7 +7,7 @@ authors = [
     "Nick Reinicke, Developer",
 ]
 license = "BSD-3-Clause"
-edition = "2024"
+edition = "2021"
 repository = "https://github.com/NREL/de-system-solver"
 
 members = [
