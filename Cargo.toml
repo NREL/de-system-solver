@@ -1,5 +1,15 @@
 [workspace]
 
+[workspace.package]
+authors = [
+    "Chad Baker, Lead Developer",
+    "Robin Steuteville, Developer",
+    "Nick Reinicke, Developer",
+]
+license = "BSD-3-Clause"
+edition = "2021"
+repository = "https://github.com/NREL/de-system-solver"
+
 members = [
     "dess-core", # pure rust core 
     "dess-examples", # examples of how to run the code,
