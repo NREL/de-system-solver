@@ -13,7 +13,3 @@ We could also add a function that copies the example files like in FASTSim or so
     source dess-venv/bin/activate
     ```
 1. run `sh build_and_test.sh` or manually run the commands in that bash script file 
-
-# Contributers
-Chad Baker -- Chad.Baker@nrel.gov
-Robin Steuteville -- Robin.Steuteville@nrel.gov
