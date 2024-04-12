@@ -1,4 +1,9 @@
 [workspace]
+members = [
+    "dess-core",          # pure rust core 
+    "dess-examples",      # examples of how to run the code,
+    "dess-examples-pyo3", # pyo3 api for dess-core
+]
 
 [workspace.package]
 authors = [
@@ -10,11 +15,6 @@ license = "BSD-3-Clause"
 edition = "2021"
 repository = "https://github.com/NREL/de-system-solver"
 
-members = [
-    "dess-core", # pure rust core 
-    "dess-examples", # examples of how to run the code,
-    "dess-examples-pyo3", # pyo3 api for dess-core
-]
 
 [profile.dev]
 opt-level = 0
@@ -26,6 +26,6 @@ opt-level = 3
 anyhow = "1.0.57"
 pyo3 = "0.18.1"
 pyo3-log = "*"
-serde = { version = "1.0.152", features = ["derive"]}
+serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.93"
 serde_yaml = "0.9.17"

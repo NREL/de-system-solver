@@ -1,6 +1,5 @@
 pub use crate::connect_states;
 pub use crate::print_to_py;
-pub use proc_macros::*;
 #[cfg(feature = "pyo3")]
 pub use crate::pyo3_imports::*;
 pub use crate::solver::*;
@@ -10,3 +9,4 @@ pub use crate::update_derivs;
 pub use crate::utilities::*;
 pub use crate::zip;
 pub use crate::{SystemState, SystemStateHistoryVec};
+pub use dess_proc_macros::*;
