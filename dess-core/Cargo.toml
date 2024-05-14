@@ -1,6 +1,6 @@
 [package]
 name = "dess-core"
-version = "0.1.0"
+version = "0.1.1"
 description = "Do not use this crate. Instead, use the crate titled dess."
 authors = { workspace = true }
 edition = { workspace = true }
