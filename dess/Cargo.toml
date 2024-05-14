@@ -1,5 +1,5 @@
 [package]
-name = "dess-core"
+name = "dess"
 version = "0.1.0"
 description = { workspace = true }
 authors = { workspace = true }

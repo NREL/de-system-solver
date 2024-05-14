@@ -110,7 +110,7 @@ pub(crate) fn solver_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
                     _ => None,
                 }
             }
-            fn state(&self) -> &dess_core::SystemState {
+            fn state(&self) -> &dess::SystemState {
                 &self.state
             }
             #fn_from_attr

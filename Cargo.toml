@@ -1,8 +1,8 @@
 [workspace]
 members = [
-    "dess-core",          # pure rust core 
+    "dess",          # pure rust core 
     "dess-examples",      # examples of how to run the code,
-    "dess-examples-pyo3", # pyo3 api for dess-core
+    "dess-examples-pyo3", # pyo3 api for dess
 ]
 
 [workspace.package]
