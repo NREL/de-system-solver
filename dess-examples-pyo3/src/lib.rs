@@ -1,4 +1,4 @@
-use dess_core::prelude::*;
+use dess::prelude::*;
 use dess_examples::components::*;
 use dess_examples::three_thermal_mass_sys::*;
 use dess_examples::three_thrml_mass_w_bc_sys::System3TMWithBC;

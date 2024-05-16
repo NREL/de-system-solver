@@ -1,7 +1,7 @@
 pub mod euler_three_thermal_mass_sys;
 pub mod euler_three_thrml_mass_w_bc_sys;
 pub mod tests_core;
-pub mod dess_core {
+pub mod dess {
     pub mod solver {}
 }
 pub struct AdaptiveSolverConfig;
@@ -10,7 +10,7 @@ pub struct AdaptiveSolverConfig;
 mod method_tests {
     use super::euler_three_thermal_mass_sys::*;
     use super::euler_three_thrml_mass_w_bc_sys::*;
-    use dess_core::solver::*;
+    use dess::solver::*;
     #[test]
     fn test_eulers_accuracy() {
         println!("Euler's Method:");

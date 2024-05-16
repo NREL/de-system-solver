@@ -1,6 +1,6 @@
 use crate::imports::*;
 use crate::three_thermal_mass_sys::System3TM;
-use dess_core::solver::SolverTypes;
+use dess::solver::SolverTypes;
 use eng_fmt::FormatEng;
 /// building and running small step (high accuracy) euler method for system3TM comparison
 pub fn baseline_euler_sys() -> System3TM {

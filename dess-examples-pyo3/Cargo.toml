@@ -13,5 +13,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { workspace = true, features = ["extension-module"] }
-dess-core = { path = "../dess-core", features = ["pyo3"] }
+dess = { path = "../dess", features = ["pyo3"] }
 dess-examples = { path = "../dess-examples", features = ["pyo3"] }
